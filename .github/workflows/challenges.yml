@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.2
       - run: uv run tools/ctf.py check
 
   changed:
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.2
       - id: select
         env:
           # Empty on workflow_dispatch, which selects every challenge.
@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.3.2
       - name: Allow nsjail user namespaces (Ubuntu 23.10+ AppArmor restriction)
         if: matrix.challenge.jail
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
