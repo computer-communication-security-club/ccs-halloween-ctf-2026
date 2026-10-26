@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Piggyback 🎃</title>
+<style>
+  :root { --pumpkin:#ff7518; --ghost:#efeaff; --purple:#1a0b2e; --purple2:#33135c; --slime:#8bff3d; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; }
+  body {
+    margin:0; color:var(--ghost); text-align:center;
+    font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;
+    background:radial-gradient(1200px 620px at 50% -12%, var(--purple2), var(--purple) 58%, #000 100%);
+    overflow-x:hidden;
+  }
+  /* drifting spooks */
+  .sky { position:fixed; inset:0; pointer-events:none; font-size:26px; }
+  .sky span { position:absolute; top:-12vh; animation:fall linear infinite; opacity:.5; }
+  @keyframes fall { to { transform:translateY(120vh) rotate(40deg); } }
+  /* ground fog */
+  .fog { position:fixed; left:0; right:0; bottom:0; height:40vh; pointer-events:none;
+         background:linear-gradient(0deg, rgba(139,255,61,.10), transparent 70%);
+         filter:blur(6px); animation:breathe 7s ease-in-out infinite; }
+  @keyframes breathe { 0%,100%{opacity:.5} 50%{opacity:.9} }
+
+  .wrap { position:relative; max-width:820px; margin:0 auto; padding:16vh 20px 10vh; }
+  .pig { font-size:clamp(84px,20vw,128px); display:inline-block;
+         animation:bob 3s ease-in-out infinite; filter:drop-shadow(0 10px 26px rgba(255,117,24,.5)); }
+  @keyframes bob { 0%,100%{transform:translateY(0) rotate(-4deg)} 50%{transform:translateY(-16px) rotate(4deg)} }
+  h1 { margin:.08em 0 0; letter-spacing:.14em; color:var(--pumpkin);
+       font-size:clamp(44px,11vw,96px);
+       text-shadow:0 0 20px rgba(255,117,24,.65), 0 3px 0 #000;
+       animation:glow 2.6s ease-in-out infinite; }
+  @keyframes glow { 0%,100%{text-shadow:0 0 20px rgba(255,117,24,.55),0 3px 0 #000}
+                    50%{text-shadow:0 0 36px rgba(255,117,24,.95),0 0 10px rgba(255,117,24,.6),0 3px 0 #000} }
+  .tag { margin:.7em auto 0; max-width:30ch; color:#d4c3ff; font-size:clamp(16px,3vw,21px); }
+  .boo { display:inline-block; margin-top:26px; padding:9px 20px; border-radius:999px;
+         border:1px solid var(--slime); color:var(--slime); font-weight:700; letter-spacing:.18em; font-size:13px;
+         box-shadow:0 0 18px rgba(139,255,61,.3); animation:flick 3s infinite; }
+  @keyframes flick { 0%,18%,22%,100%{opacity:1} 20%{opacity:.3} 60%{opacity:.75} 62%{opacity:1} }
+  .row { margin-top:40px; font-size:clamp(30px,8vw,46px); letter-spacing:.3em; }
+  .row span { display:inline-block; animation:bob 2.6s ease-in-out infinite; }
+  .row span:nth-child(2){ animation-delay:.3s } .row span:nth-child(3){ animation-delay:.6s }
+  .row span:nth-child(4){ animation-delay:.9s } .row span:nth-child(5){ animation-delay:1.2s }
+  .foot { margin-top:48px; font-size:12px; color:#8273ab; letter-spacing:.05em; }
+  .foot b { color:var(--pumpkin); }
+</style>
+</head>
+<body>
+  <div class="sky" aria-hidden="true">
+    <span style="left:6%;animation-duration:11s">🦇</span>
+    <span style="left:22%;animation-duration:9s;animation-delay:2s">👻</span>
+    <span style="left:40%;animation-duration:13s;animation-delay:1s">🦇</span>
+    <span style="left:58%;animation-duration:8s;animation-delay:3s">🕸️</span>
+    <span style="left:74%;animation-duration:12s;animation-delay:.5s">👻</span>
+    <span style="left:90%;animation-duration:10s;animation-delay:2.5s">🦇</span>
+  </div>
+  <div class="fog" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <div class="pig">🐷</div>
+    <h1>PIGGYBACK</h1>
+    <p class="tag">Boo! You wandered into our haunted little corner of the web. Mind the cobwebs. 🕸️</p>
+    <div class="boo">🎃 HAPPY HALLOWEEN 🎃</div>
+    <div class="row" aria-hidden="true"><span>🎃</span><span>👻</span><span>🦇</span><span>🕷️</span><span>🍬</span></div>
+    <p class="foot">conjured for <b>CCS Halloween CTF</b> · trick, treat, and stay spooky 🦇</p>
+  </main>
+</body>
+</html>

@@ -15,6 +15,7 @@ package main
 
 import (
 	"bufio"
+	_ "embed"
 	"fmt"
 	"io"
 	"net"
@@ -22,6 +23,9 @@ import (
 	"os"
 	"sync"
 )
+
+//go:embed landing.html
+var landing string
 
 var (
 	mu    sync.Mutex
@@ -49,13 +53,18 @@ func resp(code int, status, body string) string {
 		code, status, len(body), body)
 }
 
+func respCT(code int, status, ctype, body string) string {
+	return fmt.Sprintf("HTTP/1.1 %d %s\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s",
+		code, status, ctype, len(body), body)
+}
+
 // connEarly: did THIS connection begin with an early-data request? Derived from
 // the first request's tag and intended to taint every request on the wire.
 func route(r *http.Request, connEarly bool) string {
 	tok := token(r)
 	switch r.URL.Path {
 	case "/":
-		return resp(200, "OK", "0rtt-desync lab backend\n")
+		return respCT(200, "OK", "text/html; charset=utf-8", landing)
 	case "/warm":
 		return resp(200, "OK", "warm\n")
 	case "/promote":
