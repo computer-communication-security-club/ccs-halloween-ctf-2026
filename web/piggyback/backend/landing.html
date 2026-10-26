@@ -13,84 +13,141 @@
     --flame:#ffbf69;        /* candle highlight */
     --ember:#e07a33;        /* ember */
     --ember-deep:#9a4418;   /* deep ember */
-    --oxblood:#7c2318;      /* single cold-blooded accent */
+    --oxblood:#7c2318;
+    --gx:0px; --gy:0px; --lx:0px; --ly:0px;   /* pointer parallax */
   }
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
   body{
-    background:var(--ink);
-    color:var(--bone);
+    background:var(--ink);color:var(--bone);text-align:center;
     font-family:Georgia,"Iowan Old Style","Times New Roman",serif;
-    text-align:center;
-    -webkit-font-smoothing:antialiased;
-    overflow:hidden;
+    -webkit-font-smoothing:antialiased;overflow:hidden;
   }
 
-  /* layered candlelight: a glowing pool low-center fading into the dark */
+  /* base darkness */
   .stage{position:fixed;inset:0;
+    background:linear-gradient(180deg,#080605 0%,var(--ink2) 55%,#080605 100%);}
+
+  /* the living candle pool — drifts (dances) and follows the cursor */
+  .glow-wrap{position:fixed;inset:0;pointer-events:none;
+    transform:translate(var(--gx),var(--gy));transition:transform .25s ease-out;}
+  .glow{position:absolute;inset:0;animation:dance 9s ease-in-out infinite;
     background:
-      radial-gradient(60vw 44vh at 50% 62%, rgba(224,122,51,.22), rgba(154,68,24,.08) 45%, transparent 72%),
-      radial-gradient(90vw 90vh at 50% 120%, rgba(255,191,105,.10), transparent 60%),
-      linear-gradient(180deg, #080605 0%, var(--ink2) 55%, #080605 100%);
-    animation:flicker 5.5s infinite ease-in-out;
-  }
-  /* heavy vignette for depth */
-  .vignette{position:fixed;inset:0;pointer-events:none;
-    box-shadow:inset 0 0 22vh 10vh #000;}
-  /* film grain so it never looks like a flat gradient */
+      radial-gradient(58vw 42vh at 50% 62%, rgba(224,122,51,.26), rgba(154,68,24,.08) 46%, transparent 72%),
+      radial-gradient(90vw 90vh at 50% 122%, rgba(255,191,105,.12), transparent 60%);
+    will-change:transform,opacity;}
+
+  .vignette{position:fixed;inset:0;pointer-events:none;box-shadow:inset 0 0 22vh 10vh #000;}
   .grain{position:fixed;inset:-50%;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     animation:jitter .9s steps(2) infinite;}
 
-  @keyframes flicker{
-    0%,100%{opacity:1}
-    12%{opacity:.86}  22%{opacity:.97}  34%{opacity:.78}
-    41%{opacity:.93}  55%{opacity:.84}  70%{opacity:1}
-    82%{opacity:.8}   90%{opacity:.95}
-  }
-  @keyframes jitter{to{transform:translate(2%,-1%)}}
-  @keyframes sway{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+  /* rising embers from the candle */
+  .embers{position:fixed;inset:0;pointer-events:none;}
+  .ember{position:absolute;bottom:36%;width:3px;height:3px;border-radius:50%;
+    background:radial-gradient(circle,#ffe6bf,var(--ember) 60%,transparent 72%);
+    box-shadow:0 0 7px 1px rgba(224,122,51,.65);
+    animation:rise linear infinite, twinkle .8s ease-in-out infinite;}
+
+  /* a single bat crossing, far back and in silhouette */
+  .bat{position:fixed;top:15%;left:-10%;font-size:22px;
+    filter:brightness(0) blur(.4px);opacity:.38;
+    animation:cross 24s linear infinite;}
 
   .wrap{position:relative;height:100%;display:flex;flex-direction:column;
     align-items:center;justify-content:center;padding:0 20px;}
 
-  .lantern{font-size:clamp(50px,11vw,78px);line-height:1;
-    filter:drop-shadow(0 0 26px rgba(224,122,51,.55)) drop-shadow(0 6px 10px rgba(0,0,0,.6));
-    animation:sway 6s ease-in-out infinite;}
+  .lantern-par{transform:translate(var(--lx),var(--ly));transition:transform .25s ease-out;}
+  .lantern-sway{animation:sway 6s ease-in-out infinite;}
+  .lantern{font-size:clamp(50px,11vw,78px);line-height:1;display:inline-block;
+    animation:breathe 2.6s ease-in-out infinite;
+    filter:drop-shadow(0 0 22px rgba(224,122,51,.5)) drop-shadow(0 6px 10px rgba(0,0,0,.6));}
 
-  h1{margin:.28em 0 0;
-    font-size:clamp(44px,12vw,104px);
-    font-weight:700;letter-spacing:.2em;text-indent:.2em;
-    color:var(--bone);
-    text-shadow:0 1px 0 #000, 0 0 2px rgba(255,191,105,.35), 0 0 42px rgba(224,122,51,.22);}
+  h1{margin:.28em 0 0;font-size:clamp(44px,12vw,104px);
+    font-weight:700;letter-spacing:.2em;text-indent:.2em;color:var(--bone);
+    text-shadow:0 1px 0 #000,0 0 2px rgba(255,191,105,.35),0 0 42px rgba(224,122,51,.22);
+    animation:ignite 1.7s ease-out both, emberpulse 4.5s ease-in-out 1.7s infinite;}
 
   .rule{display:flex;align-items:center;gap:14px;margin:18px auto 0;color:var(--ember);
-    font-size:13px;letter-spacing:.3em;}
+    font-size:13px;letter-spacing:.3em;animation:fadeup 1s ease-out .7s both;}
   .rule::before,.rule::after{content:"";height:1px;width:clamp(36px,12vw,86px);
     background:linear-gradient(90deg,transparent,var(--ember-deep),transparent);}
 
-  .tag{margin:16px auto 0;max-width:30ch;color:var(--bone-dim);
-    font-style:italic;font-size:clamp(15px,2.6vw,19px);line-height:1.5;}
+  .tag{margin:16px auto 0;max-width:30ch;color:var(--bone-dim);font-style:italic;
+    font-size:clamp(15px,2.6vw,19px);line-height:1.5;animation:fadeup 1s ease-out 1s both;}
 
   .foot{position:fixed;left:0;right:0;bottom:22px;color:#6b5f49;
-    font-size:11px;letter-spacing:.32em;text-transform:uppercase;}
+    font-size:11px;letter-spacing:.32em;text-transform:uppercase;animation:fadeup 1s ease-out 1.3s both;}
   .foot b{color:var(--ember);font-weight:400;}
 
-  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+  @keyframes dance{0%,100%{transform:translate(0,0) scale(1)}
+    33%{transform:translate(-1.2vw,.6vh) scale(1.03)}66%{transform:translate(1vw,-.5vh) scale(.99)}}
+  @keyframes jitter{to{transform:translate(2%,-1%)}}
+  @keyframes sway{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+  @keyframes breathe{0%,100%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(224,122,51,.45)) drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+    50%{transform:scale(1.04);filter:drop-shadow(0 0 36px rgba(255,191,105,.8)) drop-shadow(0 6px 10px rgba(0,0,0,.6))}}
+  @keyframes rise{0%{transform:translate(0,0) scale(.6);opacity:0}
+    8%{opacity:1}70%{opacity:.85}100%{transform:translate(var(--dx,0),-64vh) scale(.2);opacity:0}}
+  @keyframes twinkle{0%,100%{filter:brightness(1)}50%{filter:brightness(1.7)}}
+  @keyframes cross{0%{transform:translate(0,0)}6%{opacity:.4}
+    50%{transform:translate(62vw,-4vh)}94%{opacity:.4}100%{transform:translate(124vw,3vh);opacity:0}}
+  @keyframes ignite{0%{opacity:0;letter-spacing:.55em;filter:blur(7px)}
+    55%{opacity:1;filter:blur(0)}70%{opacity:.7}78%{opacity:1}100%{opacity:1;letter-spacing:.2em}}
+  @keyframes emberpulse{0%,100%{text-shadow:0 1px 0 #000,0 0 2px rgba(255,191,105,.3),0 0 40px rgba(224,122,51,.18)}
+    50%{text-shadow:0 1px 0 #000,0 0 6px rgba(255,191,105,.55),0 0 60px rgba(224,122,51,.34)}}
+  @keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
   <div class="stage"></div>
+  <div class="glow-wrap"><div class="glow"></div></div>
   <div class="vignette"></div>
   <div class="grain"></div>
 
+  <div class="embers" aria-hidden="true">
+    <span class="ember" style="left:50%;--dx:-6px;animation-duration:7s;animation-delay:0s"></span>
+    <span class="ember" style="left:46%;--dx:-20px;animation-duration:8.4s;animation-delay:1.1s;width:2px;height:2px"></span>
+    <span class="ember" style="left:54%;--dx:18px;animation-duration:6.2s;animation-delay:.5s"></span>
+    <span class="ember" style="left:49%;--dx:10px;animation-duration:9s;animation-delay:2.3s;width:4px;height:4px"></span>
+    <span class="ember" style="left:57%;--dx:26px;animation-duration:7.6s;animation-delay:3.1s;width:2px;height:2px"></span>
+    <span class="ember" style="left:43%;--dx:-28px;animation-duration:8s;animation-delay:1.8s"></span>
+    <span class="ember" style="left:52%;--dx:4px;animation-duration:6.6s;animation-delay:4.2s"></span>
+    <span class="ember" style="left:47%;--dx:-14px;animation-duration:7.9s;animation-delay:.9s;width:2px;height:2px"></span>
+    <span class="ember" style="left:55%;--dx:16px;animation-duration:8.8s;animation-delay:2.9s;width:4px;height:4px"></span>
+    <span class="ember" style="left:51%;--dx:-2px;animation-duration:6.9s;animation-delay:5.1s"></span>
+    <span class="ember" style="left:44%;--dx:-22px;animation-duration:9.3s;animation-delay:3.7s;width:2px;height:2px"></span>
+    <span class="ember" style="left:58%;--dx:30px;animation-duration:7.2s;animation-delay:.2s"></span>
+    <span class="ember" style="left:48%;--dx:-10px;animation-duration:8.1s;animation-delay:4.8s"></span>
+    <span class="ember" style="left:53%;--dx:12px;animation-duration:6.4s;animation-delay:2.1s;width:2px;height:2px"></span>
+    <span class="ember" style="left:45%;--dx:-18px;animation-duration:8.6s;animation-delay:5.6s"></span>
+    <span class="ember" style="left:56%;--dx:22px;animation-duration:7.4s;animation-delay:3.4s;width:4px;height:4px"></span>
+  </div>
+
+  <span class="bat" aria-hidden="true">🦇</span>
+
   <main class="wrap">
-    <div class="lantern" aria-hidden="true">🎃</div>
+    <div class="lantern-par"><div class="lantern-sway"><div class="lantern" aria-hidden="true">🎃</div></div></div>
     <h1>PIGGYBACK</h1>
     <div class="rule" aria-hidden="true">ALL HALLOWS' EVE</div>
     <p class="tag">The veil is thin tonight. Mind the dark &mdash; it minds you back.</p>
   </main>
 
   <footer class="foot">CCS Halloween CTF &nbsp;·&nbsp; <b>MMXXVI</b></footer>
+
+  <script>
+  (function(){
+    if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    var r=document.documentElement;
+    addEventListener('pointermove',function(e){
+      var x=e.clientX/innerWidth-.5, y=e.clientY/innerHeight-.5;
+      r.style.setProperty('--gx',(x*22).toFixed(1)+'px');   // light follows cursor
+      r.style.setProperty('--gy',(y*16).toFixed(1)+'px');
+      r.style.setProperty('--lx',(x*-12).toFixed(1)+'px');  // lantern parallax (opposite)
+      r.style.setProperty('--ly',(y*-8).toFixed(1)+'px');
+    },{passive:true});
+  })();
+  </script>
 </body>
 </html>
