@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.12"
+# dependencies = []
+# ///
 """
 Reference solver for the Piggyback challenge.
 
@@ -12,7 +16,7 @@ The chain:
   3. Read /flag with the same token.
 
 Python's standard `ssl` module exposes no 0-RTT API, so we drive a real 0-RTT
-client -- `openssl s_client -early_data` -- as a subprocess, and read its output
+client -- `openssl s_client -early_data` (OpenSSL 3+, not LibreSSL) -- as a subprocess, and read its output
 with a non-blocking loop (no `-quiet`: it implies `-ign_eof` and deadlocks).
 """
 import argparse
@@ -76,9 +80,9 @@ def openssl(host, port, sni, extra, send=None, window=3.0, idle=0.6):
 
 def main():
     ap = argparse.ArgumentParser(description="Piggyback solver")
-    ap.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
-    ap.add_argument("--port", default=int(os.environ.get("PORT", "8443")), type=int)
-    ap.add_argument("--sni", default=os.environ.get("SNI", "lab"))
+    ap.add_argument("host", nargs="?", default="127.0.0.1")
+    ap.add_argument("port", nargs="?", default=32002, type=int)
+    ap.add_argument("--sni", default="piggyback")
     ap.add_argument("--tries", default=10, type=int,
                     help="max flight replays before giving up")
     args = ap.parse_args()

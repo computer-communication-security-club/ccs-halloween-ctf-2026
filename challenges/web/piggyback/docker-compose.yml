@@ -1,0 +1,96 @@
+# player ──TLS 1.3──▶ lb (haproxy, L4 round-robin) ──▶ front1 / front2 ──▶ backend
+#
+# Only lb is published. If a player could reach one edge node directly they could
+# pin it, and part of the challenge evaporates. certgen fills the certs volume once;
+# `docker compose down --volumes` wipes promotion state and rotates the ticket key.
+x-service: &service
+  platform: linux/amd64
+  restart: unless-stopped
+  read_only: true
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: 5m
+      max-file: '2'
+
+services:
+  certgen:
+    <<: *service
+    build: {context: ., target: certgen}
+    restart: "no"
+    user: '10001:10001'
+    network_mode: none
+    environment:
+      DOMAIN: piggyback
+    volumes:
+      - certs:/certs
+    cpus: 0.25
+    mem_limit: 64m
+    pids_limit: 32
+
+  backend:
+    <<: *service
+    build: {context: ., target: backend}
+    user: '10001:10001'
+    networks: [internal]
+    expose: ["8080"]
+    cpus: 0.5
+    mem_limit: 128m
+    pids_limit: 128
+
+  front1: &front
+    <<: *service
+    build: {context: ., target: front}
+    user: '10001:10001'
+    environment:
+      INSTANCE: "A"
+      LISTEN_PORT: "8443"
+      BACKEND_HOST: backend
+      BACKEND_PORT: "8080"
+    volumes:
+      - certs:/certs:ro            # same cert AND same ticket.key as front2
+    networks: [default, internal]
+    expose: ["8443"]
+    depends_on:
+      certgen:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
+    cpus: 0.5
+    mem_limit: 128m
+    pids_limit: 256
+
+  front2:
+    <<: *front
+    environment:
+      INSTANCE: "B"
+      LISTEN_PORT: "8443"
+      BACKEND_HOST: backend
+      BACKEND_PORT: "8080"
+
+  lb:
+    <<: *service
+    build: {context: ., target: lb}
+    user: haproxy
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${PUBLIC_PORT:-32002}:8443"
+    tmpfs:
+      - /tmp:size=8m
+    depends_on:
+      front1:
+        condition: service_started
+      front2:
+        condition: service_started
+    cpus: 0.5
+    mem_limit: 128m
+    pids_limit: 128
+
+networks:
+  internal:
+    internal: true
+
+volumes:
+  certs:

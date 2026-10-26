@@ -1,0 +1,38 @@
+name: Piggyback
+author: deprrous
+category: web
+connection_info: https://CHALLENGE_HOST:32002
+description: |
+  Latency is a feature.
+
+  Piggyback terminates TLS right at the edge and answers your very first request
+  out of TLS 1.3 **0-RTT early data** — bytes coming back before the handshake
+  has even finished settling. Two edge nodes up front, one warm origin behind
+  them, keep-alives that never go cold. Two edges, one origin, zero wait.
+
+  The security review left exactly one line on the whiteboard before lunch:
+  **no privileged actions on the fast path.** We wrote the guard. We shipped on
+  time. Ship fast, they said.
+
+  Make yourself an admin and read `/flag`.
+
+  TLS 1.3 only, self-signed certificate. A client that actually speaks 0-RTT is
+  the whole ballgame. `openssl s_client -early_data` is more than enough — no
+  exotic tooling required.
+attribution: Authored by deprrous
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  decay: 10
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{0rtt_3arly_d4ta_d3sync_f4cadf469aa59ae3}
+    data: case_sensitive
+tags:
+  - hard
+  - halloween
+files: []
+hints: []
+state: hidden

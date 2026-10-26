@@ -1,0 +1,19 @@
+mode: shared
+protocol: https
+architecture: linux/amd64
+service: lb
+internal_port: 8443
+public_port: 32002
+solver: automated
+readiness: TLS 1.3 handshake succeeds on the public port; the solver verifies the full chain in about 5 seconds.
+reset: docker compose down --volumes --remove-orphans; docker compose up -d --build
+state: >-
+  Promotion state is in memory in backend, keyed by each player's X-Token, so players
+  do not collide; a backend restart makes everyone redo the solve. The certs volume holds
+  the self-signed cert and the shared session-ticket key; down --volumes rotates them.
+ttl_minutes: null
+egress: none
+notes: >-
+  Five services: certgen (one-shot), backend, front1, front2, lb. Only lb is published;
+  front1/front2 must never be reachable directly. TLS ends at the C fronts, not at haproxy.
+  The server ignores SNI, so players connect by IP. Solver needs OpenSSL 3+ (not LibreSSL).

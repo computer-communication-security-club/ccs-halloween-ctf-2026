@@ -21,6 +21,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -31,14 +32,16 @@ var (
 	mu    sync.Mutex
 	step  = map[string]int{}  // per-token promotion progress: 0 -> 1 -> 2
 	admin = map[string]bool{} // tokens that reached step 2
-	flag  = envOr("FLAG", "ccsCTF{replace_me}")
+	flag  = loadFlag("/app/flag.txt")
 )
 
-func envOr(k, d string) string {
-	if v := os.Getenv(k); v != "" {
-		return v
+// loadFlag reads the flag baked into the image; a missing file yields a fake.
+func loadFlag(path string) string {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return "ccsCTF{replace_me}"
 	}
-	return d
+	return strings.TrimSpace(string(b))
 }
 
 func token(r *http.Request) string {
