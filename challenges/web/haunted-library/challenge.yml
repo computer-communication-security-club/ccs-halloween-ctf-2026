@@ -1,0 +1,28 @@
+name: Haunted Library
+author: CCS organizers
+category: web
+connection_info: http://CHALLENGE_HOST:32001
+description: |
+  The librarian filed a secret outside the public collection.
+attribution: Authored by CCS organizers
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  decay: 10
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{d3m0_l1brary_tr4v3rs4l}
+    data: case_sensitive
+tags:
+  - easy
+files:
+  - dist/Dockerfile
+  - dist/flag.txt
+  - dist/src/app.py
+  - dist/src/requirements.txt
+  - dist/src/pages/welcome.txt
+  - dist/src/flag.fake
+hints: []
+state: hidden

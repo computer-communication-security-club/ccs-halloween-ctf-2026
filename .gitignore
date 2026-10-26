@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Build artifacts (dist/ IS committed — it's the player handout)
+*.o
+core
+core.*
+.gdb_history
+
+# Local secrets / overrides
+.env
+docker-compose.override.yml
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/

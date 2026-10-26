@@ -1,0 +1,65 @@
+name: Challenges
+
+# Runs only on this private repository's own branches. No secrets are used, and
+# pull_request (not pull_request_target) keeps fork PRs away from privileged runners.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: challenges-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check metadata and handouts
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv run tools/ctf.py check
+
+  changed:
+    name: Select changed challenges
+    runs-on: ubuntu-24.04
+    outputs:
+      challenges: ${{ steps.select.outputs.challenges }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+      - id: select
+        env:
+          # Empty on workflow_dispatch, which selects every challenge.
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          challenges=$(uv run tools/ctf.py changed ${BASE:+--base "$BASE"})
+          echo "$challenges"
+          echo "challenges=$challenges" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Test ${{ matrix.challenge.name }}
+    needs: [check, changed]
+    if: needs.changed.outputs.challenges != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        challenge: ${{ fromJSON(needs.changed.outputs.challenges) }}
+    # redpwn/jail needs privileged containers and working cgroups. Set the repository
+    # variable JAIL_RUNNER to a JSON runner label list, e.g. ["self-hosted","linux","x64","jail"],
+    # if GitHub-hosted runners cannot run it.
+    runs-on: ${{ matrix.challenge.jail && fromJSON(vars.JAIL_RUNNER || '"ubuntu-24.04"') || 'ubuntu-24.04' }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Committed dist/ matches a fresh build
+        run: uv run tools/ctf.py dist --verify "${{ matrix.challenge.path }}"
+      - name: Solver recovers the flag
+        run: uv run tools/ctf.py test "${{ matrix.challenge.path }}"

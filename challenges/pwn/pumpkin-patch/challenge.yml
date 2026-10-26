@@ -1,0 +1,29 @@
+name: Pumpkin Patch
+author: CCS organizers
+category: pwn
+connection_info: nc CHALLENGE_HOST 31001
+description: |
+  Carve carefully. The pumpkin has a secret function.
+attribution: Authored by CCS organizers
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  decay: 10
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{d3m0_pumpk1n_r3t2w1n}
+    data: case_sensitive
+tags:
+  - easy
+  - halloween
+files:
+  - dist/chall
+  - dist/chall.c
+  - dist/libc.so.6
+  - dist/ld-linux-x86-64.so.2
+  - dist/Dockerfile
+  - dist/flag.txt
+hints: []
+state: hidden
