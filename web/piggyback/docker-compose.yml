@@ -1,16 +1,32 @@
-# 0-RTT early-data request-desync + cross-instance replay CTF lab.
+# Piggyback — one command to run it:
 #
-#   solver ──TLS──> lb (haproxy, round-robin TCP) ──> front1 (instance A)
-#                                                 └──> front2 (instance B)
-#                        front{1,2} ──keep-alive HTTP/1.1──> backend
+#     docker compose up --build -d
 #
-# Run ./certs/gen-certs.sh first, then `docker compose up --build`.
+# No pre-steps. `certgen` generates the self-signed cert and the shared ticket
+# key into a named volume before the edges start; everything restarts on its own
+# if it crashes or the host reboots. Players reach it on :443 (override with
+# PUBLISH_PORT). To reset all state (and rotate the ticket key), take it down
+# with `docker compose down -v`.
 services:
+  # One-shot: populate the shared `certs` volume, then exit. Idempotent — on a
+  # restart it sees existing certs and leaves the ticket key alone, so resumption
+  # tickets already handed out keep working.
+  certgen:
+    build:
+      context: .
+      dockerfile: certgen/Dockerfile
+    environment:
+      DOMAIN: "${DOMAIN:-lab}"
+    volumes:
+      - certs:/certs
+    restart: "no"
+
   backend:
     build: ./backend
     environment:
-      FLAG: "ccsCTF{0rtt_early_data_desync_x_instance_replay}"
+      FLAG: "${FLAG:-ccsCTF{0rtt_early_data_desync_x_instance_replay}}"
     expose: ["8080"]
+    restart: unless-stopped
 
   front1:
     build: ./front
@@ -20,9 +36,14 @@ services:
       BACKEND_HOST: "backend"
       BACKEND_PORT: "8080"
     volumes:
-      - ./certs:/certs:ro
-    depends_on: [backend]
+      - certs:/certs:ro            # same cert AND same ticket.key as front2
+    depends_on:
+      certgen:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
     expose: ["8443"]
+    restart: unless-stopped
 
   front2:
     build: ./front
@@ -32,23 +53,40 @@ services:
       BACKEND_HOST: "backend"
       BACKEND_PORT: "8080"
     volumes:
-      - ./certs:/certs:ro   # same cert AND same ticket.key -> shared STEK
-    depends_on: [backend]
+      - certs:/certs:ro
+    depends_on:
+      certgen:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
     expose: ["8443"]
+    restart: unless-stopped
 
   lb:
     image: haproxy:2.9
     volumes:
       - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     ports:
-      - "8443:443"           # host:container -> solver connects to localhost:8443
-    depends_on: [front1, front2]
+      - "${PUBLISH_PORT:-443}:443"
+    depends_on:
+      front1:
+        condition: service_started
+      front2:
+        condition: service_started
+    restart: unless-stopped
 
-  # Optional: run the reference exploit with `docker compose run --rm solver`.
+  # Reference exploit. Not part of `up` — run it with:
+  #   docker compose run --rm solver
   solver:
     build: ./solver
     environment:
       HOST: "lb"
       PORT: "443"
-    depends_on: [lb]
+      SNI: "${DOMAIN:-lab}"
+    depends_on:
+      lb:
+        condition: service_started
     profiles: ["solve"]
+
+volumes:
+  certs:

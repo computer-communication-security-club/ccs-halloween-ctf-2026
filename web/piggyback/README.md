@@ -41,58 +41,76 @@ A client that actually speaks 0-RTT is the whole ballgame. `openssl s_client
                                       backend  (HTTP/1.1, keep-alive)
 ```
 
-### Run it locally
+### Run it — one command
 
 ```bash
-./certs/gen-certs.sh                 # self-signed cert + shared ticket key (STEK)
 docker compose up --build -d
-./solver/solve.py                    # reference exploit — proves it's solvable
 ```
 
-The solver should land on:
+That's the whole deploy. No pre-steps: an init container generates the
+self-signed cert and the shared ticket key into a volume before the edges start,
+everything runs `restart: unless-stopped`, and the challenge is live on **:443**.
+Nothing to babysit — crashes and host reboots self-recover.
+
+Check it solves:
+
+```bash
+docker compose run --rm solver     # reference exploit, over the real LB
+```
 
 ```
     [flight 1] promote: step=1 ok
     [flight 2] promote: step=2 ok admin-granted
-[+] FLAG: ccsCTF{0rtt_early_data_desync_x_instance_replay}
+[+] FLAG: ccsCTF{...}
 ```
 
-### Deploy it publicly (real cert)
+### Settings
 
-Self-signed is fine — CTF clients don't validate the chain — but a real cert
-keeps `piggyback.sict-ccs.club` clean:
+Set these in a `.env` next to `docker-compose.yml` (or as real env vars):
+
+```ini
+FLAG=ccsCTF{your_real_flag_here}
+DOMAIN=piggyback.sict-ccs.club     # cert CN/SAN; players use it as -servername
+PUBLISH_PORT=443                   # host port the LB listens on
+```
+
+- **Reset everything** (wipe promotion state *and* rotate the ticket key):
+  `docker compose down -v && docker compose up --build -d`. A plain restart keeps
+  the cert/STEK (idempotent), so tickets players already hold keep working.
+
+### Optional: a real cert instead of self-signed
+
+Self-signed is fine — CTF clients don't validate the chain — but if you want
+`piggyback.sict-ccs.club` to look clean, seed the `certs` volume with a Let's
+Encrypt cert once, before first `up`:
 
 ```bash
-# 1) DNS: A record  piggyback.sict-ccs.club -> <server-ip>
-# 2) Issue a cert (standalone needs :80 free for a moment)
 sudo certbot certonly --standalone -d piggyback.sict-ccs.club
-# 3) Drop it where the edges read it; mint the internal ticket key
-sudo cp /etc/letsencrypt/live/piggyback.sict-ccs.club/fullchain.pem certs/server.crt
-sudo cp /etc/letsencrypt/live/piggyback.sict-ccs.club/privkey.pem   certs/server.key
-openssl rand 80 > certs/ticket.key            # STEK is internal, never from the CA
-# 4) Map the LB to 443 (edit docker-compose.yml: lb ports -> "443:443") and bring it up
-docker compose up --build -d
+docker volume create piggyback_certs
+docker run --rm -v piggyback_certs:/c -v /etc/letsencrypt/live/piggyback.sict-ccs.club:/le:ro alpine \
+  sh -c 'cp /le/fullchain.pem /c/server.crt && cp /le/privkey.pem /c/server.key && head -c80 /dev/urandom > /c/ticket.key'
+docker compose up --build -d       # certgen sees existing certs and leaves them alone
 ```
 
-Operator checklist before you open it:
+### Operator notes
 
-- **Publish only the LB.** `front1`, `front2` and `backend` stay on `expose:`,
-  never `ports:`. If a player can reach one edge node directly, they can pin it,
-  and a chunk of the challenge evaporates.
-- **Set a real `FLAG`** in `docker-compose.yml`.
+- **Only the LB is published.** `front1`, `front2` and `backend` stay on
+  `expose:`, never `ports:`. If a player can reach one edge node directly they can
+  pin it, and a chunk of the challenge evaporates. Keep it that way.
 - Promotion state is in-memory, keyed by each player's own `X-Token`, so players
-  never collide. Restart `backend` to wipe all progress.
+  never collide; a `backend` restart just makes everyone redo the ~5-second solve.
 - The server ignores SNI, so any `-servername` connects; the real name just keeps
   TLS tidy.
 
 ### Files
 
 ```
-docker-compose.yml     lb + front1 + front2 + backend (+ optional solver)
-certs/gen-certs.sh     cert (DOMAIN-aware) + shared 80-byte ticket key
+docker-compose.yml     certgen + backend + front1 + front2 + lb (+ solver)
+certgen/Dockerfile     one-shot init: generates cert + STEK into a volume
+certs/gen-certs.sh     cert (DOMAIN-aware) + shared 80-byte ticket key, idempotent
 front/front.c          edge proxy — TLS termination, 0-RTT, replay cache
 backend/main.go        origin app server
-haproxy/haproxy.cfg    round-robin TCP load balancer
+haproxy/haproxy.cfg    round-robin TCP load balancer (re-resolves on restart)
 solver/solve.py        reference exploit (Python; drives openssl -early_data)
 SOLUTION.md            writeup + difficulty knobs + vuln map  (SPOILERS)
 ```
