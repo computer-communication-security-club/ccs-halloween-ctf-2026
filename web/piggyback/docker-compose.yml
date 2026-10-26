@@ -1,0 +1,54 @@
+# 0-RTT early-data request-desync + cross-instance replay CTF lab.
+#
+#   solver ──TLS──> lb (haproxy, round-robin TCP) ──> front1 (instance A)
+#                                                 └──> front2 (instance B)
+#                        front{1,2} ──keep-alive HTTP/1.1──> backend
+#
+# Run ./certs/gen-certs.sh first, then `docker compose up --build`.
+services:
+  backend:
+    build: ./backend
+    environment:
+      FLAG: "ccsCTF{0rtt_early_data_desync_x_instance_replay}"
+    expose: ["8080"]
+
+  front1:
+    build: ./front
+    environment:
+      INSTANCE: "A"
+      LISTEN_PORT: "8443"
+      BACKEND_HOST: "backend"
+      BACKEND_PORT: "8080"
+    volumes:
+      - ./certs:/certs:ro
+    depends_on: [backend]
+    expose: ["8443"]
+
+  front2:
+    build: ./front
+    environment:
+      INSTANCE: "B"
+      LISTEN_PORT: "8443"
+      BACKEND_HOST: "backend"
+      BACKEND_PORT: "8080"
+    volumes:
+      - ./certs:/certs:ro   # same cert AND same ticket.key -> shared STEK
+    depends_on: [backend]
+    expose: ["8443"]
+
+  lb:
+    image: haproxy:2.9
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "8443:443"           # host:container -> solver connects to localhost:8443
+    depends_on: [front1, front2]
+
+  # Optional: run the reference exploit with `docker compose run --rm solver`.
+  solver:
+    build: ./solver
+    environment:
+      HOST: "lb"
+      PORT: "443"
+    depends_on: [lb]
+    profiles: ["solve"]
