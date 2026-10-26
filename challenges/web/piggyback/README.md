@@ -5,7 +5,7 @@
 | | |
 | --- | --- |
 | Deployment | `shared`, one Compose project with five services |
-| Player endpoint | `https://CHALLENGE_HOST:443`: TLS 1.3 only, self-signed, SNI ignored |
+| Player endpoint | `https://CHALLENGE_HOST:32002`: TLS 1.3 only, self-signed, SNI ignored |
 | Handout | None (black-box); `dist/` is intentionally empty |
 | Solver | `solve/solve.py HOST PORT`, standard library + **OpenSSL 3+** `openssl` binary |
 
@@ -31,7 +31,7 @@ By hand, from this directory:
 
 ```sh
 docker compose up -d --build --wait
-uv run solve/solve.py 127.0.0.1 443
+uv run solve/solve.py 127.0.0.1 32002
 docker compose down --volumes --remove-orphans
 ```
 
@@ -64,7 +64,7 @@ solve/WRITEUP.md           writeup + difficulty knobs + vuln map (SPOILERS)
 Moved from `web/piggyback/` to `challenges/web/piggyback/` and fitted to [the rules](../../../docs/RULES.md):
 
 - The flag moved from a default in `docker-compose.yml` to `flag.txt` and `challenge.yml` (same value, at the author's request), and is baked into the backend image.
-- Still on port 443, now as `${BIND_ADDR:-127.0.0.1}:${PUBLIC_PORT:-443}`, with an approved `port_exception` in `deployment.yml`. `piggyback.sict-ccs.club` was dropped: challenges have no domains, and players connect by IP.
+- Port 443 and `piggyback.sict-ccs.club` → `${BIND_ADDR:-127.0.0.1}:${PUBLIC_PORT:-32002}`, inside the web range. Challenges have no domains; players connect by IP.
 - Four per-service Dockerfiles → one root `Dockerfile` with targets; base images pinned by digest.
 - The HAProxy config is baked into the `lb` image instead of bind-mounted; HAProxy listens on 8443 inside.
 - Added non-root users, CPU/memory/PID limits, dropped capabilities, read-only filesystems, an internal backend network, and log rotation.
@@ -76,4 +76,4 @@ Moved from `web/piggyback/` to `challenges/web/piggyback/` and fitted to [the ru
 | --- | --- | --- | --- |
 | 2026-10-26 | macOS M2, Docker Desktop 29.9.2, OpenSSL 4.0.3 | Original layout (arm64), `solve.py` | PASS (baseline) |
 | 2026-10-26 | macOS M2, Docker Desktop 29.9.2 (amd64 emulation), OpenSSL 4.0.3 | `uv run tools/ctf.py test` (new layout, new flag) | PASS |
-| 2026-10-26 | macOS M2, Docker Desktop 29.9.2 (amd64 emulation), OpenSSL 4.0.3 | `uv run tools/ctf.py test` (port 443, original flag) | PASS |
+| 2026-10-26 | macOS M2, Docker Desktop 29.9.2 (amd64 emulation), OpenSSL 4.0.3 | `uv run tools/ctf.py test` (port 32002, original flag) | PASS |

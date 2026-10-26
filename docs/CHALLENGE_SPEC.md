@@ -75,7 +75,6 @@ architecture: linux/amd64
 service: chall               # Compose service; null for static
 internal_port: 8080          # null for static
 public_port: 32001           # default only; null for static
-# port_exception: approved by <organizer> on <date>: <reason>   # only for a port outside the category range
 solver: automated           # automated | manual
 readiness: GET / returns 200
 reset: docker compose down --volumes --remove-orphans; docker compose up -d

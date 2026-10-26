@@ -1,7 +1,7 @@
 name: Piggyback
 author: deprrous
 category: web
-connection_info: https://CHALLENGE_HOST:443
+connection_info: https://CHALLENGE_HOST:32002
 description: |
   Latency is a feature.
 

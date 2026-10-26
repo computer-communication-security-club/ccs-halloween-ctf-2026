@@ -326,12 +326,7 @@ def check_deployment(chall, deploy, report):
         port = deploy.get("public_port")
         low, high = PORT_RANGES.get(chall.parent.name, (0, 0))
         if isinstance(port, int) and not low <= port <= high:
-            if deploy.get("port_exception"):
-                report.warn(f"deployment.yml: public_port {port} outside {chall.parent.name} range {low}-{high} "
-                            f"(exception: {deploy['port_exception']})")
-            else:
-                report.error(f"deployment.yml: public_port {port} outside {chall.parent.name} range {low}-{high}; "
-                             "use the range, or record organizer approval in port_exception")
+            report.error(f"deployment.yml: public_port {port} outside {chall.parent.name} range {low}-{high}")
     if mode == "per-team" and not isinstance(deploy.get("ttl_minutes"), int):
         report.error("deployment.yml: per-team challenges need an integer ttl_minutes")
 

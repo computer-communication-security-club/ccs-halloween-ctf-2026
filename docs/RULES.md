@@ -64,7 +64,7 @@
 | rev | 34000–34999 |
 | misc / forensics / osint | 35000–35999 |
 
-Remote challenges publish exactly one player ingress port. Its default MUST be unique, in range, and match `challenge.yml`. A port outside the range needs organizer approval, recorded as `port_exception: <who approved and why>` in `deployment.yml`. Parameterize it as `${PUBLIC_PORT:-31001}` (use your own default) and its bind address as `${BIND_ADDR:-127.0.0.1}`. Local defaults bind to loopback; infra explicitly exposes production endpoints. Per-team allocated ports may use a separate infra pool and must be shown by the instancer.
+Remote challenges publish exactly one player ingress port. Its default MUST be unique, in range, and match `challenge.yml`. Parameterize it as `${PUBLIC_PORT:-31001}` (use your own default) and its bind address as `${BIND_ADDR:-127.0.0.1}`. Local defaults bind to loopback; infra explicitly exposes production endpoints. Per-team allocated ports may use a separate infra pool and must be shown by the instancer.
 
 Declare `mode: static`, `shared`, or `per-team` in `deployment.yml`. A jail sandbox per connection is not a persistent team instance. Per-team authors MUST complete the lifecycle and two-instance checks in [Architecture §6](ARCHITECTURE.md#6-per-team-instances).
 

@@ -81,7 +81,7 @@ def openssl(host, port, sni, extra, send=None, window=3.0, idle=0.6):
 def main():
     ap = argparse.ArgumentParser(description="Piggyback solver")
     ap.add_argument("host", nargs="?", default="127.0.0.1")
-    ap.add_argument("port", nargs="?", default=443, type=int)
+    ap.add_argument("port", nargs="?", default=32002, type=int)
     ap.add_argument("--sni", default="piggyback")
     ap.add_argument("--tries", default=10, type=int,
                     help="max flight replays before giving up")

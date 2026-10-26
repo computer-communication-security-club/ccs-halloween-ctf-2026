@@ -3,8 +3,7 @@ protocol: https
 architecture: linux/amd64
 service: lb
 internal_port: 8443
-public_port: 443
-port_exception: Approved by organizers on 2026-10-26 at the author's request; a TLS challenge on the standard HTTPS port.
+public_port: 32002
 solver: automated
 readiness: TLS 1.3 handshake succeeds on the public port; the solver verifies the full chain in about 5 seconds.
 reset: docker compose down --volumes --remove-orphans; docker compose up -d --build

@@ -76,7 +76,7 @@ services:
     build: {context: ., target: lb}
     user: haproxy
     ports:
-      - "${BIND_ADDR:-127.0.0.1}:${PUBLIC_PORT:-443}:8443"
+      - "${BIND_ADDR:-127.0.0.1}:${PUBLIC_PORT:-32002}:8443"
     tmpfs:
       - /tmp:size=8m
     depends_on:
