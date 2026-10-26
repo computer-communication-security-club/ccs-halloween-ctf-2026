@@ -14,9 +14,8 @@ This private repository contains challenge sources, real flags, and solutions. O
 ```text
 .
 ├── challenges/
-│   ├── pwn/pumpkin-patch/      # buffer overflow → ret2win; redpwn/jail
-│   ├── web/haunted-library/    # path traversal; non-root HTTP service
-│   ├── web/piggyback/          # first event challenge (deprrous)
+│   ├── pwn/
+│   ├── web/piggyback/          # TLS 1.3 0-RTT; multi-service Compose (deprrous)
 │   ├── crypto/
 │   ├── rev/
 │   ├── forensics/
@@ -29,18 +28,20 @@ This private repository contains challenge sources, real flags, and solutions. O
 └── README.md
 ```
 
-## Start from an example
+## Start a challenge
 
-Copy the closest reference implementation, then change its name, flag, port, sources, solver, and metadata. These examples are public teaching patterns and must be replaced or substantially changed before use in the event.
+Create `challenges/<category>/<slug>/` with the files in the [challenge specification](docs/CHALLENGE_SPEC.md). [Piggyback](challenges/web/piggyback/) is a complete hosted challenge to compare against: multi-service Compose, one root `Dockerfile` with targets, hardening, and an automated solver.
 
-| Example | Deployment | Default endpoint |
+The original reference examples were removed, but they are still in git history at commit `287ebbd`. Copy them as a starting point if they help:
+
+| Example | Pattern | Restore with |
 | --- | --- | --- |
-| [Pumpkin Patch](challenges/pwn/pumpkin-patch/) | Jail; fresh sandbox per TCP connection | `localhost:31001` |
-| [Haunted Library](challenges/web/haunted-library/) | Shared stateless web app | `http://localhost:32001` |
+| Pumpkin Patch | pwn under redpwn/jail; exported binary, libc, and loader | `git archive 287ebbd challenges/pwn/pumpkin-patch \| tar -x` |
+| Haunted Library | single-service non-root web app | `git archive 287ebbd challenges/web/haunted-library \| tar -x` |
+
+Rename the restored directory, then change its name, flag, port, sources, solver, and metadata.
 
 ```sh
-cp -R challenges/web/haunted-library challenges/web/my-spooky-challenge
-# Edit all metadata, author notes, sources, flags, and solve files first.
 uv run tools/ctf.py dist challenges/web/my-spooky-challenge    # export dist/
 uv run tools/ctf.py check challenges/web/my-spooky-challenge   # rules, ports, leak scan
 uv run tools/ctf.py test challenges/web/my-spooky-challenge    # compose up, solve, compare, down
@@ -59,4 +60,4 @@ You need [Docker](https://docs.docker.com/get-docker/) and [uv](https://docs.ast
 
 [GitHub Actions](.github/workflows/challenges.yml) runs `check` on every push and pull request, and `dist --verify` plus `test` for each changed challenge. Pwn needs a runner that can run privileged redpwn/jail; see the comment in the workflow. CI does not replace the independent test-solve or a manual look at `dist/`.
 
-Flag format: **`ccsCTF{...}`**. All example flags are demonstration values.
+Flag format: **`ccsCTF{...}`**.

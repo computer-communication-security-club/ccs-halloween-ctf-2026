@@ -36,7 +36,7 @@
 2. Compile inside Docker. Export the exact deployed binary, libc, and loader from the same runtime filesystem. If build packages update libc, export from that updated filesystem too. Do not build on the host.
 3. The handout MUST include `chall`, `libc.so.6`, `ld-linux-x86-64.so.2` (for the default architecture), and a runnable Dockerfile with a fake flag. Include source unless reverse engineering is intentional.
 4. Install the executable at `/srv/app/run` and the flag at `/srv/app/flag.txt`. The sandbox sees these as `/app/run` and `/app/flag.txt`, with `/app` as its working directory. Real flags MUST be world-readable inside the jail if the intended exploit reads them.
-5. Set per-connection wall time, memory, PID, and CPU budgets, plus a total connection cap. Begin with the example's limits and adjust only after testing. `JAIL_CPU` is **milliseconds of CPU per wall second**, not a core count. Document any proof of work and teach the solver to handle it.
+5. Set per-connection wall time, memory, PID, and CPU budgets, plus a total connection cap. Start from `JAIL_TIME=30`, `JAIL_MEM=32M`, `JAIL_PIDS=10`, `JAIL_CPU=100`, `JAIL_CONNS=32` with a container budget of 1 CPU, 512 MB and 256 PIDs, and adjust only after testing. The removed Pumpkin Patch example (commit `287ebbd`) shows the full jail pattern. `JAIL_CPU` is **milliseconds of CPU per wall second**, not a core count. Document any proof of work and teach the solver to handle it.
 6. Record actual `checksec` output, overflow offset or equivalent exploit assumptions, libc origin, and the native Linux test environment in the private README. Make mitigation choices deliberate.
 7. Test the official jail container on native Linux with cgroup support. Docker Desktop/emulation may build artifacts but is not sufficient evidence that nsjail works in production.
 
@@ -64,7 +64,7 @@
 | rev | 34000–34999 |
 | misc / forensics / osint | 35000–35999 |
 
-Remote challenges publish exactly one player ingress port. Its default MUST be unique, in range, and match `challenge.yml`. Parameterize it as `${PUBLIC_PORT:-31001}` (use your own default) and its bind address as `${BIND_ADDR:-127.0.0.1}`. Local defaults bind to loopback; infra explicitly exposes production endpoints. Per-team allocated ports may use a separate infra pool and must be shown by the instancer.
+Remote challenges publish exactly one player ingress port. Its default MUST be unique, in range, and match `challenge.yml`. A port outside the range needs organizer approval, recorded as `port_exception: <who approved and why>` in `deployment.yml`. Parameterize it as `${PUBLIC_PORT:-31001}` (use your own default) and its bind address as `${BIND_ADDR:-127.0.0.1}`. Local defaults bind to loopback; infra explicitly exposes production endpoints. Per-team allocated ports may use a separate infra pool and must be shown by the instancer.
 
 Declare `mode: static`, `shared`, or `per-team` in `deployment.yml`. A jail sandbox per connection is not a persistent team instance. Per-team authors MUST complete the lifecycle and two-instance checks in [Architecture §6](ARCHITECTURE.md#6-per-team-instances).
 

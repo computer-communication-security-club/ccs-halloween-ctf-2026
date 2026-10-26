@@ -25,7 +25,7 @@ Manual-only challenges may omit `solve.py` with explicit organizer approval and 
 Use the supplied [ctfcli schema](https://github.com/CTFd/ctfcli/blob/master/ctfcli/spec/challenge-example.yml) style. Example:
 
 ```yaml
-name: Haunted Library
+name: My Spooky Challenge
 author: your-handle
 category: web
 connection_info: http://CHALLENGE_HOST:32001
@@ -75,6 +75,7 @@ architecture: linux/amd64
 service: chall               # Compose service; null for static
 internal_port: 8080          # null for static
 public_port: 32001           # default only; null for static
+# port_exception: approved by <organizer> on <date>: <reason>   # only for a port outside the category range
 solver: automated           # automated | manual
 readiness: GET / returns 200
 reset: docker compose down --volumes --remove-orphans; docker compose up -d
@@ -115,20 +116,20 @@ services:
         max-file: '2'
 ```
 
-The examples build locally. Infra may substitute a private registry `image: ghcr.io/<org>/<challenge>@sha256:<reviewed-digest>` for deployment. Do not use `latest` for a reviewed production image. A single-service project needs no explicit network declaration; Compose supplies a project-scoped network. Infra still enforces egress policy at the host/upstream firewall.
+Challenges build locally. Infra may substitute a private registry `image: ghcr.io/<org>/<challenge>@sha256:<reviewed-digest>` for deployment. Do not use `latest` for a reviewed production image. A single-service project needs no explicit network declaration; Compose supplies a project-scoped network. Infra still enforces egress policy at the host/upstream firewall.
 
 Pwn uses `privileged: true` for redpwn/jail, its own jail limits, and a larger container budget. Do not copy web's user, capability, no-new-privileges, or read-only settings onto jail without validating them; the outer jail process needs privileges to establish its sandbox. Extra DB/bot services have no published ports and communicate on a project-scoped internal backend network.
 
-Flags can be copied as files into private runtime images, as in the examples. If a challenge instead accepts an environment `FLAG`, document that contract, provide only a fake local default, and have infra inject the real value. Avoid `$` in flag values where Compose interpolation could alter them; use a mounted secret or explicit escaping when necessary. Dynamic per-team flags need a checker design as well as injection.
+Flags can be copied as files into private runtime images (Piggyback copies `flag.txt` into its backend image). If a challenge instead accepts an environment `FLAG`, document that contract, provide only a fake local default, and have infra inject the real value. Avoid `$` in flag values where Compose interpolation could alter them; use a mounted secret or explicit escaping when necessary. Dynamic per-team flags need a checker design as well as injection.
 
 ## Build and solver contract
 
 From the repository root:
 
 ```sh
-uv run tools/ctf.py dist challenges/web/haunted-library    # export dist/
-uv run tools/ctf.py check challenges/web/haunted-library   # static rules
-uv run tools/ctf.py test challenges/web/haunted-library    # solve against a fresh deployment
+uv run tools/ctf.py dist challenges/<category>/<slug>    # export dist/
+uv run tools/ctf.py check challenges/<category>/<slug>   # static rules
+uv run tools/ctf.py test challenges/<category>/<slug>    # solve against a fresh deployment
 ```
 
 `test` is equivalent to, from the challenge directory:

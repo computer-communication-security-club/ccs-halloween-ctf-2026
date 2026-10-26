@@ -30,7 +30,7 @@ Default to shared when safe. A redpwn connection gets a fresh process/sandbox, n
 
 ## 3. Docker packaging
 
-Build with the challenge directory as context. The examples use a `dist` stage to export player files and a final runtime stage for hosted services. Never publish the private runtime image as a player download: it contains the real flag.
+Build with the challenge directory as context. Each Dockerfile has a `dist` stage to export player files and runtime stages for hosted services. Never publish the private runtime image as a player download: it contains the real flag.
 
 On Ubuntu 23.10 and later (including 24.04), AppArmor blocks the user namespaces nsjail creates, and every connection fails with `mount('/', '/', ..., MS_REC|MS_PRIVATE): Permission denied`. On the jail host, run `sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` and persist it in `/etc/sysctl.d/`. CI does the same on its runner.
 
@@ -48,22 +48,22 @@ Local Compose files bind published ports to `127.0.0.1` by default. Infra sets `
 
 A single app can use its ordinary project-scoped bridge for ingress. Multi-service challenges should add an `internal: true` backend network, with only the ingress app on both networks. Ordinary bridges allow outbound traffic; an internal network alone is not a complete policy for an app also attached to an ingress bridge. Infra must enforce runtime egress filtering at the Docker host or upstream firewall. Test external access, cloud metadata, platform access, and cross-challenge reachability from deployed containers. See [Docker bridge networking](https://docs.docker.com/engine/network/drivers/bridge/).
 
-If HTTPS becomes a challenge requirement, infra can add a TLS endpoint later. Avoid introducing a reverse proxy just to run the examples.
+If HTTPS becomes a challenge requirement, infra can add a TLS endpoint later. Avoid introducing a reverse proxy just to run challenges.
 
 ## 5. Shared deployment
 
 Run from the challenge directory, using a unique project name:
 
 ```sh
-BIND_ADDR=0.0.0.0 docker compose -p ccs-pumpkin-patch up -d --build
-docker compose -p ccs-pumpkin-patch ps
-docker compose -p ccs-pumpkin-patch logs --tail=50
-uv run solve/solve.py 127.0.0.1 31001
+BIND_ADDR=0.0.0.0 docker compose -p ccs-<slug> up -d --build
+docker compose -p ccs-<slug> ps
+docker compose -p ccs-<slug> logs --tail=50
+uv run solve/solve.py 127.0.0.1 <public_port>
 ```
 
 Check the solver from an external player network too. Start a TCP socket check before a solve if needed; a listening socket alone does not demonstrate challenge health. For pwn, confirm that two connections have independent files/processes and that jail timeouts work.
 
-Reset with `docker compose -p ccs-pumpkin-patch down --volumes --remove-orphans`, then start again with the same project name. This deletes that project's data: authors must list any volumes and reset effects in `deployment.yml`. No source-host bind mounts or externally named persistent resources are allowed in challenge packages.
+Reset with `docker compose -p ccs-<slug> down --volumes --remove-orphans`, then start again with the same project name. This deletes that project's data: authors must list any volumes and reset effects in `deployment.yml`. No source-host bind mounts or externally named persistent resources are allowed in challenge packages.
 
 CTFd metadata uses the [ctfcli format](https://github.com/CTFd/ctfcli/blob/master/ctfcli/spec/challenge-example.yml). Infra replaces endpoint placeholders in a release copy, imports/syncs it with their configured CTFd tooling, checks scoring and flags, then makes the challenge visible. `deployment.yml` is an organizer document, not an instancer configuration or a CTFd plugin.
 

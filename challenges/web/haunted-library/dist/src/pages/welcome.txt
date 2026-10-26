@@ -1,1 +1,0 @@
-Welcome! Our public collection lives in /app/pages. The librarian keeps secrets one shelf above.

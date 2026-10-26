@@ -1,7 +1,7 @@
 name: Piggyback
 author: deprrous
 category: web
-connection_info: https://CHALLENGE_HOST:32002
+connection_info: https://CHALLENGE_HOST:443
 description: |
   Latency is a feature.
 
@@ -28,7 +28,7 @@ extra:
   minimum: 100
 flags:
   - type: static
-    content: ccsCTF{0rtt_3arly_d4ta_d3sync_f4cadf469aa59ae3}
+    content: ccsCTF{0rtt_early_data_desync_x_instance_replay}
     data: case_sensitive
 tags:
   - hard

@@ -10,7 +10,7 @@
   uv run tools/ctf.py test CHALLENGE [--port N]    run the solver and compare with flag.txt
   uv run tools/ctf.py changed [--base REF]         list challenges changed since REF (JSON)
 
-CHALLENGE is a path such as challenges/web/haunted-library. Flags are never printed.
+CHALLENGE is a path such as challenges/web/piggyback. Flags are never printed.
 """
 
 import argparse
@@ -326,7 +326,12 @@ def check_deployment(chall, deploy, report):
         port = deploy.get("public_port")
         low, high = PORT_RANGES.get(chall.parent.name, (0, 0))
         if isinstance(port, int) and not low <= port <= high:
-            report.error(f"deployment.yml: public_port {port} outside {chall.parent.name} range {low}-{high}")
+            if deploy.get("port_exception"):
+                report.warn(f"deployment.yml: public_port {port} outside {chall.parent.name} range {low}-{high} "
+                            f"(exception: {deploy['port_exception']})")
+            else:
+                report.error(f"deployment.yml: public_port {port} outside {chall.parent.name} range {low}-{high}; "
+                             "use the range, or record organizer approval in port_exception")
     if mode == "per-team" and not isinstance(deploy.get("ttl_minutes"), int):
         report.error("deployment.yml: per-team challenges need an integer ttl_minutes")
 

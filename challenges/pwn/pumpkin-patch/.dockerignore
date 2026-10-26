@@ -1,7 +1,0 @@
-.git
-dist
-solve
-__pycache__
-**/__pycache__
-*.pyc
-.env
