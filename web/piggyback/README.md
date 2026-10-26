@@ -46,7 +46,7 @@ A client that actually speaks 0-RTT is the whole ballgame. `openssl s_client
 ```bash
 ./certs/gen-certs.sh                 # self-signed cert + shared ticket key (STEK)
 docker compose up --build -d
-./solver/solve.sh                    # reference exploit — proves it's solvable
+./solver/solve.py                    # reference exploit — proves it's solvable
 ```
 
 The solver should land on:
@@ -93,6 +93,6 @@ certs/gen-certs.sh     cert (DOMAIN-aware) + shared 80-byte ticket key
 front/front.c          edge proxy — TLS termination, 0-RTT, replay cache
 backend/main.go        origin app server
 haproxy/haproxy.cfg    round-robin TCP load balancer
-solver/solve.sh        reference exploit (openssl s_client -early_data)
+solver/solve.py        reference exploit (Python; drives openssl -early_data)
 SOLUTION.md            writeup + difficulty knobs + vuln map  (SPOILERS)
 ```

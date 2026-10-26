@@ -1,6 +1,5 @@
 FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y --no-install-recommends openssl bash \
+RUN apt-get update && apt-get install -y --no-install-recommends openssl python3 \
     && rm -rf /var/lib/apt/lists/*
-COPY solve.sh /solve.sh
-RUN chmod +x /solve.sh
-ENTRYPOINT ["/solve.sh"]
+COPY solve.py /solve.py
+ENTRYPOINT ["python3", "/solve.py"]

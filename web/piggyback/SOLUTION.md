@@ -92,8 +92,10 @@ sleep 1 | openssl s_client -connect HOST:443 -servername lab -tls1_3 -sess_in se
   | openssl s_client -connect HOST:443 -servername lab -tls1_3
 ```
 
-`solver/solve.sh` is this, wrapped in a retry loop (round-robin isn't something
-the client controls, so it just keeps sending the flight until step 2 lands).
+`solver/solve.py` is this, wrapped in a retry loop (round-robin isn't something
+the client controls, so it just keeps sending the flight until step 2 lands). It
+shells out to `openssl s_client -early_data` because Python's stdlib `ssl` has no
+0-RTT API.
 
 **The tooling trap worth knowing:** don't reach for `openssl s_client -quiet`.
 It implies `-ign_eof`, the client never closes on stdin EOF, and you deadlock
