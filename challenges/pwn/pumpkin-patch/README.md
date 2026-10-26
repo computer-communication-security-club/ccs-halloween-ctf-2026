@@ -30,7 +30,7 @@ uv run solve/solve.py 127.0.0.1 31001
 docker compose down --volumes --remove-orphans
 ```
 
-Docker Desktop on macOS can build `dist/` but cannot run the jail: the container reports `init seccomp: operation canceled` and never becomes healthy. Test the service on native Linux amd64 with cgroup support (RULES §4.7).
+Docker Desktop on macOS can build `dist/` but cannot run the jail: the container reports `init seccomp: operation canceled` and never becomes healthy. Test the service on native Linux amd64 with cgroup support (RULES §4.7). On Ubuntu 23.10+ hosts, also set `kernel.apparmor_restrict_unprivileged_userns=0` ([Architecture §3](../../../docs/ARCHITECTURE.md#3-docker-packaging)).
 
 ## Binary and runtime
 

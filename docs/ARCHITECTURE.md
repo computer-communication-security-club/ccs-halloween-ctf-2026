@@ -32,6 +32,8 @@ Default to shared when safe. A redpwn connection gets a fresh process/sandbox, n
 
 Build with the challenge directory as context. The examples use a `dist` stage to export player files and a final runtime stage for hosted services. Never publish the private runtime image as a player download: it contains the real flag.
 
+On Ubuntu 23.10 and later (including 24.04), AppArmor blocks the user namespaces nsjail creates, and every connection fails with `mount('/', '/', ..., MS_REC|MS_PRIVATE): Permission denied`. On the jail host, run `sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` and persist it in `/etc/sysctl.d/`. CI does the same on its runner.
+
 Pwn uses a pinned userland, a compiler stage, and a runtime filesystem derived from that same userland. The exported libc/loader must be the ones actually copied into `/srv`. `redpwn/jail` exposes stdin/stdout on TCP port 5000 and starts `/app/run` per connection. See the [upstream author guide](https://github.com/redpwn/jail/blob/main/docs/challenge-authors.md) and [limit reference](https://github.com/redpwn/jail#configuration-reference).
 
 Builds can need network access for dependencies. Pin package versions and use package snapshots or vendoring when exact reconstruction matters. Save the reviewed private runtime image by digest for production rather than silently rebuilding against changed package repositories.
