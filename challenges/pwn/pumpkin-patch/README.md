@@ -55,4 +55,4 @@ Stripped:   No
 | --- | --- | --- | --- |
 | 2026-10-26 | macOS M2, Docker Desktop 29.9.2 | `uv run tools/ctf.py dist` | dist/ built |
 | 2026-10-26 | macOS M2, Docker Desktop 29.9.2 | `uv run tools/ctf.py test` | Not valid: jail seccomp unsupported under Docker Desktop |
-| — | Native Linux amd64 | `uv run tools/ctf.py test` | **Pending** |
+| 2026-10-26 | GitHub Actions `ubuntu-24.04` (native amd64, AppArmor userns restriction off) | `uv run tools/ctf.py test` | PASS |
