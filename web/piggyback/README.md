@@ -15,7 +15,7 @@
 
 |            |                                            |
 | ---------- | ------------------------------------------ |
-| **Connect**    | `0rtt.sict-ccs.club:443` — TLS 1.3 only |
+| **Connect**    | `piggyback.sict-ccs.club:443` — TLS 1.3 only |
 | **Flag**       | `ccsCTF{...}`                            |
 | **Category**   | web / tls                               |
 | **Difficulty** | hard                                    |
@@ -60,15 +60,15 @@ The solver should land on:
 ### Deploy it publicly (real cert)
 
 Self-signed is fine — CTF clients don't validate the chain — but a real cert
-keeps `0rtt.sict-ccs.club` clean:
+keeps `piggyback.sict-ccs.club` clean:
 
 ```bash
-# 1) DNS: A record  0rtt.sict-ccs.club -> <server-ip>
+# 1) DNS: A record  piggyback.sict-ccs.club -> <server-ip>
 # 2) Issue a cert (standalone needs :80 free for a moment)
-sudo certbot certonly --standalone -d 0rtt.sict-ccs.club
+sudo certbot certonly --standalone -d piggyback.sict-ccs.club
 # 3) Drop it where the edges read it; mint the internal ticket key
-sudo cp /etc/letsencrypt/live/0rtt.sict-ccs.club/fullchain.pem certs/server.crt
-sudo cp /etc/letsencrypt/live/0rtt.sict-ccs.club/privkey.pem   certs/server.key
+sudo cp /etc/letsencrypt/live/piggyback.sict-ccs.club/fullchain.pem certs/server.crt
+sudo cp /etc/letsencrypt/live/piggyback.sict-ccs.club/privkey.pem   certs/server.key
 openssl rand 80 > certs/ticket.key            # STEK is internal, never from the CA
 # 4) Map the LB to 443 (edit docker-compose.yml: lb ports -> "443:443") and bring it up
 docker compose up --build -d

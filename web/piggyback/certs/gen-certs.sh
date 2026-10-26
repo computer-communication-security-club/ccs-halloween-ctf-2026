@@ -5,7 +5,7 @@
 # do 0-RTT) on the other — the realistic "identical instances" setup.
 #
 # DOMAIN controls the cert's CN/SAN. For a LOCAL run leave it as "lab". For a
-# PUBLIC deployment behind a real name, either set DOMAIN=0rtt.sict-ccs.club and
+# PUBLIC deployment behind a real name, either set DOMAIN=piggyback.sict-ccs.club and
 # ship this self-signed cert (players just ignore the warning), OR drop a real
 # Let's Encrypt cert in place of server.crt/server.key (see README). The STEK
 # (ticket.key) is internal and is generated the same way either way.
