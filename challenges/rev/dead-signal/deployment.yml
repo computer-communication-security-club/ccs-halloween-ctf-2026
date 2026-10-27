@@ -1,0 +1,24 @@
+mode: static
+protocol: none
+architecture: linux/amd64
+service: null
+internal_port: null
+public_port: null
+solver: automated
+readiness: >-
+  Static handout challenge; there is no runtime service to probe. The committed
+  dist/ binary is the entire player experience.
+reset: >-
+  Nothing to reset; the handout is static and stateless.
+state: >-
+  No runtime state. The binary embeds the flag only as ciphertext derived from
+  the correct token.
+ttl_minutes: null
+egress: none
+notes: >-
+  Static reverse engineering challenge. Players download the stripped binary and
+  reconstruct the authentication token from its validation pipeline; the flag is
+  released only by the binary itself with the correct token. The automated
+  solver works offline against dist/ only. The intended solve time is 45-90
+  minutes; with heavy AI assistance 20-45 minutes (see the private README for
+  the difficulty assessment).

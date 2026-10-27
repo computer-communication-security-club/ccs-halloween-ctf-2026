@@ -1,0 +1,39 @@
+name: DEAD SIGNAL
+author: bg0d-glitch
+category: rev
+description: |
+  A satellite transmitted its final encrypted authentication sequence before
+  disappearing. Investigators recovered its authentication software — but the
+  valid recovery token was never written down.
+
+  The recovered terminal will only release its payload to the one correct
+  **24-character authentication token**.
+
+  Reverse engineer `dead_signal`, reconstruct the valid token, and capture the
+  flag.
+
+  The token is exactly 24 characters from `A-Z` and `0-9`. Exactly one token is
+  valid, everything needed to recover it is inside the binary, and patching the
+  binary to skip the check will not give up the flag — you need the real token.
+
+  `dead_signal` runs on any modern x86_64 Linux system (glibc).
+attribution: Authored by bg0d-glitch
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  decay: 10
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{dead_signal_305df5081d53}
+    data: case_sensitive
+tags:
+  - hard
+  - halloween
+files:
+  - dist/dead_signal
+  - dist/README.md
+  - dist/SHA256SUMS
+hints: []
+state: hidden
