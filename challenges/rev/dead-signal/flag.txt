@@ -1,0 +1,1 @@
+ccsCTF{dead_signal_305df5081d53}
