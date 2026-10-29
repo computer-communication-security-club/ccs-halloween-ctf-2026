@@ -1,0 +1,28 @@
+mode: shared
+protocol: tcp
+architecture: linux/amd64
+service: hydra
+internal_port: 31337
+public_port: 34001
+solver: automated
+readiness: >-
+  TCP connect to the published port returns the HYDRA-SVC/1.0 banner and a
+  32-hex NONCE line; `solve/solve.py HOST PORT` completes one proof and prints
+  the flag in under a second locally.
+reset: >-
+  docker compose down --volumes --remove-orphans; docker compose up -d --build
+state: >-
+  No persistent state and no volumes. Every connection receives a fresh
+  16-byte nonce, so proofs are single-use. Restarting the container discards
+  only transient connection threads.
+ttl_minutes: null
+egress: none
+notes: >-
+  One service. Non-root uid 10001, read-only filesystem, cap_drop ALL,
+  no-new-privileges, 1 CPU, 256 MiB memory, and 128 PIDs. The real flag is
+  copied only into the private runtime image at /flag.txt; committed dist/
+  contains no flag, solver, or writeup. The server runs the encrypted verifier
+  firmware in the HYDRA VM and returns only AUTH-OK/AUTH-FAIL; it never
+  computes or returns a tag or proof. The player handout is four files:
+  README.md, PROTOCOL.md, hydra-server, firmware.enc. Limit the service to the
+  challenge VM's TCP port; no outbound dependency.

@@ -1,0 +1,37 @@
+name: HYDRA VM
+author: bg0d-glitch
+category: rev
+connection_info: nc CHALLENGE_HOST 34001
+description: |
+  HYDRA boots a custom 16-bit virtual machine from encrypted firmware. The
+  gatekeeper issues a fresh 16-byte nonce and accepts a 16-byte **candidate
+  proof** only when its nonce-dependent verifier accepts it. No tag endpoint
+  exists, and the binary contains no routine that turns a nonce into an
+  accepted response.
+
+  Reverse `hydra-server`, recover the virtual instruction set, decrypt
+  `firmware.enc`, reconstruct the verifier's constraints, and produce a valid
+  proof for an arbitrary nonce.
+
+  Flag format: `ccsCTF{...}`
+attribution: Authored by bg0d-glitch
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  decay: 10
+  minimum: 100
+flags:
+  - type: static
+    content: 'ccsCTF{hydr4_vM_r3v3rs3d_f1rmw4r3_decrypted_n0nce_c0nqu3rd}'
+    data: case_sensitive
+tags:
+  - hard
+  - halloween
+files:
+  - dist/README.md
+  - dist/PROTOCOL.md
+  - dist/hydra-server
+  - dist/firmware.enc
+hints: []
+state: hidden
