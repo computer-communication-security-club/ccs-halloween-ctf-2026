@@ -16,10 +16,15 @@ COPY src/chall.c .
 # fronts /seance with a signature WAF and a proof-of-work gate (both in chall.c);
 # neither changes the language or the vulnerability.
 #
+# -fcf-protection=none is DELIBERATE: the intended solve overwrites a saved return
+# address, which Intel CET / shadow stack would block. (gcc on Ubuntu enables CET
+# by default; CET is enforced on native amd64 runners but not under qemu-user, so
+# leaving it on would make the challenge unsolvable in production.)
+#
 # The static offsets the official solver needs (arena, clientfd, write@got, and
 # process_request's return site) are captured from the UNstripped intermediate
 # into an author-only file; it is NOT part of the player handout.
-RUN gcc -O1 -fstack-protector-strong -fPIE -pie -Wl,-z,relro,-z,now \
+RUN gcc -O1 -fstack-protector-strong -fcf-protection=none -fPIE -pie -Wl,-z,relro,-z,now \
         -o /tmp/run chall.c \
  && A=$(nm /tmp/run | awk '$3=="arena"{print $1}') \
  && C=$(nm /tmp/run | awk '$3=="clientfd"{print $1}') \

