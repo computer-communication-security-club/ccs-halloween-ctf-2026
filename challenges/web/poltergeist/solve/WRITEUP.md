@@ -11,19 +11,24 @@ the arena the next request reuses (a cross-request use-after-free; the PHP2Shell
 shape). Poisoning `g_echo` and dropping a forged `Val` on top of it gives an
 **arbitrary read** (`recall`) and an **arbitrary write** (`echo_write`). There is
 no flag in memory and no gate to flip — the flag is only in `/flag.txt`. The build
-is **PIE + Full RELRO + NX + canary and fully stripped**, so the solve is a real
-pwn: leak the image and libc, leak the stack, lay an `open`/`read`/`write` **ROP
-chain** over `process_request`'s return address, and exfiltrate `/flag.txt` to our
-own socket.
+is **PIE + NX + canary, GOT writable (no RELRO), fully stripped**, so the solve is
+a real pwn: leak the image and libc, overwrite `puts@got` with `system`, and make
+the worker run `system("cat /flag.txt 1>&<clientfd>")` so the flag is written
+straight down your own socket.
+
+(Why not a stack ROP? The write and read primitives are there for it, but modern
+amd64 hosts enforce Intel **CET / shadow stack**, so overwriting a saved return
+address does not redirect control. The GOT entry is an **indirect call**, not a
+return, so it works regardless — this is why RELRO is deliberately off.)
 
 Behind a warded door:
 
 0. **Pass the wards** — solve the proof-of-work, keep payloads WAF-clean.
 1. **Leak** the PIE base (dangling-descriptor window).
 2. **Leak libc** (arbitrary-read `write@got`) and read `clientfd`.
-3. **Leak the stack** (arbitrary-read libc `environ`) and find the return slot.
-4. **ROP** — `echo_write` an `open`/`read`/`write("/flag.txt" → socket)` chain over
-   `process_request`'s return address; when it returns, the flag is sent to you.
+3. **Overwrite** `puts@got` with `system` (arbitrary write; the GOT is writable).
+4. **Trigger** `knell("cat /flag.txt 1>&<clientfd>")` → `puts` → `system` → the flag
+   is `cat`-ed onto your socket.
 
 See [`../docs/cve-analysis.md`](../docs/cve-analysis.md) and
 [`../docs/INVARIANTS.md`](../docs/INVARIANTS.md).
@@ -73,25 +78,19 @@ That yields:
 * **arbitrary WRITE** — `echo_write($s)` does `memcpy(addr, $s, min(len, $s.len))`,
   i.e. write-what-where of attacker bytes.
 
-(`echo_poke` is the 8-byte-at-a-time cousin; `echo_write` is what lets you place a
-whole ROP chain in one request.)
+(`echo_poke` is the 8-byte-at-a-time cousin; `echo_write` is the full
+write-what-where that places `system`'s address on the GOT in one request.)
 
 ## 3. The binary is stripped — recover the offsets
 
-The chain needs four things from the image, and **the binary has no symbols**:
+The exploit needs four things from the image, and **the binary has no symbols**:
 
 * `arena` — bump-allocator base; turns a leaked arena pointer into the image base.
 * `write@got` — a GOT slot (its relocation survives stripping: read it from
   `.rela.plt`/`.dynsym`); arbitrary-read it to leak libc.
-* `clientfd` — the accepted socket fd (a `.data` int); read it so the chain can
-  `write()` the flag back to us.
-* **`process_request`'s return site** — the address in `serve` just after
-  `call process_request`. Find the request handler in the disassembly (it is the
-  function the accept loop calls to run a program); the instruction right after that
-  call is the value you will scan the stack for.
-
-`process_request` has a stack canary, but its saved **return address sits above the
-frame that holds the canary**, so overwriting the return (and up) never touches it.
+* `puts@got` — the GOT slot the `knell` builtin calls through; the write target.
+* `clientfd` — the accepted socket fd (a `.data` int); read it so the shell can
+  redirect its output to our socket.
 
 ## 4. Leaks
 
@@ -101,48 +100,48 @@ frame that holds the canary**, so overwriting the return (and up) never touches 
 #      an arena address -> image base = leaked - off(arena) - 24.
 # libc: arbitrary-read write@got -> write()'s libc address -> libc base.
 # clientfd: arbitrary-read the clientfd global.
-# stack: arbitrary-read libc `environ` -> a stack address; read a few KiB below
-#        it and scan for (image_base + retsite) -> process_request's return slot.
 ```
 
 All derived from a single leaked pointer and the handed-out `libc.so.6`, so the
 exploit is ASLR-independent.
 
-## 5. ROP — open / read / write the flag to our socket
+## 5. GOT overwrite → system → the flag on our socket
 
-Build, with libc gadgets (`pop rdi|rsi|rdx|rax ; ret`, `syscall ; ret`) and raw
-syscalls, a chain laid out starting at the return slot (the `/flag.txt` string and
-a scratch buffer ride along at the end of the chain, at known stack addresses):
+The GOT is writable (no RELRO). The `knell(s)` builtin calls `puts(s)`, so:
 
 ```
-open("/flag.txt", 0)                 # fd = clientfd + 1 (single-threaded, close-per-request)
-read(clientfd+1, buf, 100)
-write(clientfd, buf, 100)            # the flag, straight back down our own socket
-exit(60)
+# overwrite puts@got with system()
+echo_write(&puts@got, p64(libc_base + system_offset))
+
+# trigger: knell(cmd) -> puts(cmd) -> system(cmd)
+knell("cat /flag.txt 1>&<clientfd>")
 ```
 
-`echo_write` that chain over the return slot in one request. `process_request`
-finishes (it even sends its normal `200`), then **returns into the chain**, which
-appends the flag to the response. `solve.py` reads it off the tail.
+`system("/bin/sh -c cat /flag.txt 1>&<clientfd>")` forks a shell that inherits the
+accepted socket as `<clientfd>`, so `cat` writes the flag **straight down our own
+connection** (before the request's `200`). `solve.py` reads the whole response.
+
+Why an indirect call and not a stack ROP? Modern amd64 hosts enforce Intel **CET /
+shadow stack**: overwriting a saved return address does not redirect control (the
+`ret` uses the protected copy). Overwriting a **GOT** entry is an indirect call,
+immune to the shadow stack — which is why the build is `-z norelro`.
 
 ```bash
 python3 solve/solve.py <HOST> <PORT>      # e.g. 127.0.0.1 32731
-# [*] pie base ... libc base ... retslot ...
+# [*] pie base ... libc base ... system ...
 # [+] FLAG: ccsCTF{...}
 ```
 
-The worker runs under a **watchdog parent**: the chain's `exit` kills only that
-worker, and the parent immediately forks a fresh one, so a solve never takes the
-service down (the port never drops, the container never restarts).
+`system` forks a shell; the worker runs under a **watchdog parent** that re-spawns
+it if anything ever kills it, so the service stays up for everyone.
 
 ## 6. Automated solver
 
 [`solve.py`](solve.py) does every stage, solving the proof-of-work with `hashlib`
-and resolving libc gadgets/symbols from the handed-out `libc.so.6`. The four static
+and resolving `write`/`system` from the handed-out `libc.so.6`. The four static
 offsets (§3) are not in the stripped binary; for reproducibility the official
 solver reads them from an author-only `solve/chall.offsets` (**never shipped** —
-players reverse-engineer them). Against a non-stripped local rebuild it falls back
-to the `.symtab`.
+players reverse-engineer them).
 
 ## 7. Why it's fair, and why it's hard
 
@@ -154,19 +153,20 @@ Everything is discoverable from the handed-out `chall.c` and binary:
 3. Spot that `g_echo` is cleared on the normal and script-error paths but **not**
    on the OOM bailout; turn the dangle into arbitrary read (`recall`) and write
    (`echo_write`).
-4. **Reverse-engineer the stripped binary** for the four offsets, leak the image,
-   libc and stack, and ROP `open`/`read`/`write` to exfiltrate `/flag.txt`.
+4. **Reverse-engineer the stripped binary** for the four offsets, leak the image
+   and libc, overwrite `puts@got` with `system`, and trigger `knell` to read
+   `/flag.txt` onto your socket.
 
 No brute force and no guessing — a precise lifetime bug chained into a leak and a
-full ROP, behind a stripped binary and a warded door.
+GOT-overwrite RCE, behind a stripped binary and a warded door.
 
 ## 8. How to fix it
 
 * **Clear engine references to request memory on *every* exit path**, fatal
-  included. Adding `g_echo = NULL;` to the OOM bailout kills the chain at the root:
+  included. Adding `g_echo = NULL;` to the OOM bailout kills it at the root:
   with no dangling pointer there is no read **and** no write, so there is no leak
-  and no ROP. The handout ships only the vulnerable source; the regression harness
-  applies this one-line patch and shows both primitives vanish.
+  and no GOT overwrite. The handout ships only the vulnerable source; the
+  regression harness applies this one-line patch and shows both primitives vanish.
 * Better still: don't let a fatal path abandon an operation mid-way — either finish
   establishing invariants or terminate the worker (PHP's soft/hard `memory_limit`).
 * Don't hand interpreter values raw pointers into a shared arena; use handles or

