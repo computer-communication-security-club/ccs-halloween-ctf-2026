@@ -8,6 +8,10 @@ services:
     environment:
       # Front-door proof-of-work difficulty (leading zero bits); 0 disables it.
       POW_BITS: "${POW_BITS:-24}"
+      # The intended solve is a ROP over a saved return address; Intel CET /
+      # shadow stack would block it. The binary is already built -fcf-protection=none,
+      # and this disables the shadow stack on hosts that would otherwise enforce it.
+      GLIBC_TUNABLES: "glibc.cpu.x86_shstk=off"
     user: '10001:10001'
     read_only: true
     tmpfs:

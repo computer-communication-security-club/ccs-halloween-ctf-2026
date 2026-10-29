@@ -20,14 +20,16 @@ notes: |
   bailout / CVE-2026-109619 request-state UAF). A fatal out-of-memory error
   longjmps out of a request and skips the cleanup that clears an engine-global
   pointer into request-arena memory; the next request on the same worker reuses
-  that memory. The build is PIE + Full RELRO + NX + canary and FULLY STRIPPED, and
-  there is no flag in memory and no gate: the flag exists only in /flag.txt, so the
-  intended solve is remote code execution. The forged Val gives arbitrary read
-  (recall) and arbitrary write (echo_write); the chain reverse-engineers the
-  stripped binary for a few offsets, leaks PIE + libc (write@got) + stack
-  (environ), and echo_writes an open/read/write ROP chain over process_request's
-  return address to exfiltrate /flag.txt down the attacker's own socket — no
-  container escape. A single worker handles requests sequentially (shared engine
+  that memory. The build is PIE + NX + canary, FULLY STRIPPED, and RELRO is OFF on
+  purpose (writable GOT). There is no flag in memory and no gate: the flag exists
+  only in /flag.txt, so the intended solve is remote code execution. The forged Val
+  gives arbitrary read (recall) and arbitrary write (echo_write); the exploit
+  reverse-engineers the stripped binary for a few offsets, leaks PIE + libc
+  (write@got), overwrites puts@got with system, and triggers the knell builtin so
+  the worker runs system("cat /flag.txt 1>&<clientfd>"), writing the flag down the
+  attacker's own socket — no container escape. (A stack-return ROP is blocked by
+  Intel CET / shadow stack on native amd64, so the finish is a GOT overwrite, an
+  indirect call immune to the shadow stack.) A single worker handles requests sequentially (shared engine
   state) so the exploit is reliable; a watchdog parent re-spawns the worker after
   the exploit's exit, so a solve never drops the port or restarts the container.
   The container is non-root, read-only, cap-dropped, no-new-privs, CPU/mem/PID

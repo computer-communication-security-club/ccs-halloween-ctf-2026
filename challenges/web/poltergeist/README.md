@@ -23,9 +23,15 @@ leaving the CVE-2026-109619 cross-request use-after-free). See
 The forged `Val` yields **arbitrary read** (`recall`) and **arbitrary write**
 (`echo_write`, a `memcpy`-what-where). There is **no flag in memory and no gate**:
 the flag exists only in `/flag.txt`, so the intended solve is **remote code
-execution** — leak PIE + libc + stack, then `echo_write` an `open`/`read`/`write`
-ROP chain over `process_request`'s return address to exfiltrate `/flag.txt` down
-the attacker's own socket. No container escape.
+execution** — leak PIE + libc, overwrite `puts@got` with `system` (the GOT is
+writable), then trigger the `knell` builtin so the worker runs
+`system("cat /flag.txt 1>&<clientfd>")` and the flag is written straight down the
+attacker's own socket. No container escape.
+
+A stack ROP over a saved return address is **not** used on purpose: modern amd64
+hosts enforce Intel **CET / shadow stack**, so overwriting a return no longer
+redirects control. A **GOT** overwrite is an indirect call, immune to the shadow
+stack — hence `-z norelro`.
 
 Front-door wards (both in the handed-out `chall.c`, neither touching the bug): a
 **signature WAF** and a **proof-of-work gate** (`GET /pow` → solve → `X-Pow`
@@ -55,20 +61,20 @@ handed-out `dist/libc.so.6` plus the author-only `solve/chall.offsets`.
 ## Mitigations (recorded `checksec dist/chall`)
 
 ```
-RELRO: Full    STACK CANARY: Canary found    NX: enabled    PIE: enabled
+RELRO: No RELRO    STACK CANARY: Canary found    NX: enabled    PIE: enabled
 RPATH/RUNPATH: none    Symbols: No Symbols (fully stripped)    FORTIFY: Yes
 ```
 
-`gcc -O1 -fstack-protector-strong -fPIE -pie -Wl,-z,relro,-z,now`, then
-`strip --strip-all`. Full RELRO removes the easy `puts@got → system` finish; the
-chain targets `process_request`'s **return address**, which sits above the frame
-holding the canary, so the write never touches the canary.
+`gcc -O1 -fstack-protector-strong -fcf-protection=none -fPIE -pie -Wl,-z,norelro`,
+then `strip --strip-all`. **RELRO is off on purpose** so the solve can overwrite a
+GOT entry: a stack-return ROP is blocked by Intel CET / shadow stack on native
+amd64, so the intended finish is `puts@got → system` (an indirect call, immune to
+the shadow stack). NX + PIE + canary remain.
 
 ## Offsets (why `solve/chall.offsets` exists)
 
 The handout binary is **stripped**, so a player reverse-engineers the four static
-offsets the chain needs: `arena`, `clientfd`, `write@got`, and
-`process_request`'s return site. For CI reproducibility the official solver reads
+offsets the exploit needs: `arena`, `clientfd`, `write@got`, and `puts@got`. For CI reproducibility the official solver reads
 them from **`solve/chall.offsets`** (author-only, never in the handout). They are
 captured deterministically from the UNstripped intermediate during the Docker
 `dist` build and are regenerated with:
