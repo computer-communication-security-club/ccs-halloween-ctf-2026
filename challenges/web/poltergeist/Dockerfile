@@ -9,30 +9,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev b
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /build
 COPY src/chall.c .
-# Build config: hardened -- PIE/ASLR, Full RELRO (GOT read-only), NX, stack
-# canaries -- and then FULLY STRIPPED. The handout binary is byte-for-byte the
-# deployed one, but it carries no symbol table: a player must reverse-engineer
-# the image to locate the globals/return-site the exploit needs. The worker also
-# fronts /seance with a signature WAF and a proof-of-work gate (both in chall.c);
-# neither changes the language or the vulnerability.
+# Build config: hardened -- PIE/ASLR, NX, stack canaries -- and then FULLY
+# STRIPPED. The handout binary is byte-for-byte the deployed one, but it carries
+# no symbol table: a player must reverse-engineer the image to locate the globals
+# and GOT slots the exploit needs. The worker also fronts /seance with a signature
+# WAF and a proof-of-work gate (both in chall.c); neither changes the language or
+# the vulnerability.
 #
-# -fcf-protection=none is DELIBERATE: the intended solve overwrites a saved return
-# address, which Intel CET / shadow stack would block. (gcc on Ubuntu enables CET
-# by default; CET is enforced on native amd64 runners but not under qemu-user, so
-# leaving it on would make the challenge unsolvable in production.)
+# RELRO is OFF (-z norelro): the GOT stays writable so the intended solve can
+# overwrite a resolved libc GOT entry (puts@got -> system) -- an indirect call,
+# not a return. (Full RELRO would force a stack ROP over a saved return address,
+# which Intel CET / shadow stack blocks on native amd64 runners, making the
+# challenge unsolvable in production. -fcf-protection=none keeps the hijack simple.)
 #
-# The static offsets the official solver needs (arena, clientfd, write@got, and
-# process_request's return site) are captured from the UNstripped intermediate
-# into an author-only file; it is NOT part of the player handout.
-RUN gcc -O1 -fstack-protector-strong -fcf-protection=none -fPIE -pie -Wl,-z,relro,-z,now \
+# The static offsets the official solver needs (arena, clientfd, write@got,
+# puts@got) are captured from the UNstripped intermediate into an author-only
+# file; it is NOT part of the player handout.
+RUN gcc -O1 -fstack-protector-strong -fcf-protection=none -fPIE -pie -Wl,-z,norelro \
         -o /tmp/run chall.c \
  && A=$(nm /tmp/run | awk '$3=="arena"{print $1}') \
  && C=$(nm /tmp/run | awk '$3=="clientfd"{print $1}') \
  && W=$(objdump -R /tmp/run | awk '/ write@/{print $1}') \
- && CALL=$(objdump -d /tmp/run | grep -E 'call +[0-9a-f]+ <process_request>' | head -1 \
-           | awk '{print $1}' | tr -d :) \
- && RET=$(printf '%x' $((0x$CALL + 5))) \
- && printf 'arena 0x%s\nclientfd 0x%s\nwrite_got 0x%s\nretsite 0x%s\n' "$A" "$C" "$W" "$RET" \
+ && P=$(objdump -R /tmp/run | awk '/ puts@/{print $1}') \
+ && printf 'arena 0x%s\nclientfd 0x%s\nwrite_got 0x%s\nputs_got 0x%s\n' "$A" "$C" "$W" "$P" \
       > /tmp/run.offsets \
  && strip --strip-all /tmp/run \
  && cat /tmp/run.offsets

