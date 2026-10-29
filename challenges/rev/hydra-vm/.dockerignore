@@ -1,0 +1,15 @@
+.git/
+.gitignore
+solve/
+dist/
+tests/
+src/tests/
+src/tools/
+README.md
+challenge.yml
+deployment.yml
+docker-compose.yml
+__pycache__/
+*.pyc
+*.o
+.env
