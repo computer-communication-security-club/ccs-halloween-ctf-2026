@@ -363,7 +363,7 @@ def exploit(host, port, cand):
 
 def solve(host, port):
     log("[*] Poltergeist -- RCE via cross-request UAF -> ROP")
-    for attempt in range(0, 6):
+    for attempt in range(0, 1):
         try:
             flag = exploit(host, port, attempt)
         except (OSError, IOError, ValueError) as e:
