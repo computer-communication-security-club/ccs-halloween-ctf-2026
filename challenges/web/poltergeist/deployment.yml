@@ -1,0 +1,56 @@
+mode: shared
+protocol: http
+architecture: linux/amd64
+service: chall
+internal_port: 8080
+public_port: 32731
+solver: automated
+readiness: GET /healthz returns 200 "ok"; GET / serves the Séance page.
+reset: docker compose down --volumes --remove-orphans; docker compose up -d --build
+state: |
+  The worker is a single, long-lived process that holds engine-global state
+  across requests ON PURPOSE (that is the vulnerability). There is no database
+  or disk state; recreating the container fully resets it. Because engine state
+  persists in-process, a restart is the only clean reset.
+ttl_minutes: null
+egress: none
+notes: |
+  Séance is a custom PHP-flavoured language whose worker has an intentional
+  cross-request use-after-free that models PHP2Shell (CVE-2026-109618 OOM
+  bailout / CVE-2026-109619 request-state UAF). A fatal out-of-memory error
+  longjmps out of a request and skips the cleanup that clears an engine-global
+  pointer into request-arena memory; the next request on the same worker reuses
+  that memory. The build is PIE + Full RELRO + NX + canary and FULLY STRIPPED, and
+  there is no flag in memory and no gate: the flag exists only in /flag.txt, so the
+  intended solve is remote code execution. The forged Val gives arbitrary read
+  (recall) and arbitrary write (echo_write); the chain reverse-engineers the
+  stripped binary for a few offsets, leaks PIE + libc (write@got) + stack
+  (environ), and echo_writes an open/read/write ROP chain over process_request's
+  return address to exfiltrate /flag.txt down the attacker's own socket — no
+  container escape. A single worker handles requests sequentially (shared engine
+  state) so the exploit is reliable; a watchdog parent re-spawns the worker after
+  the exploit's exit, so a solve never drops the port or restarts the container.
+  The container is non-root, read-only, cap-dropped, no-new-privs, CPU/mem/PID
+  limited, egress none. /flag.txt is 0444 and never served by the app.
+
+  Front-door wards sit in front of /seance (both in chall.c; neither changes the
+  language or the vulnerability): a signature WAF (rejects 7+ digit literals,
+  generic scanner/traversal probes, and >4 KiB bodies) and a stateless
+  proof-of-work gate (GET /pow issues a time-windowed sha256 challenge; the solved
+  nonce is sent back in an X-Pow header, valid ~120 s and reusable). Difficulty is
+  POW_BITS leading zero bits (env, default 24; 0 disables). The per-request
+  memory_limit is 256 KiB, so the OOM trigger must be a <7-digit count — shaped to
+  pass the WAF. The automated solver handles both wards.
+
+  Shared-mode safety: a solver's RCE runs inside a non-root, read-only,
+  cap-dropped, no-new-privileges, egress-none container. It can read /flag.txt
+  (the goal) but cannot write it (0444 + read-only fs), cannot reach the network,
+  cannot escalate, and cannot persist — the watchdog re-spawns a fresh worker, so
+  no team can durably spoil the service for another. The watchdog is a supervisor
+  (single worker, respawn-on-death), NOT a per-connection fork server; this is an
+  HTTP web challenge, so the redpwn/jail requirement for stdin/stdout pwn does not
+  apply. A stalled client cannot wedge the sequential worker (15 s socket
+  timeouts). If per-team isolation is preferred, the same image runs unchanged
+  behind a per-team allocator.
+env:
+  POW_BITS: "24"   # proof-of-work difficulty (leading zero bits); 0 disables

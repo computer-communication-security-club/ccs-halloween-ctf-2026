@@ -1,0 +1,11 @@
+# keep the build context lean and never ship private material into the image
+solve
+docs
+tests
+examples
+dist
+.git
+.gitignore
+.DS_Store
+README.md
+*.md

@@ -1,0 +1,41 @@
+name: Poltergeist
+author: mundur
+category: web
+connection_info: http://CHALLENGE_HOST:32731
+description: |
+  The coven moved their séances online. **Séance** is a tiny PHP-flavoured
+  language served by a single long-lived worker: write a program, POST it, and
+  the worker brews it and whispers back the result. One cute feature crosses
+  the veil — a séance may `leave` an echo for the next page in the same séance
+  to `recall`.
+
+  They swear every séance starts clean — no spirit from one request may linger
+  into the next. They are wrong. The full source of the worker is in your hands
+  (the binary ships stripped); prove a spirit *can* linger, seize the worker, and
+  make it read aloud the one name it keeps on disk and never speaks.
+
+  The door is warded: the ritual chamber asks a small toll before it listens
+  (`GET /pow` — a proof-of-work), and turns away the clumsy. Read the source.
+
+  http://CHALLENGE_HOST:32731
+attribution: Authored by mundur
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  decay: 10
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{th3_l1ng3r1ng_3ch0_r0se_fr0m_uaf_t0_a_full_r0p_r3m0t3_c0d3_3x3c_518d6171ffd89ec9}
+    data: case_sensitive
+tags:
+  - insane
+  - halloween
+files:
+  - dist/chall
+  - dist/chall.c
+  - dist/libc.so.6
+  - dist/ld-linux-x86-64.so.2
+hints: []
+state: hidden

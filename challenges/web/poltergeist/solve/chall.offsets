@@ -1,0 +1,4 @@
+arena 0x000000000012c3a0
+clientfd 0x000000000000b014
+write_got 0x000000000000aeb0
+retsite 0x711e

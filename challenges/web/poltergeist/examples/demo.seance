@@ -1,0 +1,48 @@
+# demo.seance — a friendly tour of the Séance language.
+#
+#   POST this file's contents to /seance (Content-Type: text/plain) and the
+#   worker whispers the output back.  Locally:
+#
+#     curl --data-binary @examples/demo.seance http://127.0.0.1:32731/seance
+#
+# Comments start with '#'.  Statements end with ';'.  Variables wear a '$'.
+
+whisper "~ welcome to the Séance ~";
+
+# variables, arithmetic, and string concat with '.'
+summon $bats  = 3;
+summon $frogs = 7;
+whisper "ingredients: " . str($bats + $frogs);
+
+# rites (functions) with 'return'
+rite greet($who) {
+    return "boo, " . $who . "!";
+}
+whisper greet("mortal");
+
+# conditionals
+when ($bats < $frogs) {
+    whisper "more frogs than bats";
+} otherwise {
+    whisper "more bats than frogs";
+}
+
+# loops
+summon $n = 3;
+chant ($n > 0) {
+    whisper "the bell tolls " . str($n);
+    $n = $n - 1;
+}
+
+# arrays and builtins
+summon $spell = ["eye", "of", "newt"];
+whisper $spell[1];                 # -> of
+whisper "len = " . str(len($spell));
+whisper concat("abra", "", "cadabra");
+whisper "A is " . str(ord("A")) . ", 66 is " . chr(66);
+
+# the one cross-page feature: leave an echo for the next séance to recall.
+# On a HEALTHY worker this is dismissed when the request ends, so a later
+# request's recall() returns null.  (Proving otherwise is the challenge.)
+leave("a friendly ghost");
+whisper "left an echo; recall() now = " . str(recall());
