@@ -1,6 +1,6 @@
 # Piggyback — author notes (private)
 
-**web / TLS, hard.** By deprrous. The player-facing text is in [`challenge.yml`](challenge.yml); the writeup, anti-cheese reasoning, difficulty knobs and vulnerability map are in [`solve/WRITEUP.md`](solve/WRITEUP.md) (spoilers).
+**web / TLS** By deprrous. The player-facing text is in [`challenge.yml`](challenge.yml); the writeup, anti-cheese reasoning, difficulty knobs and vulnerability map are in [`solve/WRITEUP.md`](solve/WRITEUP.md) (spoilers).
 
 | | |
 | --- | --- |

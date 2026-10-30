@@ -1,4 +1,4 @@
-# CCS Halloween CTF 2026 🎃 — Challenge author guide
+# CCS Halloween CTF 2026 🎃
 
 This private repository contains challenge sources, real flags, and solutions. Only files explicitly listed from `dist/` are released to players.
 
@@ -11,11 +11,11 @@ This private repository contains challenge sources, real flags, and solutions. O
 
 **Every challenge is Dockerized**, including static challenges whose Dockerfile produces the handout. Remote pwn challenges use **redpwn/jail**. The default target is **Linux amd64**; authors on Apple Silicon should build with `--platform linux/amd64`. Pwn must also be tested on a native amd64 Linux host with jail support.
 
-```text
+```
 .
 ├── challenges/
 │   ├── pwn/
-│   ├── web/piggyback/          # TLS 1.3 0-RTT; multi-service Compose (deprrous)
+│   ├── web/
 │   ├── crypto/
 │   ├── rev/
 │   ├── forensics/
@@ -37,7 +37,6 @@ The original reference examples were removed, but they are still in git history 
 | Example | Pattern | Restore with |
 | --- | --- | --- |
 | Pumpkin Patch | pwn under redpwn/jail; exported binary, libc, and loader | `git archive 287ebbd challenges/pwn/pumpkin-patch \| tar -x` |
-| Haunted Library | single-service non-root web app | `git archive 287ebbd challenges/web/haunted-library \| tar -x` |
 
 Rename the restored directory, then change its name, flag, port, sources, solver, and metadata.
 
