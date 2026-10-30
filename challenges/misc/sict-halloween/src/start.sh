@@ -35,12 +35,12 @@ cat > server.properties <<PROPERTIES
 server-ip=
 server-port=25565
 level-name=sict
-motd=SICT Halloween CTF
+motd=CCS Halloween CTF
 gamemode=adventure
 force-gamemode=true
 difficulty=normal
 hardcore=false
-online-mode=true
+online-mode=false
 enforce-secure-profile=true
 spawn-protection=0
 max-players=$max_players
