@@ -32,7 +32,6 @@ connection_info: http://CHALLENGE_HOST:32001
 description: |
   The librarian filed a secret outside the public collection.
   Can you find it?
-attribution: Authored by your-handle
 type: dynamic
 value: 1000
 extra:
@@ -50,7 +49,7 @@ hints: []
 state: hidden
 ```
 
-`value` initializes the score; `extra` defines the dynamic scoring policy. Exactly one tag is a difficulty. Attribution may be Markdown, e.g. `Authored by [handle](https://github.com/handle)`. Omit `connection_info` for static challenges. For TCP use `nc CHALLENGE_HOST <port>`. Plain HTTP and direct ports are the default; no Traefik labels or proxy networks are needed.
+`value` initializes the score; `extra` defines the dynamic scoring policy. Exactly one tag is a difficulty. `author` may be a Markdown link, e.g. `[handle](https://github.com/handle)`. Omit `connection_info` for static challenges. For TCP use `nc CHALLENGE_HOST <port>`. Plain HTTP and direct ports are the default; no Traefik labels or proxy networks are needed.
 
 `files` lists explicit paths under `dist/`, e.g. `dist/chall`, `dist/libc.so.6`, `dist/ld-linux-x86-64.so.2`. Files aren't recursively uploaded just because the directory exists. Default to hidden; infra releases the challenge after endpoint and flag verification.
 

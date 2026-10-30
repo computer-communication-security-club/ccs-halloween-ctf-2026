@@ -209,7 +209,7 @@ def check_dockerfile(chall, report):
 
 def check_metadata(chall, meta, deploy, flag, report):
     category = chall.parent.name
-    for key in ("name", "author", "category", "description", "attribution", "type", "value",
+    for key in ("name", "author", "category", "description", "type", "value",
                 "flags", "tags", "state"):
         if key not in meta:
             report.error(f"challenge.yml: missing '{key}'")

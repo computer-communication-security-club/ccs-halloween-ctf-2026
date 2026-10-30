@@ -2,7 +2,7 @@
 
 This is a manual Minecraft exploration and precision-platforming challenge. It does not have a 60-second automated flag solver. Organizer approval of the manual-solver exception and an independent test-solve are required before release.
 
-1. Join the endpoint using a Minecraft Java Edition **26.3** client and a unique player name. The server forces Adventure mode. Spawn is `-175 64 78`.
+1. Join the endpoint using a Minecraft Java Edition **26.3** client and a unique player name. The server forces Adventure mode. Spawn is `-130 71 60`, outside the front fence.
 2. Search the shrubs by the sealed entrance. Approach the short oak branch from the south, around `-180 64 77`, and look upward. Press its downward-facing stone button at `-180 65 76`.
 3. Enter the passage while the door is open. Follow the lit tunnel and interior stairs into the west wing. No digging, block placement, flying, or operator commands are needed. The door postpones closing while somebody occupies its doorway; the inside button opens it for leaving.
 4. Visit the top-floor east-wing classroom. Right-click the lectern at `-112 87 -11` to collect paper **1/4**.
