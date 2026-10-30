@@ -101,8 +101,8 @@
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/adventure_tick.mcfunction",
-      "bytes": 185,
-      "sha256": "58b0245c1f9ce6b896361c162f7b2d8b339c9f8c96bdab71658c89737f6a0d03"
+      "bytes": 228,
+      "sha256": "d945e0165ca2568bd8af63653dca279da2b0829e9e9a8a742029f05c6b3c8f04"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/build.mcfunction",

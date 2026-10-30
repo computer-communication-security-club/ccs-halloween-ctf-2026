@@ -11,7 +11,7 @@ A Minecraft Java **26.3** exploration challenge in the SICT campus, with a conce
 | Handout | None; `dist/` intentionally empty |
 | Resources | 2 CPUs, 6 GiB container memory, 4 GiB Java heap, 512 PIDs |
 | Persistent state | Project-scoped `server-data` volume |
-| Default game mode | Adventure, enforced on join |
+| Default game mode | Adventure, enforced on join and every tick |
 | Spawn | `-175 64 78`, facing north |
 
 ## Run
@@ -84,16 +84,20 @@ The campus is an interpreted block model built from reference photographs and Op
 | `uv run tests/check_package.py` | Passed: 292 seed-file hashes, absent player records, fragment rendering with special characters, invalid flag rejection |
 | Official Docker Compose CLI 5.6.1 `config --quiet` | Passed |
 | POSIX/Bash syntax checks for the entrypoint, admin wrapper, and renderer | Passed |
+| Isolated Java 25 / Minecraft 26.3 startup on macOS arm64 | Passed: datapack load/reload, nine protection gamerules, border, team creation, initialization, status handshake, clean shutdown |
 | Linux amd64 Docker build/start and `dist --verify` | Not run: Docker Engine unavailable |
 | Independent manual solve / load / egress validation | Pending |
 
 `validation/local-map-checks.json` records the earlier checks on the saved map before flag templating and repository packaging. It is evidence about that map, not a Docker runtime test.
+
+`validation/hardening-checks.json` records a separate test of the committed seed with a fake flag and the official 26.3 server JAR. The server ran directly on Java 25 with loopback-only access; this verifies command compatibility and applied rules, but does not exercise the container entrypoint, RCON wrapper, or multiplayer behavior. PvP and border settings were rechecked after a datapack reload.
 
 ## Multiplayer defaults
 
 This configuration targets a fresh deployment; no existing world migration is included.
 
 - PvP and friendly fire are disabled by the Minecraft 26.3 gamerule and team settings; player collision is disabled.
+- Adventure mode is enforced for every player each tick, preventing ordinary block placement and breaking even if a saved player was in Survival or Creative. Challenge items grant no placement or breaking permissions. This enforcement also applies to operators; map editing requires disabling it deliberately.
 - Mob griefing, TNT explosions, fire spread, and projectile block damage cannot destroy the campus. Command blocks and Nether travel are disabled; datapack functions and basketball projectiles remain enabled.
 - A 256-block world border centered on `-137 11` contains the whole campus and spawn, limiting exploration-driven chunk generation.
 - Each refill replaces the requesting player's remaining tagged basketballs with eight shots; it cannot accumulate unlimited inventory stacks or affect another player.

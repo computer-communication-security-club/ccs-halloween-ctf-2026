@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-30",
+  "tested_commit": "0a3f7cd253e81d4a31fa1fe7a298b568cc508ac2",
+  "platform": "macOS arm64",
+  "java": "Microsoft OpenJDK 25.0.1",
+  "minecraft": "26.3",
+  "server_jar_sha256": "d052f14d7a173734fba553711e5b570162e2f2a313267ee31a21b975a679be64",
+  "seed_manifest_sha256": "cb831d9d2fd34d2ac225178703ebbed5b34ff7d63f7cf5318cd3494fa994a2d7",
+  "setup": "Isolated temporary copy of the committed seed, rendered with a fake flag. Properties extracted from src/start.sh, overriding bind address to 127.0.0.1, port to 35567, RCON off, and empty-server pause to 0. Java launched directly with a 2 GiB heap.",
+  "checks": {
+    "startup": "passed",
+    "datapack_load_and_reload": "passed; no errors in server log",
+    "gamerules": {
+      "pvp": "false",
+      "mob_griefing": "false",
+      "tnt_explodes": "false",
+      "fire_spread_radius_around_player": "0",
+      "projectiles_can_break_blocks": "false",
+      "command_blocks_work": "false",
+      "allow_entering_nether_using_portals": "false",
+      "locator_bar": "false",
+      "show_advancement_messages": "false"
+    },
+    "world_border_width": 256,
+    "team_created": "sict_players",
+    "initialization_marker": "1b",
+    "after_reload": "PvP false and border 256 rechecked",
+    "status_handshake": "passed via solve/check_endpoint.py",
+    "shutdown": "clean save and stop",
+    "package": "292 seed hashes, fragment rendering, invalid flag rejection passed",
+    "repository_check": "passed with no errors or warnings",
+    "compose_config": "passed",
+    "shell_syntax": "passed"
+  },
+  "not_tested": [
+    "Docker build/start on Linux amd64",
+    "Runtime entrypoint and RCON wrapper execution",
+    "Independent manual gameplay solve",
+    "Live multiplayer collision, damage, refill and load testing",
+    "Production firewall/egress isolation"
+  ],
+  "followup": {
+    "change": "Enforce Adventure mode for all players every tick",
+    "seed_manifest_sha256": "1bff4b5ef1d0980edc2bd8f018d4cdfeae09d798f6d9fb90354b1a17694aa6d2",
+    "adventure_tick_sha256": "d945e0165ca2568bd8af63653dca279da2b0829e9e9a8a742029f05c6b3c8f04",
+    "checks": [
+      "26.3 server restart passed",
+      "adventure_tick function execution and datapack reload passed without log errors",
+      "292-file seed manifest and fragment-rendering checks passed",
+      "Repository validation and git diff --check passed"
+    ],
+    "limitation": "No connected player was used to test a placement attempt or game-mode transition."
+  }
+}
