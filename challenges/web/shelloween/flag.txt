@@ -1,0 +1,1 @@
+ccsCTF{node2shell_4_sh3ll0w33n}

@@ -1,0 +1,25 @@
+name: Shelloween
+author: now.sh
+category: web
+connection_info: http://CHALLENGE_HOST:32001
+description: |
+  The Shell Market is open for the season — Bash, Zsh, Fish, every shell a
+  growing goblin could want.
+
+  Buy one, or get one. Read `/flag.txt`.
+attribution: Authored by now.sh
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  decay: 10
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{node2shell_4_sh3ll0w33n}
+    data: case_sensitive
+tags:
+  - hard
+files: []
+hints: []
+state: hidden

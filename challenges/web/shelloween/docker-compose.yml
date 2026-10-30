@@ -1,0 +1,24 @@
+services:
+  chall:
+    build:
+      context: .
+      target: app
+    platform: linux/amd64
+    ports:
+      - "${BIND_ADDR:-127.0.0.1}:${PUBLIC_PORT:-32001}:8000"
+    restart: unless-stopped
+    user: node
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    cpus: 0.5
+    mem_limit: 256m
+    pids_limit: 128
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: '2'

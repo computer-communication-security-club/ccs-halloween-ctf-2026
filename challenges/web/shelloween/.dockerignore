@@ -1,0 +1,24 @@
+# Never ship the solver, the VCS metadata, or host-installed dependencies.
+solve/
+.git/
+.gitignore
+
+# Host node_modules must not shadow the tree pnpm installs in the image.
+node_modules/
+**/node_modules/
+.pnpm-store/
+**/.pnpm-store/
+
+# Local/runtime artifacts.
+dist/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Challenge metadata is not part of the running service.
+challenge.yml
+deployment.yml
+docker-compose.yml

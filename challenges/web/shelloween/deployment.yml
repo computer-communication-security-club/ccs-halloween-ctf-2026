@@ -1,0 +1,16 @@
+mode: shared
+protocol: http
+architecture: linux/amd64
+service: chall
+internal_port: 8000
+public_port: 32001
+solver: automated
+readiness: GET /health returns 200 within ~5s of container start.
+reset: docker compose down --volumes --remove-orphans; docker compose up -d --build
+state: In-memory catalog/orders; reset on worker restart. Read-only root fs; /tmp tmpfs.
+ttl_minutes: null
+egress: none
+notes: >-
+  Single Node/Express service, one published port. RCE via a Brotli decoder bug
+  reached with Content-Encoding: br on any JSON endpoint; lands as `node` and
+  reads /flag.txt. Keep the base image tag pinned to the vulnerable build.
