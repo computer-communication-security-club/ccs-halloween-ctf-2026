@@ -1,0 +1,9 @@
+.git
+solve
+tests
+dist
+validation
+.env
+backups
+*.md
+*.yml

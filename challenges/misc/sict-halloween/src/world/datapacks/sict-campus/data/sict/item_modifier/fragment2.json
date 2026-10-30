@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:set_components",
+  "components": {
+    "minecraft:custom_name": {
+      "text": "2/4: @@FRAGMENT_2@@",
+      "color": "light_purple",
+      "italic": false
+    },
+    "minecraft:lore": []
+  }
+}

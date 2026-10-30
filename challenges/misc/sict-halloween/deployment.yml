@@ -1,0 +1,37 @@
+mode: shared
+protocol: tcp
+architecture: linux/amd64
+service: minecraft
+internal_port: 25565
+public_port: 35001
+solver: manual
+readiness: >-
+  Compose mc-health passes and a Java 26.3 client can join in Adventure mode.
+  Run uv run solve/check_endpoint.py HOST PORT for the Minecraft status handshake.
+reset: >-
+  Whole event instance: docker compose down --volumes --remove-orphans, then
+  EULA=TRUE docker compose up -d --build --wait. This erases all player progress.
+  One connected player: docker compose exec -T minecraft /opt/sict/admin
+  "execute as PLAYER_NAME run function sict:server_reset_player".
+state: >-
+  The project-scoped server-data volume holds /data: the running map, player
+  records, scoreboard progress, generated server properties, private RCON
+  credentials, and the server's bundled libraries. Ordinary restarts preserve
+  progress; removing the volume imports the pristine private seed again.
+ttl_minutes: null
+egress: >-
+  Organizer approval required: normal online-mode authentication needs DNS and
+  HTTPS to sessionserver.mojang.com and api.minecraftservices.com. Profile lookup
+  may also use api.mojang.com. Deny other destinations, metadata endpoints, and
+  other challenge networks at the host firewall. Server binaries are downloaded
+  and checksum-verified at build time, not fetched by the runtime entrypoint.
+notes: >-
+  Manual gameplay solver and authenticated external-service dependency need
+  organizer sign-off before merge/release; approval is not recorded here.
+  Clients need licensed Minecraft Java Edition 26.3. The nc connection_info
+  follows this repository's raw-TCP convention; players must use the Minecraft
+  client address from the description. Budget 2 CPUs and 6 GiB per instance
+  (4 GiB Java heap); the 20-player default is not load-tested. PvP and player
+  collision are disabled, but sharing fragments between players is permitted.
+  Only TCP 35001 is published; RCON stays private. EULA acceptance is an explicit
+  operator step. No public map download or player container is provided.
