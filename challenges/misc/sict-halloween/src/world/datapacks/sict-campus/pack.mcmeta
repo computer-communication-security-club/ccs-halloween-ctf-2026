@@ -1,0 +1,13 @@
+{
+  "pack": {
+    "description": "MUST SICT campus \u2014 photo and OSM reference build",
+    "min_format": [
+      121,
+      0
+    ],
+    "max_format": [
+      121,
+      0
+    ]
+  }
+}

@@ -1,0 +1,1468 @@
+{
+  "minecraftVersion": "26.3",
+  "dataVersion": 5023,
+  "flagTemplated": true,
+  "playerDataRemoved": true,
+  "files": [
+    {
+      "path": "data/minecraft/custom_boss_events.dat",
+      "bytes": 48,
+      "sha256": "49937c8cea10110c1a760809c5537145cbdabc5405c8c456563e750c4cf592e0"
+    },
+    {
+      "path": "data/minecraft/game_rules.dat",
+      "bytes": 815,
+      "sha256": "63e30e5ae538ae574811e3284a3a7b2955151dc631f9233ce27f4267cfc09aab"
+    },
+    {
+      "path": "data/minecraft/random_sequences.dat",
+      "bytes": 1132,
+      "sha256": "2367b48d92e4b24ae0ba92c421b429729eebc1c2dc6f0f766248c3954a366c8d"
+    },
+    {
+      "path": "data/minecraft/scoreboard.dat",
+      "bytes": 226,
+      "sha256": "ff2669cb72822faea7245c9cd4a7e779f47e80e8ec01d65f7926dab31679661c"
+    },
+    {
+      "path": "data/minecraft/stopwatches.dat",
+      "bytes": 64,
+      "sha256": "884dd1cac468fc6c15da5e2a66d5aea26e1aac35c8e2b0c3bd58695f600451ba"
+    },
+    {
+      "path": "data/minecraft/wandering_trader.dat",
+      "bytes": 81,
+      "sha256": "9ddffd88b082767b49d464c0a7a943fa0ec8b92af9d51997010d95915aa82859"
+    },
+    {
+      "path": "data/minecraft/weather.dat",
+      "bytes": 110,
+      "sha256": "70843f465cf37ac5a59d3967e334d385226cceed0de8bc2110915f410912dc72"
+    },
+    {
+      "path": "data/minecraft/world_clocks.dat",
+      "bytes": 104,
+      "sha256": "3859e88b27fec71dfe8af63980189557eb9188bffe9c6756e6bf02b503a663a3"
+    },
+    {
+      "path": "data/minecraft/world_gen_settings.dat",
+      "bytes": 250,
+      "sha256": "a92287a3c275c100f09b2c67aa1ab71133c858b26c5d9410c748d9c6845070da"
+    },
+    {
+      "path": "data/sict/command_storage.dat",
+      "bytes": 221,
+      "sha256": "0924dcbd9a9dbe93aeeaa936fb01c430516f2cc0f03c7793e5e8fe01cb88a352"
+    },
+    {
+      "path": "datapacks/sict-campus/data/minecraft/tags/function/load.json",
+      "bytes": 76,
+      "sha256": "0f1b74445c4c457d81992aa11e1e1e8accfe4659ebf28d99ee0c4bac048deb26"
+    },
+    {
+      "path": "datapacks/sict-campus/data/minecraft/tags/function/tick.json",
+      "bytes": 95,
+      "sha256": "27bf1e46c0c9d5fa8b5dec508150dde79d871925acc884fc072d5dad9ac3675b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/adventure_button_tick.mcfunction",
+      "bytes": 266,
+      "sha256": "83507d78d051d5818fa898060a0b12f248ed09f9c3243737d51b454e820cd5d3"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/adventure_buttons.mcfunction",
+      "bytes": 332,
+      "sha256": "8aa6d765c09521d221ae6476cb8a6ecccbb61ece10e555afc5593ed1129bebe7"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/adventure_defaults.mcfunction",
+      "bytes": 164,
+      "sha256": "991117354a3fc59193321a3145e9737799539d9fc45edb1c51782d8255097b99"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/adventure_entry_press.mcfunction",
+      "bytes": 201,
+      "sha256": "a378146e77b3142b4c5ea6d11618cb39910e811452c7e71e3fde9f82000ea1e2"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/adventure_entry_release.mcfunction",
+      "bytes": 84,
+      "sha256": "2994fd340b32e0c90c87951046e504b3dc86061d133f490698560056c0ec6210"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/adventure_exit_press.mcfunction",
+      "bytes": 196,
+      "sha256": "beccf1dd0310a73545776056283d9e7350ebea14059d530cfc8448f3d2c5fa1e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/adventure_exit_release.mcfunction",
+      "bytes": 80,
+      "sha256": "6935a5580e52fad2ac58f55c81c4502591f118f28d4e40976abe52b9e948a436"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/adventure_tick.mcfunction",
+      "bytes": 228,
+      "sha256": "d945e0165ca2568bd8af63653dca279da2b0829e9e9a8a742029f05c6b3c8f04"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/build.mcfunction",
+      "bytes": 76,
+      "sha256": "3ed18d912fc14382e5f37e82b36a37df50e1e61c4d31208e8592902e8e4ab79d"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/conceal_entrance.mcfunction",
+      "bytes": 26,
+      "sha256": "46b5e50b08913a9bef332254724e8c3d9f3370504ad8e5473023925f2b20af56"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/balls.mcfunction",
+      "bytes": 322,
+      "sha256": "33bf900ad9ab9506bd06a052641da60bfd8b9fc473efc4345d41095532ca948f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/briefing.mcfunction",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/check_ball.mcfunction",
+      "bytes": 267,
+      "sha256": "e1013927695a6b1cb98ab2f29e1dd334176ee1ebd5d0fcfbf911447456a5057e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/claim1.mcfunction",
+      "bytes": 548,
+      "sha256": "aca163f8357af0b2235698fb5bcf540036056aa57bb94bd8e41c2a68069c5dca"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/claim2.mcfunction",
+      "bytes": 548,
+      "sha256": "ddc31c7460d2b3333320adbddbe4c76db0ade6c62c538f7959292a199ddabb69"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/claim3.mcfunction",
+      "bytes": 585,
+      "sha256": "da7694827bdc6b9c55a1a92c0d8d0e2b34fb32d0f27e1f6f8c33f1d3bab2873f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/claim4.mcfunction",
+      "bytes": 548,
+      "sha256": "47924ba852ccb763ac914673665440d6fe1d7f4c9bb533660e8f93d630846a4e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/complete.mcfunction",
+      "bytes": 107,
+      "sha256": "fd0dc5804bb394b07782a2b1e694d6cc99c627f0931ba11693b7a7c79feb14d4"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/fall.mcfunction",
+      "bytes": 36,
+      "sha256": "3e5e0032c199c225a1385af246661ef0c5a5ddf7656ff588cb922e011832bc84"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad1.mcfunction",
+      "bytes": 103,
+      "sha256": "006ee9b5803e9b8d853f57d799b301c96c1aeeee426a122a152cbdc201e1de60"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad2.mcfunction",
+      "bytes": 103,
+      "sha256": "7ea120ae9a2ef90ca9441899e4dcec100beb712b40e808aae530eb9a4bcb43ee"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad3.mcfunction",
+      "bytes": 103,
+      "sha256": "4862a27eb47f9fa1f7918957de30bd2f2d68640cdf94a48f06c589e74e50c5b3"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad4.mcfunction",
+      "bytes": 103,
+      "sha256": "11dbe89f063fb1835f9171e39a740376b38fbc9b2cc6b476d430e96b6ae0cff7"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad5.mcfunction",
+      "bytes": 103,
+      "sha256": "e0e5cc60c7953473748f834628ee4d64a63596f1ee821155251036c32148495e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad6.mcfunction",
+      "bytes": 103,
+      "sha256": "ec75aeba511c337e9d9482da6c6b8a3e666ec076a226732ae02a5d8051b490c4"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad7.mcfunction",
+      "bytes": 103,
+      "sha256": "a79dddd2b8874603a9d4bd802244c3cac48a2aa1930cc46363cb9903d2db74fb"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad8.mcfunction",
+      "bytes": 103,
+      "sha256": "3f22c93d5673a816305e8741c1a479236c19cc2e65876ec9f582f0ab593156e7"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/pad9.mcfunction",
+      "bytes": 128,
+      "sha256": "a93bc414b5813802259b3e41bde32d5b717fbd18951d6ea12e7208db8585b75f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/refill.mcfunction",
+      "bytes": 107,
+      "sha256": "69a6c3ed86f583293bdac861f4903eac144c271617a426c8a057f544e6b718b9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/score_ball.mcfunction",
+      "bytes": 117,
+      "sha256": "6f0ac86d232920ef73daf0b63c09de831211a7abf05428aa7651b3ed80de0e0e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/setup.mcfunction",
+      "bytes": 4553,
+      "sha256": "b60efe6cf40157aede50ca6567c1d2eef53f7fa0b2e1a169b577ef6f5ef96393"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/start.mcfunction",
+      "bytes": 36,
+      "sha256": "ac908aa5ab7fed70efc3d913d2bd2317d53d285db8a5f37f7a39615b340278e4"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/ctf/tick.mcfunction",
+      "bytes": 3673,
+      "sha256": "e1892b8ea3cd37d7dcfb7584d99d854568d5b5a20288ae2d5e91f795f7f06fcf"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/detail_residence.mcfunction",
+      "bytes": 18676,
+      "sha256": "8494776f27c2f990e72c9b5256f2a29fa40f7e515c62a6093cb6d6d8941618f2"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/entrance_button.mcfunction",
+      "bytes": 1919,
+      "sha256": "4519768bb172352d5700a12362386fe74f8a565c74645a01fe1b6ac008af99b3"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/entrance_foliage.mcfunction",
+      "bytes": 1761,
+      "sha256": "7dd3d731b94f41919b4b6bcde2613262019f67c6f386fc21fca2a5c9fec0f251"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/flush_entry.mcfunction",
+      "bytes": 2661,
+      "sha256": "f6d85e3d1447f6dc6cad7d6992a7d78458fdf8612eaf1df1165a72e00fa106f2"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/halloween.mcfunction",
+      "bytes": 17938,
+      "sha256": "686e4d178686e141e52117c763d9bc50876af5203d1ff58972b569ec2246a6fd"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/halloween_cobwebs.mcfunction",
+      "bytes": 37650,
+      "sha256": "2c59d7e78767705adcc669a9e759694122fef6c359172055f74a04ec09bd61d8"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/halloween_interiors.mcfunction",
+      "bytes": 45161,
+      "sha256": "9462506627592ce1582399585cae0e1e9b4d2dec107b6debaf9549a6c5e0a784"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting.mcfunction",
+      "bytes": 89,
+      "sha256": "f1958f777d67855069659b054372df15e7781eb8283ef2b90e8d5f82d1a60000"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_000.mcfunction",
+      "bytes": 12903,
+      "sha256": "60e7fbaf5eafda238b5bf011e004e2e27a8d3f3084605c434531db93fa611d28"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_001.mcfunction",
+      "bytes": 12821,
+      "sha256": "1c1172db2a679ab6f78db07a450ee4866946eafaa146479b9f0d36401118dbe1"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_002.mcfunction",
+      "bytes": 12810,
+      "sha256": "cb65ffd1657603e3e58fc52be27b08c5da6966439579fd5000ea2e7190d5ba00"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_003.mcfunction",
+      "bytes": 12820,
+      "sha256": "9153cf12b541c4a432da7e334a52c73bdbdb4cf74eec939a1fa61052699e2035"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_004.mcfunction",
+      "bytes": 12813,
+      "sha256": "1aa00fcc7143f4ab78a8d0eab2a7e839cefe9c3b44d05b4b43bf81086f96331d"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_005.mcfunction",
+      "bytes": 12932,
+      "sha256": "3e1428b604d2a33c35326335fabb2d9463815e456cd762fedce575ec53c3f312"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_006.mcfunction",
+      "bytes": 12945,
+      "sha256": "c1d4b67d6411cb3552b63b56c73a04f105c85cc43f31bdc6ca15843ccc4099cb"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_007.mcfunction",
+      "bytes": 12921,
+      "sha256": "1b5f23480cde24f55d56281548b7eec0e8af79a18231ceeda23e9bcb9ef2cfb9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_008.mcfunction",
+      "bytes": 12910,
+      "sha256": "5983dfbc41a606539466bc0190b493e39c28d5b0d20f1063880f5c65246d3b66"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_009.mcfunction",
+      "bytes": 12841,
+      "sha256": "d102ce85232d81791c56b1938558fbc075f98ea1fbdb023b4a6ccc5623ffa071"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_010.mcfunction",
+      "bytes": 12783,
+      "sha256": "2d5b4d57268e43dcc0771f37b0e9ecc479eea94d8a5bc6afbe6eb1552d281bc2"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_011.mcfunction",
+      "bytes": 12665,
+      "sha256": "591aea22c93274383b62053feed8f204129029b2aebd97f0cfe7c5c3ac9cc608"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_012.mcfunction",
+      "bytes": 12146,
+      "sha256": "9fd896442c39a951061aa362ad23e2c16613257b1968039de589b813fb8556a5"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_013.mcfunction",
+      "bytes": 12799,
+      "sha256": "628e7df94a190ef759a4d492096c2ad18a19115a11c717e108421dc62d57ae5a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_014.mcfunction",
+      "bytes": 12872,
+      "sha256": "2ca7d1cad257e34de0bc68990ae995dd47e66b28894464888696ced9c924a277"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_015.mcfunction",
+      "bytes": 13015,
+      "sha256": "15b200f8b8b3babb9324507fa44b9d5e7afcd0328ade05ffa34e7058b23dc9be"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_016.mcfunction",
+      "bytes": 13017,
+      "sha256": "daee60f6b9f544b81137e15bfe1c13ba79db699a26e1cc9784bddbbec8726461"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_017.mcfunction",
+      "bytes": 13004,
+      "sha256": "2f54c32e6f70c1d751dc8dbc9a2d86469098ee0e4cc55d98fde6aa403b3be8c5"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_018.mcfunction",
+      "bytes": 13004,
+      "sha256": "099cfd39102328aebde5edf663a2f0ba13d1aa52ef4493dd54111f539c23a1b5"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_019.mcfunction",
+      "bytes": 12952,
+      "sha256": "990e3313e669f899ec64a260208e885573c9218bcfcb9cd51cdfb557036bad86"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_020.mcfunction",
+      "bytes": 12967,
+      "sha256": "ebaff0af632bd946fe02cb17e1a28874c85d1714a96449148fb848075c1630a9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_021.mcfunction",
+      "bytes": 12870,
+      "sha256": "564a0f086066997263436041383f681190fada7824061cdbadbb8106f2a5fa0a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_022.mcfunction",
+      "bytes": 12911,
+      "sha256": "1e68b5eb1c1f6bf73586ad55a75d7825cea33438a4aaa575163894287b21f84f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_023.mcfunction",
+      "bytes": 12895,
+      "sha256": "ffba52f5b237209dc14c48a43648eb6cf5a1a9d53523d5b48871ecdc5018b79e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_024.mcfunction",
+      "bytes": 12888,
+      "sha256": "3524c6a17cbaf7ec5486971b7236b7fd3fcdfe453b03b041a09f1d5096462943"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_025.mcfunction",
+      "bytes": 12907,
+      "sha256": "7c999ee484c77eca4cf755db48a7375335935c74c93c6c19bd0b3fb002eaebf9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_026.mcfunction",
+      "bytes": 12832,
+      "sha256": "9b1e725499fe90237353631c455494228aa72a299cb2f56e7fbd85902b4198c4"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_027.mcfunction",
+      "bytes": 12848,
+      "sha256": "5018e1f79ee36e536dd956ee58c1f5796580328043e90f1c6d45d08ef700acef"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_028.mcfunction",
+      "bytes": 12903,
+      "sha256": "e8015fbe9683d87b4500d958cc7a1aaafde6a1530cf7c190e6c8aef7e0234499"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_029.mcfunction",
+      "bytes": 12761,
+      "sha256": "6d50c8e72f41abb074977c9fcac493141dae8ea8dc4b4cf53ff01c32dcb068da"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_030.mcfunction",
+      "bytes": 12560,
+      "sha256": "0c837f757ca6f54a3b248d09dc3d80246f49029d24cd99215098c13686fb0d47"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_031.mcfunction",
+      "bytes": 12615,
+      "sha256": "4fc2a0508cd812eda9b60d8041a4cad47e1ebc2591a9f031188475f5ab06acfa"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_032.mcfunction",
+      "bytes": 12537,
+      "sha256": "dd85335264f8d391b95bcfa8e4950da092ac5c3d8de23b1d3cc02e55e5c2b3b2"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_033.mcfunction",
+      "bytes": 12561,
+      "sha256": "1415d7abb18fb07fa23fc2651d819370a3d3a9da31620786fd79c50cc022fd50"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_034.mcfunction",
+      "bytes": 12586,
+      "sha256": "df71b45ab95dbaddd4da91ca6bf44ae2cdf7b4b47b3a8dc41ca565907a36007a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_035.mcfunction",
+      "bytes": 12604,
+      "sha256": "fe2db7e0ef933431b0a923e945d04a6ba6c520f0813968747c666e89526954c0"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_036.mcfunction",
+      "bytes": 12662,
+      "sha256": "fdc279b69bc94ed2591df469bc7b199edf9ee090c16c69adb6140963ed2b50e9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_037.mcfunction",
+      "bytes": 12642,
+      "sha256": "d5bfefe04263b55e9849480e3b86ac2a51427f7ad2884666c025282498ff20e3"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_038.mcfunction",
+      "bytes": 12652,
+      "sha256": "305a3f72ad99e5e70cd348247f3136a837f872d8cb185b417a1a824b68a6853c"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_039.mcfunction",
+      "bytes": 4146,
+      "sha256": "b75dcf03fe1e2c1ce899f27bfbf448b0223398369fb07ecb0c268f5f9f58a958"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_040.mcfunction",
+      "bytes": 12879,
+      "sha256": "27f0731da3d7d9815c59ebc86448e394a59ecebd81c3ef03d6a5c2a3f98761c4"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_041.mcfunction",
+      "bytes": 12945,
+      "sha256": "5b694c522930267128afe42a4a6c8a21304f03f66cca7c1eb3d0c8a8da4f940c"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_042.mcfunction",
+      "bytes": 12940,
+      "sha256": "6eab66c4f66e1cb71166295ac09e9fe3bae36527b0c3a2081f0db3b29934d7b9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_043.mcfunction",
+      "bytes": 13020,
+      "sha256": "27480079ecdbe7adab9ba3db7a5391d6b3ea9ec3ccf1348f2483c31cefe69b44"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_044.mcfunction",
+      "bytes": 12958,
+      "sha256": "fc0ab9009bee8c469457635c5ed71da1fa27585152eff1ee707133c7fcac212d"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_045.mcfunction",
+      "bytes": 12927,
+      "sha256": "5f54588688391265c5b47a4b7ddb4fbf26146b139ce3a3e3ddde6508b1a9c88a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_046.mcfunction",
+      "bytes": 12951,
+      "sha256": "c8b8a8bdc5560c92458649afe014c8dc0a9ec98881e817788da88a257a7345f5"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_047.mcfunction",
+      "bytes": 12951,
+      "sha256": "e8a4872d07d43e6d70788d06eb40ba272d8293d8e44ce2308f525fa2e43e0941"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_048.mcfunction",
+      "bytes": 12936,
+      "sha256": "235e2d9afb1edaa1a8e85c917d0e2c95fe4fd304155ece99d0f11679de43599e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_049.mcfunction",
+      "bytes": 12968,
+      "sha256": "d7fee828b20c5c6ccebd9102df470b6f82ed4841f178fa871a2e44cca7d5288e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_050.mcfunction",
+      "bytes": 12977,
+      "sha256": "1ad003bbb7cbcb7aa7ea28fee44e9ac90f5fee8296d26c8949da40cc7725bdf2"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_051.mcfunction",
+      "bytes": 12940,
+      "sha256": "44f19b199d181d6d317b99b60e64c1d3ec141ebe1f88a2e2d5925e60a3d82a13"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_052.mcfunction",
+      "bytes": 12952,
+      "sha256": "5c168ade771ab71972800b76aaa41bddfd6a38896d5544ac112a9ddeada034d9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_053.mcfunction",
+      "bytes": 12974,
+      "sha256": "1a87d8dabc75aa4e178e5c3dea9e32281d67cbf5f8a9b18f8736c8ad02c996dc"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_054.mcfunction",
+      "bytes": 12949,
+      "sha256": "713698303c3c0bd65d1af07d25dd15675c09c6a9889afacb3efb4555d34acc93"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_055.mcfunction",
+      "bytes": 12958,
+      "sha256": "e484a7c2cab80a8d536d222fa3dd5adb83d7a25bd4516b0998182d234b76d942"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_056.mcfunction",
+      "bytes": 12924,
+      "sha256": "94a9c24e7871abfc04c7151c30793840a17649624e1daf1e1e0dc5f08654ae51"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_057.mcfunction",
+      "bytes": 12914,
+      "sha256": "edb8e31022e8a8cd8d6246a64b33e954b0cec095d4ef902ae09c7619cd7c3b10"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_058.mcfunction",
+      "bytes": 12903,
+      "sha256": "23a6ecf1df7e4854a7aae74b2b1a7805f93e2093edb4fd298371ef383524edd5"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_059.mcfunction",
+      "bytes": 12900,
+      "sha256": "0d948d750caa9a694c025f5c22e1d8a5705f3ddb02a7673ae7aaae9edf2e1062"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_060.mcfunction",
+      "bytes": 12898,
+      "sha256": "e343f4ecf031be8fd6b0edf59021c743fb5d441171b1489dcd45be80f2f16d47"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_061.mcfunction",
+      "bytes": 12879,
+      "sha256": "2363aa848e925264eecbd30fe2bd4bc3d8ea07ff91f406bccd7d55695a4960fb"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_062.mcfunction",
+      "bytes": 12926,
+      "sha256": "aa7541f09690abec7c645aa3d0d40368ed11290985c3fb3d8def8e5fea689f7e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_063.mcfunction",
+      "bytes": 12889,
+      "sha256": "6ea98e42715f190aec1c25ef1b0345224afda241cbe3f4995dc6dc6227e96c81"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_064.mcfunction",
+      "bytes": 12921,
+      "sha256": "a81a58b379d8e15feda02e02a38527dd21b28168175c7d33d42a636062ff71b7"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_065.mcfunction",
+      "bytes": 12938,
+      "sha256": "41044088bd8c9efbd57ef1c42f9849853f60de3a7979d1c84122ebcf1677ebac"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_066.mcfunction",
+      "bytes": 12947,
+      "sha256": "26f9f24bfc37c045ff6eb47b9c61d2d8d21a8e73ac0ae5379cd8c69a31229f37"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_067.mcfunction",
+      "bytes": 12915,
+      "sha256": "88d6e940d2f45ae635af086fd993f64da0dc612c04263605df951b8009423f43"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_068.mcfunction",
+      "bytes": 12939,
+      "sha256": "9cc24db797d6bd4486f2112c4cce634deeaf5b62bb5857fecb7b1bcff5bcc57d"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_069.mcfunction",
+      "bytes": 12943,
+      "sha256": "b1dbb2d88483dfc4d39ed06b96016e5128f9af7b325e29925b3d9ae34b7d06ac"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_070.mcfunction",
+      "bytes": 12954,
+      "sha256": "a8db5c34def9c07db9e9680c4a28aba4cd60c6a66a287ca782e1e50761a358f6"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_071.mcfunction",
+      "bytes": 12942,
+      "sha256": "ec1c7cc13cff6ec8b33d1be21452499694b18272d248e799476cee314f9ccd79"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_072.mcfunction",
+      "bytes": 12931,
+      "sha256": "2021af34b77714570ed02fd73e30ada13b05f3fb9e76a1ecef243e3c29a9b9c3"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_073.mcfunction",
+      "bytes": 12924,
+      "sha256": "f17d2aac8745be5f0a39082d7a56ad232ac57f7307f8d6d53bb8d24c9cd8815a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_074.mcfunction",
+      "bytes": 12906,
+      "sha256": "c40708618ec3da928024fe79b4d3701c86f9c3118c6c7b56d379bb304040ae5b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_075.mcfunction",
+      "bytes": 12918,
+      "sha256": "68b0e1728413f1cb16b86e9b80a2787957872f298db9304dd95d7113c7e1c23c"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_076.mcfunction",
+      "bytes": 12908,
+      "sha256": "280cf08015bbc1c853060d0c4f6d999b3b70645bb9a021ce03465407e57e0f64"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_077.mcfunction",
+      "bytes": 12914,
+      "sha256": "0d7ec3b1b522a9bdfd0d0024e6e247352c63c7ae2faefe4e9c632291e7067db4"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_078.mcfunction",
+      "bytes": 12925,
+      "sha256": "d63d400ecb2d3eff57edef9c7d2424d32e55b489f6ecfcac74ea4e7d320a0da6"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_079.mcfunction",
+      "bytes": 12913,
+      "sha256": "08301de7da8fdcc599863b3c2c9ee064608bc5e93ab53dd67a42ffb4e1ee87f3"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_080.mcfunction",
+      "bytes": 12942,
+      "sha256": "b7483cbf965fab1d0a7c15b95300af4c9d1b66690be71d10f00c071031320fb9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_081.mcfunction",
+      "bytes": 12918,
+      "sha256": "c88691d61f91fa0b0c916f71621f4745dde3b7eb557fa5cfe6f3e27e56738b20"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_082.mcfunction",
+      "bytes": 12953,
+      "sha256": "52bef6661962f665e130bf00f0d609a79006442df0ca840fb24fddd65b4f2ff9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_083.mcfunction",
+      "bytes": 12949,
+      "sha256": "18bc24cc9409c5f65347a346cb9602fe21602929e9337d01d765ab11d60f151e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_084.mcfunction",
+      "bytes": 12955,
+      "sha256": "d3092fbaec7db3d0ed0eef2e27347db519a4e0647dec020857523d8950f82573"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_085.mcfunction",
+      "bytes": 12925,
+      "sha256": "cf0d58d854028ed71fc2540cd4497c042851e29722ba9397ea518f6662678f13"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_086.mcfunction",
+      "bytes": 12935,
+      "sha256": "9ee67e0370ba3044bb778df4fd485b7c536a96208c50794c54ed4cc9bb6bff8e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_087.mcfunction",
+      "bytes": 12878,
+      "sha256": "e5df2cf42cdb0922a78d13266d05132ba7b5a72a991a530db9ebca6e25b5ae62"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_088.mcfunction",
+      "bytes": 12856,
+      "sha256": "7f6ea2e122a026e106c1f077a6f2c5f2dde4c7384c27578fd671620770d69b29"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_089.mcfunction",
+      "bytes": 12825,
+      "sha256": "f5ca1482f35446f5e32c753c4ec96df24f102eeb64a993e6df58d2e92afac26f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_090.mcfunction",
+      "bytes": 12882,
+      "sha256": "aef40296ba8b1cdcc67ec539e6a6188653379eca8bb51239c741bcbb32213993"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_091.mcfunction",
+      "bytes": 12882,
+      "sha256": "99232475056512490a0107acfac6e3123ba1c0b6022cb8c77e34e66e7c9e995a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_092.mcfunction",
+      "bytes": 12878,
+      "sha256": "19378d28949af9d8c8ea75e6c9e4c04106f00df602fc6126d4c0a4e1310c519f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_093.mcfunction",
+      "bytes": 12864,
+      "sha256": "32e60c03910317cdd8d326a1e40144e703679e1826a5f39dcd64c180ecd8c88d"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_094.mcfunction",
+      "bytes": 12839,
+      "sha256": "9a2ce41a1d5191a2c50c8406a368e48803a428c5d8d83b5c2ac346902cf5bb23"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_095.mcfunction",
+      "bytes": 12914,
+      "sha256": "22675c219492651b8a36dcf1f8d6309cd3f86e8ae9f560599311e5b39af07816"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_096.mcfunction",
+      "bytes": 12902,
+      "sha256": "81865a6a8ff04540aa2c074b5d3f7403d69d0a912997bc560d1040651a4eec74"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_097.mcfunction",
+      "bytes": 12896,
+      "sha256": "e007d3a6a3e2e507735bc0371004a4692c06ee421e822447bd313f27e83f16cd"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_098.mcfunction",
+      "bytes": 12916,
+      "sha256": "4c8e269582f1f5a71c3690635ac670a73e57d24afd306b9beef858bb009f6000"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_099.mcfunction",
+      "bytes": 12887,
+      "sha256": "baf87a67e1c42c919c0d6074da4138e197efd5691e19a595e366cac30f363c93"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_100.mcfunction",
+      "bytes": 12895,
+      "sha256": "11b400f2ef409b61892ec353098ddd8a497ac00ed018bcd8e8d4f395a9c067c2"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_101.mcfunction",
+      "bytes": 12880,
+      "sha256": "cb60b9bf6afbc8eb21a9998bb9b9862a7124689ec5e9160babbf17ab25fe835b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_102.mcfunction",
+      "bytes": 12877,
+      "sha256": "62379dcc69edb5138776af8e5d6801650de0a8a8525babd0a39afac5d5265444"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_103.mcfunction",
+      "bytes": 12854,
+      "sha256": "30d60d817bd86a1d134e4bda91677ada0bbc495652fe8b539c9a7e82fd1cefb1"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_104.mcfunction",
+      "bytes": 12868,
+      "sha256": "5c531ba122fa8c5985559bc6a1838b01de071d2d05cd6a6645774e3466388881"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_105.mcfunction",
+      "bytes": 12643,
+      "sha256": "622ce6caf2d12447bcf83ebb77be63f37f1a6f1feb8e6b8c096d89d2388c9f60"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_106.mcfunction",
+      "bytes": 12631,
+      "sha256": "33c2f62ccd6bc2e2ff5525339d3daa5e28861fc86868903a292f60d6c122ceed"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_107.mcfunction",
+      "bytes": 12629,
+      "sha256": "29882f11d1f1fc277938ada298ca4cf3766aea40526e67d3e60ed182e3042abb"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_108.mcfunction",
+      "bytes": 12560,
+      "sha256": "d4531c1b791fe8869d8a89478963448b35a00bb920526bdd84c0293fb2116179"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_109.mcfunction",
+      "bytes": 12613,
+      "sha256": "a98eaa35dc7b25a244064db93601a66a0c449db8d8ae7c1b30856d04b2fa1eab"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_110.mcfunction",
+      "bytes": 12602,
+      "sha256": "8d99cfd8558ad29f52b636ce0bb20f036a93be1939d033d49906458a719e2a65"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_111.mcfunction",
+      "bytes": 12596,
+      "sha256": "105f2019a9f6163d031f42fd195a87d5aa00fc42706f26a2b31a3c89b21b77a8"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_112.mcfunction",
+      "bytes": 12554,
+      "sha256": "f34ee8ba214e1fbfac23c59e45761561d8b0f98231d1313a99a005e712fdf584"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_113.mcfunction",
+      "bytes": 12616,
+      "sha256": "3a69eb60c986f6514bb4b7c9336fc6191f3f415c48450882d5edaf99612be2cc"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_114.mcfunction",
+      "bytes": 12612,
+      "sha256": "5e234e545b3f62792318093f1db473a2155b2953f4e9f81517ef93fee813a947"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_115.mcfunction",
+      "bytes": 12615,
+      "sha256": "99c9edd04e3ebf8bd98dac889876e09b2c2e9abfa2c3d93d51eac009e2ab6cdc"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_116.mcfunction",
+      "bytes": 12662,
+      "sha256": "3a9aa8faeaa98b9490677b09890371c6a72f05a724a8938e0abd4d08da78962e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_117.mcfunction",
+      "bytes": 12636,
+      "sha256": "3e07dc29056e5a427f7859071ef75291c2fbb5a64eacf683fb1ab6bac82df8d4"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_118.mcfunction",
+      "bytes": 12644,
+      "sha256": "925d92c29e626f85420ebc27df82b82518d748a82b51d1d11e0ae305146cf2d1"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_119.mcfunction",
+      "bytes": 12647,
+      "sha256": "1daa2d977007d5fa2bbd1217971ee928ee81daae4e1924b89f09ad060bc3f5cc"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_120.mcfunction",
+      "bytes": 12622,
+      "sha256": "d624ee67b64a22dfcaa0ca4f72971fa6f43fb87aa140ecb50ee413beabe09732"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_121.mcfunction",
+      "bytes": 12664,
+      "sha256": "886e30cf742b9211189654f88b4fd14fe209ccfcf184b91e66fb5645281cf834"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_122.mcfunction",
+      "bytes": 12612,
+      "sha256": "a63d23c44054b4c4e920dc8976ec66719bab9780f4c0efff839c43a72e7f2128"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_123.mcfunction",
+      "bytes": 12661,
+      "sha256": "a79b6209439b2e7e78437c25c5d8f0ac3c5a6671c12ca34f767cc4efda91d29b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_124.mcfunction",
+      "bytes": 12650,
+      "sha256": "5d36d8a4266e065118593dee1193649e2077345298f7a8988bdfbf95e7572553"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_125.mcfunction",
+      "bytes": 12654,
+      "sha256": "2361a02b37cc9452aebad723677e0408e6bd86b0ee6aafcc02c0ec50b89a71de"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_126.mcfunction",
+      "bytes": 12619,
+      "sha256": "7d635edcb6e06aa2df33dfc62531ce666afc1b71eb8bb48c6cff1bd344e2f891"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_127.mcfunction",
+      "bytes": 12631,
+      "sha256": "325d5e0b1d73dae6c9bf4c900e77e204294a4fcdebd0bd05d4be63e8f8d9be04"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_128.mcfunction",
+      "bytes": 12613,
+      "sha256": "64d51259864c2f36c7ae1b18ffe881ea7998a81bb150ac76702cd7994d7693fc"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_129.mcfunction",
+      "bytes": 10409,
+      "sha256": "0d0ba7e2a7968952b51446fc2a794ff54fd1557a8dfc929f7d0230a71879fd6a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/lighting_edges.mcfunction",
+      "bytes": 9183,
+      "sha256": "4dd2f4659f590f4236832c35b0c84128c12ae867b4ac21e519977ab70f6c4c8c"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/multiplayer_rules.mcfunction",
+      "bytes": 639,
+      "sha256": "3ea07cfa4de8f11267d58c92e132830067203306c7a4bad4fafab73374e3ef9b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/overview.mcfunction",
+      "bytes": 24,
+      "sha256": "a7133b30f5b82311adcd712953b6e0c697b4462948505dc403b657fe7f36f87d"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/relocate_button.mcfunction",
+      "bytes": 240,
+      "sha256": "c9553d54871674ed2c48be3f66943dd4a499a02f2a418af1d4867908950aa8e5"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/remove_text.mcfunction",
+      "bytes": 24084,
+      "sha256": "184b5ad63bcedb0be5bd86c88f2af471180e8750f66e0c90b10bd9d91bb5b117"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/repair_fixtures.mcfunction",
+      "bytes": 9317,
+      "sha256": "1ca66ddad3549a812044cbc48d05b452faaaf67295ce8b45c75e3fa977d98e52"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/repair_geometry.mcfunction",
+      "bytes": 14867,
+      "sha256": "31b6649fe7b6a0d80ccf148ee327137c9077cf3faba35ead2cf90ffac9b387e0"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/repair_labels.mcfunction",
+      "bytes": 46,
+      "sha256": "86168c180c7b86982476ce73d7fc12716e44f1332f24a9ba6de66aa28e79fc5a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/repair_overflow.mcfunction",
+      "bytes": 2690,
+      "sha256": "8cdabe570a0075f3279e1e569f2a23728994e4485c353f6335d2b38634b5ece1"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/repair_walls.mcfunction",
+      "bytes": 1072,
+      "sha256": "cf7fbf9090ff9da4d3560579a4494904f3b2ca19ac126b91f56fcf3a3b5d93e3"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/restore_entrance_terrain.mcfunction",
+      "bytes": 22969,
+      "sha256": "2244045fa9a749b58db8b1fdd622afb40e339c2e1b82a37475259e51dd0c9028"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/secret_close.mcfunction",
+      "bytes": 193,
+      "sha256": "eba2e2eac01e055b448f69b1cd581812a4bd36a0a92bd3a672c3202d4cf8bdf0"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/secret_interact.mcfunction",
+      "bytes": 115,
+      "sha256": "015c95d7a502d4a89c317880ab35b4426326a0793466e5eb0eb687799a068d8b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/secret_open.mcfunction",
+      "bytes": 133,
+      "sha256": "e9913fb89ddb8c2a8f8ba8d2c0ef816ed1ca8935383a5cadc0d6e6e64fda6d68"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/secret_seal.mcfunction",
+      "bytes": 101,
+      "sha256": "ff9964824606a7c93f3e0b25c7e2196d32bf6a74b77024368843e8ac810fba2f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/security_build.mcfunction",
+      "bytes": 5447,
+      "sha256": "5f04fea85ec5536a7ae51da644da223a3b9070ce028091472c5daa331d0ff543"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/security_tick.mcfunction",
+      "bytes": 276,
+      "sha256": "b51f05050a9e8e4ba552db4470afd3384ae31b295050aa99cdc7d124ee79d44d"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/server_first_start.mcfunction",
+      "bytes": 171,
+      "sha256": "b7d08f6715f6eb09bb388ec617a665ee032628284b39f1d326dd44d6c58a0425"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/server_load.mcfunction",
+      "bytes": 178,
+      "sha256": "fb6a51ad287be73d0f72e09faad4f88687902b38824dcfa1466fdbc5fa1e7c80"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/server_reset_player.mcfunction",
+      "bytes": 740,
+      "sha256": "77629f7832b0fb1c1729e80909b709626000710cf0f5acec8917ecf5a1cf9915"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_000.mcfunction",
+      "bytes": 4662,
+      "sha256": "e31660fe638068b90f81e08b4650d34d50c31eb4c58611022f2c4aea382dc808"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_001.mcfunction",
+      "bytes": 5565,
+      "sha256": "b8823dfc97a878fd2776c04c93d5fb6665ad76d8ec464eb3f87464ad283815ef"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_002.mcfunction",
+      "bytes": 5679,
+      "sha256": "8924c212a0f147019e62be798a46e1122d3019741ba5f0c263494b466315456f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_003.mcfunction",
+      "bytes": 5625,
+      "sha256": "f76fb201f5497970e47275380fce473378258033b3ec6179f27b68150c55aaf1"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_004.mcfunction",
+      "bytes": 5512,
+      "sha256": "c68f59e012839c37c15a5822244bd8fd7083cf77967c30542ea5bb108ff7b17f"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_005.mcfunction",
+      "bytes": 4616,
+      "sha256": "384b25e7b55d7e6a7499531806da8506440b09a3ef54297d2aab5566a9102729"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_006.mcfunction",
+      "bytes": 5531,
+      "sha256": "7bfad0f44334a1d94e781e932f4903c1bf9da929b52dc2046a8766383063b720"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_007.mcfunction",
+      "bytes": 5311,
+      "sha256": "4413546bbe4e5110f3b0761d93c64794b8650623f287c57580389cfd47158bc7"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_008.mcfunction",
+      "bytes": 5541,
+      "sha256": "d50107bb75b8145fd3f53747bb6066dab41efbe648f812c964ba1b1c27b27a3b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_009.mcfunction",
+      "bytes": 6110,
+      "sha256": "67347caadad0ad74c17f31193d76d5600e1a539816a8179f2c2a709336768065"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_010.mcfunction",
+      "bytes": 6109,
+      "sha256": "775ffb72ff8b8c6d9c207493f972391dd3a8512dfe7b2848248af7e23379aa49"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_011.mcfunction",
+      "bytes": 6121,
+      "sha256": "5071ce885f850011c5937da14d791d60ea915416220fc14becabeb902d774063"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_012.mcfunction",
+      "bytes": 6088,
+      "sha256": "790d6f5fe1a1830ebfdf5d0a6e6d3eeafd6faf8b53573ae5f3c9179bed1134a0"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_013.mcfunction",
+      "bytes": 6997,
+      "sha256": "b0cb07469a8416da472076d9987800bb8d9a6b11e1967d84aceb4b798ba207a8"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_014.mcfunction",
+      "bytes": 6521,
+      "sha256": "ea8469d2a4cf9d2607d7c2cf63db56d03e301f54f66eb68d3dcf339cc8477bee"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_015.mcfunction",
+      "bytes": 5034,
+      "sha256": "ce9aee64db04658d94c22b65cc525331e7c3a13daa8e0abf18ecd5b9ab86d5b3"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_016.mcfunction",
+      "bytes": 5913,
+      "sha256": "d9b72cd85d00a45a370c4ad467326ca5c34dff0f7704bd292419ede0f27b696a"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_017.mcfunction",
+      "bytes": 5390,
+      "sha256": "944732c4897da6e6d92005b082da153b4d14194c399e6b30986032da37e2f772"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_018.mcfunction",
+      "bytes": 5495,
+      "sha256": "f9dc685d460c4ca9e21f8f401acd2c42dc6ff565ee78d097f0fcc245393544b1"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_019.mcfunction",
+      "bytes": 5744,
+      "sha256": "9ba8b0d1f3cda38c12ab4f82d696c1ac4385539ffbe24328250410c7337dcb3c"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_020.mcfunction",
+      "bytes": 5225,
+      "sha256": "41c45c80b80a51bb37d210b628604fd664fba449530d59198247cde70de8b8ce"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_021.mcfunction",
+      "bytes": 5496,
+      "sha256": "1368506a3bee111ebac48eb34f12daa59a11841dd4f345bc5dc0440d369f1b15"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_022.mcfunction",
+      "bytes": 5543,
+      "sha256": "54c4097484f4c554d4b553d15d004e7a7fde9c1029391a2662304eb938dfdf73"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_023.mcfunction",
+      "bytes": 4929,
+      "sha256": "1ac6ecc9ddfb820cc429243a9c28c794c852a28fe1f7ad737af7f593a4799787"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_024.mcfunction",
+      "bytes": 5530,
+      "sha256": "a522e2ae2816bf177850bc0930aceadfeb50020476bcb7967a4ee2ab3ed7bad1"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_025.mcfunction",
+      "bytes": 6349,
+      "sha256": "780a74edd5b59111034b511068d474c6253dced0820d22fd2c93e2c83944154e"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_026.mcfunction",
+      "bytes": 6356,
+      "sha256": "5835dea6ca44a6ca8e75d093b6a6e376fcad29895e5593ced4870e75c3d2c720"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_027.mcfunction",
+      "bytes": 6517,
+      "sha256": "0589875e2805be86eb71289b1e5288ce482b9254747e41e6c32afad3db7a8bc9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_028.mcfunction",
+      "bytes": 6316,
+      "sha256": "f63634dcad779f85c3626a96b3442e573e40dcb3d078f6e490c17d4c94783548"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_029.mcfunction",
+      "bytes": 4793,
+      "sha256": "ca9398750dbc3319f762a1762571a4293b29ebfc50217e994dd99b1b771a3765"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_030.mcfunction",
+      "bytes": 5654,
+      "sha256": "b3b7262170cd0cc5e7f0b59e20088b0314b2a067996bdeebfe0b7e27e18b78bb"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_031.mcfunction",
+      "bytes": 5712,
+      "sha256": "c504662db90824a1c72e85da7496066cda37a86890c41360175200da9b46f808"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_032.mcfunction",
+      "bytes": 5749,
+      "sha256": "4671cafaeb898def3dcf57484536a0ecc0a04c9cf64a852700775b38ae7cd622"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_033.mcfunction",
+      "bytes": 5773,
+      "sha256": "86b2c2051fa9c873a66b4e4f0b05ba35f0a0db76fc8f25cf3c9a11f75dd22804"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_034.mcfunction",
+      "bytes": 5843,
+      "sha256": "57bfc62db1bd2fb413681cfbab336b505121e9d1a83e41d87e6cf8311bd556fe"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_035.mcfunction",
+      "bytes": 5773,
+      "sha256": "c9fd054f6afc2e96f7bee361b6c9a09de398371b15483f8876bc54fc94dc7a7b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_036.mcfunction",
+      "bytes": 5773,
+      "sha256": "06a54847416f9a3acd70a0be1a860afdb6ebab7ad1c65bea7b673700a310f393"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_037.mcfunction",
+      "bytes": 5732,
+      "sha256": "41b426bbdd4ec97439576edbbd829154bc41dce9017bcde54de53b5c6c05e733"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_038.mcfunction",
+      "bytes": 5662,
+      "sha256": "2ddd0a845fc5d7b0f114fd9560eaa043ef932ac582ab283831196626d82570a9"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_039.mcfunction",
+      "bytes": 5662,
+      "sha256": "62891a6d6a57943b19231f2b909df10fe656fca82927a3581716b726664b273c"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_040.mcfunction",
+      "bytes": 5735,
+      "sha256": "65d16912519c2e4182e0e06de2a36cf2958125abe306fc3e1fb8868bf9c3f8db"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_041.mcfunction",
+      "bytes": 5808,
+      "sha256": "9bbc54fdddb4612da5f3f6645d252f4f1ba3fe0591da1b1578fdfbefa9c75c79"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_042.mcfunction",
+      "bytes": 5875,
+      "sha256": "4c2bc6ba58d6adc7577e87427607b86f84ca06f7be2ca91eb362cd3c8105306d"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_043.mcfunction",
+      "bytes": 5943,
+      "sha256": "210c98314e9442c774e4e9989778de0866542f8407d78eb1ad3173465edd5f21"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_044.mcfunction",
+      "bytes": 5875,
+      "sha256": "f44ed07dcc3400aa642ed6d9a90fee24ce1df4326dba1ecb37a44bb0940e7e3b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_045.mcfunction",
+      "bytes": 5875,
+      "sha256": "49b8c5ca0bf0728ff9940fe23eb0379f84c11fedeb5abe3b2e2d9e9248e4861b"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_046.mcfunction",
+      "bytes": 6298,
+      "sha256": "7d1e8588de3a1499bf88cab80426b842af0cc71ad05d580efc43373e776686b7"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_047.mcfunction",
+      "bytes": 5041,
+      "sha256": "dc0b6813d270497c2bed94fa87f9d1984505a64c6725f50b64d8d54ead7b1926"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_048.mcfunction",
+      "bytes": 4528,
+      "sha256": "91bf38b573ff18c73c4e90343aacac450679681ef7efe0adc8e53095617af1fe"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_049.mcfunction",
+      "bytes": 4399,
+      "sha256": "180ea0639b91e59dfe2968ebb75c9824fa575ed6ae8967f2ad79695ca240c4f7"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_050.mcfunction",
+      "bytes": 5989,
+      "sha256": "5b3df1b75e8a068fe166ec05fca8ec561e5f1edf208e4705afdd1cd1f1062ab4"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_051.mcfunction",
+      "bytes": 6538,
+      "sha256": "3dca5685ed7847928aa6118c35f032a125a736ffbe6babdedfef7178099d2a2c"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_052.mcfunction",
+      "bytes": 5918,
+      "sha256": "1ba2d569d25783e34965b3608040ee5305ed4fbb19ffa2b4662959b7849a56fe"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/step_053.mcfunction",
+      "bytes": 2003,
+      "sha256": "c6c3478a55a6c0e2ad87e511f1270ebf9d7027f994cd60885de2461e8bfca777"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/visit.mcfunction",
+      "bytes": 24,
+      "sha256": "78f966e110f479779f53168a56678c0a5913f8af71a5416e1753fa284b208c34"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/west_stairs.mcfunction",
+      "bytes": 6124,
+      "sha256": "28350fc63a3565097f0b74cb5c3065bb0db5bf47f6a99546b8b607b40b957120"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/item_modifier/fragment1.json",
+      "bytes": 217,
+      "sha256": "24e3f512ee5539d75e5fb4e50d76f883dbf560bf084ed9eb1b566df1cc8108af"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/item_modifier/fragment2.json",
+      "bytes": 217,
+      "sha256": "f65bce99cee2e1b1644dec30addde7818f5092ed255b2d4fb8cd1c3ebe5135b6"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/item_modifier/fragment3.json",
+      "bytes": 217,
+      "sha256": "6e22112be92e911fb07c026506008e4acde31ff2987cefb15189d25257bbef02"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/item_modifier/fragment4.json",
+      "bytes": 217,
+      "sha256": "997646fb03ed65d59a59e98dfd892308c05ba7eb536f7a227986c7ebd21e7ed9"
+    },
+    {
+      "path": "datapacks/sict-campus/pack.mcmeta",
+      "bytes": 186,
+      "sha256": "d4b95520a047f6dd4e962dae75dac716b53cd031dde57a118868d0fa239970bc"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/data/minecraft/chunk_tickets.dat",
+      "bytes": 48,
+      "sha256": "49937c8cea10110c1a760809c5537145cbdabc5405c8c456563e750c4cf592e0"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/data/minecraft/raids.dat",
+      "bytes": 74,
+      "sha256": "a959f552a81e8df73f88c2579310796ba856f7fa9479c574515abcf6e1f13fc0"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/data/minecraft/world_border.dat",
+      "bytes": 169,
+      "sha256": "8779c464cec6a2f385881650b6e60bf8a0d3081c45a43fd44feddc575e193433"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/entities/r.-1.-1.mca",
+      "bytes": 274432,
+      "sha256": "370a7df519d3fda9e3f21289da89114f46e43869d799cda6da1ede8cf371e65e"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/entities/r.-1.0.mca",
+      "bytes": 413696,
+      "sha256": "b09e6d1b80f8c4e3710f8d4b82340efd913f4e8ce37f87f739d898f9608e24de"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/entities/r.0.-1.mca",
+      "bytes": 57344,
+      "sha256": "47fd90b15f647c7209fc2b3cf7993b786e3193daecaf4d7020fb88117f0e5683"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/entities/r.0.0.mca",
+      "bytes": 65536,
+      "sha256": "a57d54c74c30b8ff81cbccb2f0c0716fe5d52d021f8622328986159cf07adcc1"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/poi/r.-1.-1.mca",
+      "bytes": 45056,
+      "sha256": "d8015237e1f750e6a17c7e93e2c00e3054fae12dfd46fc6d01d39668ac96e0d1"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/poi/r.-1.0.mca",
+      "bytes": 20480,
+      "sha256": "e35d0667b810bf73d45607d74768eb74ef5ac698c33ba606396c781c99d06825"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/poi/r.0.-1.mca",
+      "bytes": 40960,
+      "sha256": "362c08c461613776fe78535748614694d672ff0d7d5a556181a753551ccc334a"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/poi/r.0.0.mca",
+      "bytes": 24576,
+      "sha256": "334a13465e8572466176c8e3a8f218854ae87c68c47c3264fc7a9844c390af9e"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/region/r.-1.-1.mca",
+      "bytes": 7086080,
+      "sha256": "1851d28d8823617059209cff317b78eb78f4e38a7dfdef7171918fca14d7b25c"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/region/r.-1.-2.mca",
+      "bytes": 270336,
+      "sha256": "2b9fcbeca5362f37147161c4d2ccce2fb5c8dae1562c4c69836f7d798f120374"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/region/r.-1.0.mca",
+      "bytes": 6746112,
+      "sha256": "ee6e04d3fd2ad53603fc6145cb384a26eae3a02fa234e818e26707301848c524"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/region/r.-2.-1.mca",
+      "bytes": 749568,
+      "sha256": "ec9a9a0bac8feb501273bd55ded68720b91f68d53b9691d68228d0df5caa99eb"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/region/r.-2.0.mca",
+      "bytes": 794624,
+      "sha256": "1514ff50f2562c3f920f870374e605fded5e439cb16c53860e96e7c17ce8a4d3"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/region/r.0.-1.mca",
+      "bytes": 4325376,
+      "sha256": "4ef494baf46c59e96de6dcb6f599eaf77b948e080f78921e434cbf7fdd6db693"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/region/r.0.-2.mca",
+      "bytes": 172032,
+      "sha256": "0a741dbb9155608c79e84af36e6434fd66df70164c4fba561c820924f461dbc8"
+    },
+    {
+      "path": "dimensions/minecraft/overworld/region/r.0.0.mca",
+      "bytes": 4481024,
+      "sha256": "82c273d8c1be608b9d4c65dca6d5d4cafd0edbbd0a4c5b69617eb6d95930b597"
+    },
+    {
+      "path": "dimensions/minecraft/the_end/data/minecraft/chunk_tickets.dat",
+      "bytes": 48,
+      "sha256": "49937c8cea10110c1a760809c5537145cbdabc5405c8c456563e750c4cf592e0"
+    },
+    {
+      "path": "dimensions/minecraft/the_end/data/minecraft/ender_dragon_fight.dat",
+      "bytes": 159,
+      "sha256": "77cd6317188aa4960a588affa669a324782bfd3b65a6011294859f50ff779272"
+    },
+    {
+      "path": "dimensions/minecraft/the_end/data/minecraft/raids.dat",
+      "bytes": 74,
+      "sha256": "a959f552a81e8df73f88c2579310796ba856f7fa9479c574515abcf6e1f13fc0"
+    },
+    {
+      "path": "dimensions/minecraft/the_end/data/minecraft/world_border.dat",
+      "bytes": 169,
+      "sha256": "8779c464cec6a2f385881650b6e60bf8a0d3081c45a43fd44feddc575e193433"
+    },
+    {
+      "path": "dimensions/minecraft/the_nether/data/minecraft/chunk_tickets.dat",
+      "bytes": 48,
+      "sha256": "49937c8cea10110c1a760809c5537145cbdabc5405c8c456563e750c4cf592e0"
+    },
+    {
+      "path": "dimensions/minecraft/the_nether/data/minecraft/raids.dat",
+      "bytes": 74,
+      "sha256": "a959f552a81e8df73f88c2579310796ba856f7fa9479c574515abcf6e1f13fc0"
+    },
+    {
+      "path": "dimensions/minecraft/the_nether/data/minecraft/world_border.dat",
+      "bytes": 169,
+      "sha256": "8779c464cec6a2f385881650b6e60bf8a0d3081c45a43fd44feddc575e193433"
+    },
+    {
+      "path": "icon.png",
+      "bytes": 10382,
+      "sha256": "653b847545ecbceb50b0cdd86f1cc534ddb8fa19757338ebe9e2b92c953f33f1"
+    },
+    {
+      "path": "level.dat",
+      "bytes": 438,
+      "sha256": "5353cc33e9b64f271328cea2c2c0e9b07a7b305e765ed82c1676bab5a3c3a2be"
+    }
+  ]
+}
