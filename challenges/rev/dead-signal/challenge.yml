@@ -17,7 +17,6 @@ description: |
   binary to skip the check will not give up the flag — you need the real token.
 
   `dead_signal` runs on any modern x86_64 Linux system (glibc).
-attribution: Authored by bg0d-glitch
 type: dynamic
 value: 1000
 extra:

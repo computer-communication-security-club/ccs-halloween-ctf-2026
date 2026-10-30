@@ -1,5 +1,5 @@
 name: Poltergeist
-author: mundur
+author: '[mundur](https://github.com/M0nd0R)'
 category: web
 connection_info: http://CHALLENGE_HOST:32731
 description: |
@@ -18,7 +18,6 @@ description: |
   (`GET /pow` — a proof-of-work), and turns away the clumsy. Read the source.
 
   http://CHALLENGE_HOST:32731
-attribution: Authored by mundur
 type: dynamic
 value: 1000
 extra:

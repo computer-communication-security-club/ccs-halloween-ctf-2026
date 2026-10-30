@@ -14,7 +14,6 @@ description: |
   proof for an arbitrary nonce.
 
   Flag format: `ccsCTF{...}`
-attribution: Authored by bg0d-glitch
 type: dynamic
 value: 1000
 extra:

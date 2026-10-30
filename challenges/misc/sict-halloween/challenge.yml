@@ -15,7 +15,6 @@ description: |
   a basket. Start on the gold pad, visit every orange platform in order,
   then throw a Basketball through the orange hoop. The barrel refills shots.
   Falling resets the parkour attempt. Nothing needs to be broken or placed.
-attribution: Authored by zolbooo
 type: dynamic
 value: 1000
 extra:
