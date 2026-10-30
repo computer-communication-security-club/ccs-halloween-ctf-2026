@@ -10,7 +10,7 @@ RUN bash /build/prepare-world.sh /build/world /build/flag.txt
 
 FROM itzg/minecraft-server:java25@sha256:f7f2222512810f0f0e85133913622cf639be77a5dd1d4b11f24ab675da6ba742 AS runtime
 USER 0:0
-COPY --from=build /build/server.jar /opt/sict/server.jar
+COPY --from=build --chmod=644 /build/server.jar /opt/sict/server.jar
 COPY --from=build /build/world /opt/sict/world
 COPY --chmod=755 src/start.sh /opt/sict/start.sh
 COPY --chmod=755 src/admin.sh /opt/sict/admin
