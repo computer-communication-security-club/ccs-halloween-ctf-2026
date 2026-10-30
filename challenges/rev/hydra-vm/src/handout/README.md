@@ -19,11 +19,10 @@ Your task:
 
 ## Connecting
 
-The organizers will announce the challenge host. The service listens on TCP
-port **34001**:
+The service listens on TCP port **34001**:
 
 ```bash
-nc CHALLENGE_HOST 34001
+nc 104.154.238.6 34001
 ```
 
 The server speaks first. See `PROTOCOL.md` for the exact wire format.
