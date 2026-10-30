@@ -77,7 +77,7 @@
     {
       "path": "datapacks/sict-campus/data/sict/function/adventure_defaults.mcfunction",
       "bytes": 164,
-      "sha256": "991117354a3fc59193321a3145e9737799539d9fc45edb1c51782d8255097b99"
+      "sha256": "1565b2337d8616cc25e6279ea0744af2cc64579188c06454d372eccd80fb7141"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/adventure_entry_press.mcfunction",
@@ -101,8 +101,8 @@
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/adventure_tick.mcfunction",
-      "bytes": 228,
-      "sha256": "d945e0165ca2568bd8af63653dca279da2b0829e9e9a8a742029f05c6b3c8f04"
+      "bytes": 345,
+      "sha256": "f03b95cb202beaa7444f023fb8be7906f617d521b0035d2672cae33667059618"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/build.mcfunction",
@@ -1017,7 +1017,12 @@
     {
       "path": "datapacks/sict-campus/data/sict/function/server_reset_player.mcfunction",
       "bytes": 740,
-      "sha256": "77629f7832b0fb1c1729e80909b709626000710cf0f5acec8917ecf5a1cf9915"
+      "sha256": "3205a9d574d48d4dc3d902290e0228e7c336e68ca31ecab7a8f08ee9bf1158a1"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/server_spawn_player.mcfunction",
+      "bytes": 86,
+      "sha256": "7ceeea0c2a6bb300db4eb442de17521eaf414cc2a2a7e22513080590db9f7796"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/step_000.mcfunction",

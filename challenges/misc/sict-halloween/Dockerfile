@@ -14,9 +14,13 @@ COPY --from=build /build/server.jar /opt/sict/server.jar
 COPY --from=build /build/world /opt/sict/world
 COPY --chmod=755 src/start.sh /opt/sict/start.sh
 COPY --chmod=755 src/admin.sh /opt/sict/admin
-RUN mkdir -p /data && chown 1000:1000 /data
+RUN chmod 755 /opt/sict && chmod 644 /opt/sict/server.jar \
+    && mkdir -p /data && chown 1000:1000 /data
 WORKDIR /data
 USER 1000:1000
+RUN test -r /opt/sict/server.jar && test -x /opt/sict/start.sh \
+    && test -r /opt/sict/start.sh && test -x /opt/sict/admin \
+    && test -r /opt/sict/admin && test -r /opt/sict/world/level.dat
 EXPOSE 25565
 ENTRYPOINT ["/opt/sict/start.sh"]
 
