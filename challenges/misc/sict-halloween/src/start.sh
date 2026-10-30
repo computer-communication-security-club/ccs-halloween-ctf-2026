@@ -41,12 +41,11 @@ force-gamemode=true
 difficulty=normal
 hardcore=false
 online-mode=false
-enforce-secure-profile=true
+enforce-secure-profile=false
 spawn-protection=0
 max-players=$max_players
-view-distance=10
-simulation-distance=10
-enable-command-block=false
+view-distance=8
+simulation-distance=6
 enable-query=false
 enable-status=true
 enable-rcon=true
@@ -56,6 +55,20 @@ broadcast-rcon-to-ops=false
 broadcast-console-to-ops=false
 white-list=false
 sync-chunk-writes=true
+allow-flight=false
+accepts-transfers=false
+hide-online-players=true
+log-ips=false
+enable-jmx-monitoring=false
+management-server-enabled=false
+op-permission-level=2
+function-permission-level=2
+rate-limit=200
+player-idle-timeout=15
+pause-when-empty-seconds=60
+max-chained-neighbor-updates=100000
+max-tick-time=60000
+network-compression-threshold=256
 PROPERTIES
 printf 'host: 127.0.0.1\nport: 25575\npassword: %s\n' "$password" > .rcon-cli.yaml
 exec java -Xms512M "-Xmx$memory" -Duser.home=/data -Djava.io.tmpdir=/tmp -jar /opt/sict/server.jar nogui

@@ -7,7 +7,7 @@ A Minecraft Java **26.3** exploration challenge in the SICT campus, with a conce
 | Category / difficulty | misc / hard |
 | Deployment | Shared Minecraft server, Linux amd64 |
 | Player endpoint | Minecraft Multiplayer → `CHALLENGE_HOST:35001` |
-| Authentication | Licensed Java accounts, normal online mode |
+| Authentication | Offline mode (maintainer-selected); usernames are not authenticated |
 | Handout | None; `dist/` intentionally empty |
 | Resources | 2 CPUs, 6 GiB container memory, 4 GiB Java heap, 512 PIDs |
 | Persistent state | Project-scoped `server-data` volume |
@@ -16,7 +16,7 @@ A Minecraft Java **26.3** exploration challenge in the SICT campus, with a conce
 
 ## Run
 
-Copy `.env.example` to `.env`. Read the [Minecraft EULA](https://www.minecraft.net/eula), then set `EULA=TRUE` if accepted. Docker Engine with BuildKit and Compose is required. The default endpoint binds only to loopback; infra explicitly chooses its production bind address.
+Create a local `.env` with `EULA=TRUE` after accepting the [Minecraft EULA](https://www.minecraft.net/eula). Optional variables are `BIND_ADDR`, `PUBLIC_PORT`, `MEMORY`, and `MAX_PLAYERS`. Docker Engine with BuildKit and Compose is required. The default endpoint binds only to loopback; infra explicitly chooses its production bind address.
 
 ```sh
 docker compose up -d --build --wait --wait-timeout 300
@@ -59,7 +59,7 @@ Scores and shot ownership are per player. The shared server disables PvP and pla
 
 This branch does **not** record approval of the manual-solver exception. Organizer approval, an independent manual test-solve, and Linux amd64 Docker startup verification are required before merge/release. `ctf.py test` explicitly skips manual challenges; that result is not a successful automated solve.
 
-Normal account authentication requires HTTPS to Mojang/Minecraft account services and DNS. Infra must approve and enforce the allowlist in `deployment.yml`, denying unrelated outbound traffic, cloud metadata, and other challenge services. The runtime JAR and libraries are supplied by the image/server bundle; startup has no dependency-download step.
+Offline mode does not authenticate usernames. Do not grant OP to player names on an untrusted offline-mode server; administer through the private RCON wrapper. For identity protection, enable both `online-mode` and `enforce-secure-profile` in `src/start.sh` and approve account-service HTTPS access. Infra must deny unrelated outbound traffic, cloud metadata, and other challenge services. The runtime JAR and libraries are supplied by the image/server bundle; startup has no dependency-download step.
 
 ## Validation
 
@@ -81,10 +81,23 @@ The campus is an interpreted block model built from reference photographs and Op
 | Check | Result |
 | --- | --- |
 | `uv run tools/ctf.py check challenges/misc/sict-halloween` | Passed, no errors or warnings |
-| `uv run tests/check_package.py` | Passed: 291 seed-file hashes, absent player records, fragment rendering with special characters, invalid flag rejection |
+| `uv run tests/check_package.py` | Passed: 292 seed-file hashes, absent player records, fragment rendering with special characters, invalid flag rejection |
 | Official Docker Compose CLI 5.6.1 `config --quiet` | Passed |
 | POSIX/Bash syntax checks for the entrypoint, admin wrapper, and renderer | Passed |
 | Linux amd64 Docker build/start and `dist --verify` | Not run: Docker Engine unavailable |
 | Independent manual solve / load / egress validation | Pending |
 
 `validation/local-map-checks.json` records the earlier checks on the saved map before flag templating and repository packaging. It is evidence about that map, not a Docker runtime test.
+
+## Multiplayer defaults
+
+This configuration targets a fresh deployment; no existing world migration is included.
+
+- PvP and friendly fire are disabled by the Minecraft 26.3 gamerule and team settings; player collision is disabled.
+- Mob griefing, TNT explosions, fire spread, and projectile block damage cannot destroy the campus. Command blocks and Nether travel are disabled; datapack functions and basketball projectiles remain enabled.
+- A 256-block world border centered on `-137 11` contains the whole campus and spawn, limiting exploration-driven chunk generation.
+- Each refill replaces the requesting player's remaining tagged basketballs with eight shots; it cannot accumulate unlimited inventory stacks or affect another player.
+- View distance 8, simulation distance 6, 15-minute idle timeout, and a 200-packet/second per-connection rate limit complement the existing CPU, memory, PID and log limits. These are starting limits, not a tested 20-player capacity guarantee.
+- Remote management, JMX, query, server transfers and player-list disclosure are disabled. RCON is still private; operators and functions use permission level 2.
+
+Offline mode remains enabled as requested by the maintainer. These controls protect gameplay and resources; they cannot prevent username impersonation. Enable authenticated online mode for an untrusted public event.

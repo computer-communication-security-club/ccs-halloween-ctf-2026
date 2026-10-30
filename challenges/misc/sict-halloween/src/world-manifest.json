@@ -116,8 +116,8 @@
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/ctf/balls.mcfunction",
-      "bytes": 256,
-      "sha256": "6154f91e8030f43a360ed7fb5c2a21c4c2abd36631e291d2b75cb2e1b9238f29"
+      "bytes": 322,
+      "sha256": "33bf900ad9ab9506bd06a052641da60bfd8b9fc473efc4345d41095532ca948f"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/ctf/briefing.mcfunction",
@@ -925,6 +925,11 @@
       "sha256": "4dd2f4659f590f4236832c35b0c84128c12ae867b4ac21e519977ab70f6c4c8c"
     },
     {
+      "path": "datapacks/sict-campus/data/sict/function/multiplayer_rules.mcfunction",
+      "bytes": 639,
+      "sha256": "3ea07cfa4de8f11267d58c92e132830067203306c7a4bad4fafab73374e3ef9b"
+    },
+    {
       "path": "datapacks/sict-campus/data/sict/function/overview.mcfunction",
       "bytes": 24,
       "sha256": "a7133b30f5b82311adcd712953b6e0c697b4462948505dc403b657fe7f36f87d"
@@ -1006,8 +1011,8 @@
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/server_load.mcfunction",
-      "bytes": 286,
-      "sha256": "ab44b4004768b6240abe6d460769fa8fbd7daae13eeb3072c440f519285902e4"
+      "bytes": 178,
+      "sha256": "fb6a51ad287be73d0f72e09faad4f88687902b38824dcfa1466fdbc5fa1e7c80"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/server_reset_player.mcfunction",
