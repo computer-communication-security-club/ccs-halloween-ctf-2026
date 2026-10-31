@@ -1,7 +1,7 @@
 # Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
 challenges:
 - name: HYDRA VM
-  author: '[bg0d](https://github.com/bg0d-glitch)'
+  author: bg0d
   category: rev
   description: |
     HYDRA boots a custom 16-bit virtual machine from encrypted firmware. The

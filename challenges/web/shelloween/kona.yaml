@@ -1,7 +1,7 @@
 # Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
 challenges:
 - name: Shelloween
-  author: '[now.sh](https://github.com/n0wsh)'
+  author: now.sh
   category: web
   description: |-
     The Shell Market is open for the season — Bash, Zsh, Fish, every shell a

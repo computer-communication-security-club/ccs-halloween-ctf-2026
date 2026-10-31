@@ -1,7 +1,7 @@
 # Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
 challenges:
 - name: SICT After Dark
-  author: '[flame](https://github.com/zolbooo)'
+  author: flame
   category: misc
   description: |
     SICT is closed for Halloween, but four pieces of a secret remain inside.

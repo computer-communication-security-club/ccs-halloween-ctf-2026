@@ -1,7 +1,7 @@
 # Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
 challenges:
 - name: Piggyback
-  author: '[deprrous](https://github.com/deprrous)'
+  author: deprrous
   category: web
   description: |
     Latency is a feature.
