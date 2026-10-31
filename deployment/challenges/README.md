@@ -22,8 +22,9 @@ their plan charges; destroy temporary workers after retaining needed data.
 | Shelloween | Per-team HTTPS endpoint supplied by rCTF |
 | Poltergeist | Per-team HTTPS endpoint supplied by rCTF |
 | Dead Signal | Static handout in rCTF |
+| The Cursed MAYO | Per-team TCP-over-TLS hostname on port 443 supplied by rCTF |
 
-All six challenges are scheduled through Konata to open on October 31, 2026 at
+All seven challenges are scheduled through Konata to open on October 31, 2026 at
 18:00 Ulaanbaatar time (10:00 UTC). Their canonical metadata uses `state: visible`
 with `release_time: '2026-10-31T18:00:00+08:00'`; the future timestamp keeps them
 unavailable before the event. Review the verification results before opening.
@@ -39,7 +40,9 @@ database credentials or administrator token.
 
 Shelloween and Poltergeist use isolated containers and networks, one instance
 per team per challenge, a 30-minute renewable lifetime, a global cap of 60
-instances, and a cap of 30 per challenge. Starts are serialized and limited to
+instances, and a cap of 30 per web challenge. The Cursed MAYO uses the same
+isolation and lifetime with a cap of 20, 1 CPU, 512 MiB RAM, 128 PIDs, and
+64 MiB of tmpfs. Its TCP-over-TLS route uses SNI on port 443. Starts are serialized and limited to
 one per team every ten seconds. The upstream pruner removes expired resources.
 The policy accepts only the deployed image IDs and exact container settings.
 
@@ -96,6 +99,8 @@ To rebuild and reapply the reviewed configuration:
 
 ```sh
 python3 deployment/challenges/deploy.py build instancer
+# Or rebuild only MAYO:
+python3 deployment/challenges/deploy.py build instancer --challenge the-cursed-mayo
 python3 deployment/challenges/deploy.py build-instancer instancer --upstream /path/to/pinned/rctf
 python3 deployment/challenges/deploy.py install instancer
 python3 deployment/challenges/deploy.py build minecraft
@@ -132,3 +137,8 @@ python3 deployment/challenges/manage.py destroy --delete-workers
 
 Also remove stale challenge DNS records and the scoreboard's instancer
 configuration when retiring the workers.
+
+To update only the per-team launcher policy after building images, run
+`python3 deployment/challenges/deploy.py install-instances instancer`. This
+recreates the launcher without restarting the proxy or existing team containers.
+Verify MAYO with `python3 deployment/challenges/verify.py instances --challenge the-cursed-mayo`.

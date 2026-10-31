@@ -1,0 +1,39 @@
+name: The Cursed MAYO
+author: just-s1lence
+category: crypto
+connection_info: nc CHALLENGE_HOST 33001
+description: |
+  A cryptographic laboratory tried to summon an unbreakable post-quantum
+  signature scheme. The Halloween ritual stuttered, and the signing oracle has
+  been haunted ever since.
+
+  Every invocation returns a MAYO-2 signature with four wounded nibbles. The
+  wounds are selected by a sigil map inside the provided signer, and the value
+  written into each wound is stained by a fresh, unexposed field element.
+
+  Reverse the haunted signer, recover the hidden signing structure, and forge a
+  signature for the oracle's next message to break the curse.
+
+  The handout contains `cursed_signer`, a player README, and a small ritual
+  client. Start your per-team instance below, then connect over TCP with TLS:
+  `openssl s_client -quiet -connect HOST:443 -servername HOST` or
+  `python3 ritual_client.py --tls HOST 443 pk`, using the assigned hostname.
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{the_curse_lives_in_the_oil_space}
+    data: case_sensitive
+tags:
+  - hard
+  - halloween
+files:
+  - dist/README.md
+  - dist/cursed_signer
+  - dist/ritual_client.py
+hints: []
+state: visible
+release_time: "2026-10-31T18:00:00+08:00"

@@ -54,7 +54,7 @@ async def start(form):
             for item in details
         }
         challenge_count = sum(challenge == form.challenge_integration_id for challenge, _ in active)
-        if len(active) >= POLICY["max_instances"] or challenge_count >= POLICY["max_per_challenge"]:
+        if len(active) >= POLICY["max_instances"] or challenge_count >= POLICY["challenges"][form.challenge_integration_id].get("max_instances", POLICY["max_per_challenge"]):
             raise HTTPException(429, "Worker capacity reached; stop an instance or wait for expiry")
         key = f"ccs:start:{form.team_id}"
         if not await redis.set(key, "1", ex=10, nx=True):

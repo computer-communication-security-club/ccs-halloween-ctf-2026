@@ -444,8 +444,8 @@ def check_layout(report):
     misplaced = set()
     for path in repo_files():
         parts = path.parts
-        # The worker's instance manager is infrastructure, not a challenge.
-        if path == Path("deployment/challenges/instancer/Dockerfile"):
+        # These worker and scoreboard images are infrastructure, not challenges.
+        if path in {Path("deployment/challenges/instancer/Dockerfile"), Path("deployment/rctf/theme/Dockerfile")}:
             continue
         in_challenge = len(parts) >= 4 and parts[0] == "challenges" and parts[1] in CATEGORIES
         if parts[0] in CATEGORIES or (len(parts) >= 2 and parts[0] == "challenges" and parts[1] not in CATEGORIES):

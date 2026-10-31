@@ -1,0 +1,11 @@
+.git
+solve
+dist
+README.md
+challenge.yml
+deployment.yml
+public
+build
+cursed_work
+__pycache__
+*.pyc

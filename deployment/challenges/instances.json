@@ -110,5 +110,68 @@
     ],
     "timeout_milliseconds": 1800000,
     "extendable": true
+  },
+  "the-cursed-mayo": {
+    "challenge_integration_id": "the-cursed-mayo",
+    "instancer": "ccs",
+    "config": {
+      "services": {
+        "chall": {
+          "restart": "unless-stopped",
+          "user": "10001:10001",
+          "read_only": true,
+          "tmpfs": {
+            "/tmp": "size=64m,mode=1777"
+          },
+          "cap_drop": [
+            "ALL"
+          ],
+          "security_opt": [
+            "no-new-privileges:true"
+          ],
+          "cpus": 1.0,
+          "mem_limit": "512m",
+          "pids_limit": 128,
+          "image": "sha256:75820701be437bd96e94ec57a565560df5bcf6401823ead3d1e992a841f16620",
+          "networks": [
+            "internal"
+          ],
+          "dns": [
+            "127.0.0.1"
+          ],
+          "environment": {
+            "PORT": "33001"
+          },
+          "healthcheck": {
+            "test": [
+              "CMD",
+              "python3",
+              "-c",
+              "import socket; socket.create_connection(('127.0.0.1', 33001), 2).close()"
+            ],
+            "interval": "10s",
+            "timeout": "3s",
+            "start_period": "10s",
+            "retries": 5
+          }
+        }
+      },
+      "networks": {
+        "internal": {
+          "driver": "bridge",
+          "internal": true
+        }
+      }
+    },
+    "expose": [
+      {
+        "kind": "tcp-ssl",
+        "host_prefix": "the-cursed-mayo",
+        "container_name": "chall",
+        "container_port": 33001
+      }
+    ],
+    "timeout_milliseconds": 1800000,
+    "extendable": true
   }
 }

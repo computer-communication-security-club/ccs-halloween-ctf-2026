@@ -1,0 +1,92 @@
+# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
+challenges:
+- name: The Cursed MAYO
+  author: just-s1lence
+  category: crypto
+  description: |-
+    A cryptographic laboratory tried to summon an unbreakable post-quantum
+    signature scheme. The Halloween ritual stuttered, and the signing oracle has
+    been haunted ever since.
+
+    Every invocation returns a MAYO-2 signature with four wounded nibbles. The
+    wounds are selected by a sigil map inside the provided signer, and the value
+    written into each wound is stained by a fresh, unexposed field element.
+
+    Reverse the haunted signer, recover the hidden signing structure, and forge a
+    signature for the oracle's next message to break the curse.
+
+    The handout contains `cursed_signer`, a player README, and a small ritual
+    client. Start your per-team instance below, then connect over TCP with TLS:
+    `openssl s_client -quiet -connect HOST:443 -servername HOST` or
+    `python3 ritual_client.py --tls HOST 443 pk`, using the assigned hostname.
+
+
+    Start your team's isolated instance using the instance controls below. Instances expire after 30 minutes.
+  hidden: false
+  tags:
+  - hard
+  - halloween
+  scoring:
+    initial_value: 1000
+    minimum_value: 100
+    rctf:
+      kind: decay
+      eligible_for_tiebreaks: true
+  flags:
+    rctf:
+    - provider: flags/static
+      config:
+        flag:
+          file: flag.txt
+  attachments:
+    pre_compressed:
+    - dist/README.md
+    - dist/cursed_signer
+    - dist/ritual_client.py
+  release_time: '2026-10-31T18:00:00+08:00'
+  instancer_config:
+    challenge_integration_id: the-cursed-mayo
+    instancer: ccs
+    config:
+      services:
+        chall:
+          restart: unless-stopped
+          user: 10001:10001
+          read_only: true
+          tmpfs:
+            /tmp: size=64m,mode=1777
+          cap_drop:
+          - ALL
+          security_opt:
+          - no-new-privileges:true
+          cpus: 1.0
+          mem_limit: 512m
+          pids_limit: 128
+          image: sha256:75820701be437bd96e94ec57a565560df5bcf6401823ead3d1e992a841f16620
+          networks:
+          - internal
+          dns:
+          - 127.0.0.1
+          environment:
+            PORT: '33001'
+          healthcheck:
+            test:
+            - CMD
+            - python3
+            - -c
+            - import socket; socket.create_connection(('127.0.0.1', 33001), 2).close()
+            interval: 10s
+            timeout: 3s
+            start_period: 10s
+            retries: 5
+      networks:
+        internal:
+          driver: bridge
+          internal: true
+    expose:
+    - kind: tcp-ssl
+      host_prefix: the-cursed-mayo
+      container_name: chall
+      container_port: 33001
+    timeout_milliseconds: 1800000
+    extendable: true

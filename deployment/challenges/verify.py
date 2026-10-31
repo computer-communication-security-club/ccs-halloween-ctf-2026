@@ -6,6 +6,7 @@ import json
 import re
 import shlex
 import socket
+import ssl
 import subprocess
 import sys
 import time
@@ -44,6 +45,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("group", choices=["shared", "instances", "instances-local", "minecraft"])
     parser.add_argument("--origin-ip", help="Test HTTPS directly at the origin, preserving TLS hostname verification")
+    parser.add_argument("--challenge", help="Verify only this per-team challenge slug")
     args = parser.parse_args()
     state = manage.state()
     if args.origin_ip:
@@ -68,8 +70,10 @@ def main():
     else:
         api = API()
         summary = json.loads((manage.LOCAL / "import-summary.json").read_text())
+        if args.challenge and not any(item["per_team"] and item["slug"] == args.challenge for item in summary):
+            raise ValueError("Unknown per-team challenge")
         for item in summary:
-            if not item["per_team"]:
+            if not item["per_team"] or (args.challenge and item["slug"] != args.challenge):
                 continue
             route = f"/api/v2/admin/challs/{item['id']}/instance"
             if api.call(route)["data"]["status"] != "stopped":
@@ -101,7 +105,7 @@ def main():
                     with socket.socket() as listener:
                         listener.bind(("127.0.0.1", 0))
                         port = listener.getsockname()[1]
-                    service_port = 8000 if item["slug"] == "shelloween" else 8080
+                    service_port = 33001 if item["slug"] == "the-cursed-mayo" else (8000 if item["slug"] == "shelloween" else 8080)
                     tunnel = subprocess.Popen([*manage.ssh_args("instancer")[:-1],
                         "-o", "ExitOnForwardFailure=yes", "-N", "-L",
                         f"127.0.0.1:{port}:{address}:{service_port}", manage.ssh_args("instancer")[-1]])
@@ -114,6 +118,24 @@ def main():
                                 break
                         except OSError:
                             time.sleep(0.1)
+                if item["slug"] == "the-cursed-mayo":
+                    # Running containers can precede Traefik's routing refresh.
+                    deadline = time.monotonic() + 30
+                    while True:
+                        try:
+                            with socket.create_connection((host, port), timeout=3) as raw:
+                                connection = ssl.create_default_context().wrap_socket(raw, server_hostname=host) if tls else raw
+                                with connection:
+                                    assert connection.recv(4096), "Missing oracle banner"
+                            break
+                        except (OSError, AssertionError):
+                            if time.monotonic() >= deadline:
+                                raise
+                            time.sleep(1)
+                    solve(manage.ROOT / "challenges/crypto/the-cursed-mayo",
+                          host, port, tls=tls, origin_ip=args.origin_ip)
+                    print(f"{item['slug']}: rCTF start/status passed")
+                    continue
                 url = f"{'https' if tls else 'http'}://{host}:{port}"
                 path = "/health" if item["slug"] == "shelloween" else "/healthz"
                 with urllib.request.urlopen(url + path, timeout=15) as response:
@@ -129,6 +151,8 @@ def main():
                     assert api.call(route)["data"]["status"] == "stopped"
             print(f"{item['slug']}: rCTF start/status/stop passed")
     group = "instances-origin" if args.origin_ip else args.group
+    if args.challenge:
+        group += "-" + args.challenge
     result = {"time": datetime.now(timezone.utc).isoformat(), "group": group, "passed": True}
     (manage.HERE / f"verification-{group}.json").write_text(json.dumps(result, indent=2) + "\n")
 

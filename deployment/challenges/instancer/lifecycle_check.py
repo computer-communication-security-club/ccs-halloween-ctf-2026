@@ -3,6 +3,7 @@ import asyncio
 import copy
 import json
 import os
+import sys
 from pathlib import Path
 import time
 import urllib.error
@@ -12,15 +13,16 @@ import uuid
 from aiodocker import Docker
 
 POLICY = json.loads(Path('/etc/ccs/policy.json').read_text())
+CHALLENGE = sys.argv[1] if len(sys.argv) > 1 else 'shelloween'
 PREFIX = 'ccs-verify-' + uuid.uuid4().hex
 TEAMS = [PREFIX + '-a', PREFIX + '-b']
 
 
 def call(method, team, *, create=False, ttl=20000, expected=200, mutate=None):
     form = {'rctfAuthToken': os.environ['AUTH_TOKEN'], 'teamId': team,
-            'challengeIntegrationId': 'shelloween'}
+            'challengeIntegrationId': CHALLENGE}
     if create:
-        form.update(copy.deepcopy(POLICY['challenges']['shelloween']))
+        form.update(copy.deepcopy(POLICY['challenges'][CHALLENGE]))
     if create or method == 'PATCH':
         form['timeoutMilliseconds'] = ttl
     if mutate:
@@ -61,8 +63,11 @@ async def main():
             details = await a[0].show()
             host = details['HostConfig']
             assert host['ReadonlyRootfs'] and not host['Privileged']
-            assert host['Memory'] == 256 * 1024 * 1024
+            assert host['Memory'] == (512 if CHALLENGE == 'the-cursed-mayo' else 256) * 1024 * 1024
             assert host['PidsLimit'] == 128
+            if CHALLENGE == 'the-cursed-mayo':
+                assert host['NanoCpus'] == 1000000000
+                assert host['Tmpfs']['/tmp'] == 'size=64m,mode=1777'
             assert host['Dns'] == ['127.0.0.1']
             labels = details['Config']['Labels']
             assert any(k.startswith('traefik.tcp.routers.') for k in labels)

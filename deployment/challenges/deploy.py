@@ -31,10 +31,14 @@ def bootstrap(role):
     manage.ssh(role, "sudo sh -s", input=(HERE / "worker/cloud-init.sh").read_text())
 
 
-def build(role):
+def build(role, challenge=None):
     paths = [ROOT / "challenges/misc/sict-halloween"] if role == "minecraft" else [
         ROOT / "challenges" / name for name in ["web/piggyback", "web/shelloween",
-                                               "web/poltergeist", "rev/hydra-vm"]]
+                                               "web/poltergeist", "rev/hydra-vm", "crypto/the-cursed-mayo"]]
+    if challenge:
+        paths = [p for p in paths if p.name == challenge]
+        if not paths:
+            raise ValueError("Unknown challenge for this worker")
     upload(role, [(p / name, f"{p.name}/{name}") for p in paths
                   for name in ["Dockerfile", ".dockerignore", "src", "flag.txt"]
                   if (p / name).exists()], "/opt/ccs-build")
@@ -114,29 +118,44 @@ systemctl enable --now ccs-firewall.service
         upload(role, [(target, "compose.yml")], f"/opt/ccs-worker/{slug}")
         manage.ssh(role, f"sudo bash -c 'cd /opt/ccs-worker/{slug} && docker compose up -d --wait --wait-timeout 120'")
 
+    install_instances(role)
+
+
+def install_instances(role):
+    if role != "instancer":
+        raise ValueError("Instances require the instancer worker")
+    state = manage.state()
     policy = {"ttl_seconds": manage.CONFIG["ttl_seconds"],
               "max_instances": manage.CONFIG["max_instances"],
               "max_per_challenge": manage.CONFIG["max_instances_per_challenge"], "challenges": {}}
-    for slug in ["shelloween", "poltergeist"]:
-        service = yaml.safe_load((ROOT / "challenges/web" / slug / "docker-compose.yml").read_text())["services"]["chall"]
+    for category, slug in [("web", "shelloween"), ("web", "poltergeist"), ("crypto", "the-cursed-mayo")]:
+        service = yaml.safe_load((ROOT / "challenges" / category / slug / "docker-compose.yml").read_text())["services"]["chall"]
         spec = service.pop("build")
         target = spec.get("target", "runtime") if isinstance(spec, dict) else "runtime"
         service["image"] = image_id(role, f"ccs/{slug}:{target}")
         for key in ["ports", "platform", "logging"]:
             service.pop(key, None)
-        service["tmpfs"] = {"/tmp": "size=16m,mode=1777"}
+        service["tmpfs"] = {"/tmp": "size=64m,mode=1777" if slug == "the-cursed-mayo" else "size=16m,mode=1777"}
         service["networks"] = ["internal"]
         service["dns"] = ["127.0.0.1"]
+        if slug == "the-cursed-mayo":
+            # Port 1337 is reserved for the control API by the worker firewall.
+            service["environment"] = {"PORT": "33001"}
+            service["healthcheck"] = {
+                "test": ["CMD", "python3", "-c", "import socket; socket.create_connection(('127.0.0.1', 33001), 2).close()"],
+                "interval": "10s", "timeout": "3s", "start_period": "10s", "retries": 5,
+            }
         if slug == "poltergeist":
             service["environment"]["POW_BITS"] = "24"
             # Jinja normalizes literal CRLFs while rendering Konata values.
             # Keep printf escapes textual so its health probe stays unchanged.
             service["healthcheck"]["test"] = [part.replace("\r", "\\r").replace("\n", "\\n")
                                                for part in service["healthcheck"]["test"]]
-        policy["challenges"][slug] = {"config": {"services": {"chall": service},
+        policy["challenges"][slug] = {"max_instances": 20 if category == "crypto" else policy["max_per_challenge"],
+            "config": {"services": {"chall": service},
             "networks": {"internal": {"driver": "bridge", "internal": True}}},
-            "expose": [{"kind": "https", "hostPrefix": slug, "containerName": "chall",
-                        "containerPort": 8000 if slug == "shelloween" else 8080}]}
+            "expose": [{"kind": "tcp-ssl" if category == "crypto" else "https", "hostPrefix": slug, "containerName": "chall",
+                        "containerPort": 33001 if category == "crypto" else (8000 if slug == "shelloween" else 8080)}]}
     target = manage.LOCAL / "policy.json"
     target.write_text(json.dumps(policy, indent=2) + "\n")
     instances = {}
@@ -165,20 +184,23 @@ PRIVATE_IP={state['workers'][role]['private_ip']}
 INSTANCES_HOST={manage.CONFIG['instances_host']}
 EOF
 docker compose config --quiet
-docker compose up -d --wait --wait-timeout 120 --force-recreate instancer traefik
+docker compose up -d --wait --wait-timeout 120 --force-recreate instancer
 """)
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("action", choices=["bootstrap", "build", "build-instancer", "install"])
+    p.add_argument("action", choices=["bootstrap", "build", "build-instancer", "install", "install-instances"])
     p.add_argument("role", choices=["instancer", "minecraft"])
     p.add_argument("--upstream", default="/tmp/ccs-rctf-instancer-upstream")
+    p.add_argument("--challenge", help="Build only this challenge slug")
     args = p.parse_args()
     if args.action == "build-instancer":
         build_instancer(args.upstream)
+    elif args.action == "build":
+        build(args.role, args.challenge)
     else:
-        globals()[args.action](args.role)
+        globals()[args.action.replace("-", "_")](args.role)
 
 
 if __name__ == "__main__":
