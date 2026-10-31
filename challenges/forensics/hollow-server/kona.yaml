@@ -9,7 +9,7 @@ challenges:
 
     > [!CONNECTION]
     > https://d2o1rk98pkw6lk.cloudfront.net
-  hidden: true
+  hidden: false
   tags:
   - easy
   scoring:
@@ -26,3 +26,4 @@ challenges:
           file: flag.txt
   attachments:
     pre_compressed: []
+  release_time: '2026-10-31T18:00:00+08:00'
