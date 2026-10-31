@@ -5,6 +5,8 @@ tls:
   options:
     default:
       minVersion: VersionTLS12
+      # Raw TCP forwarding cannot translate HTTP/2 for HTTP/1.1 backends.
+      alpnProtocols: [http/1.1]
 http:
   middlewares:
     permanent-https-redirect:
