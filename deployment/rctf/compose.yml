@@ -15,7 +15,7 @@ services:
     mem_limit: 256m
 
   rctf:
-    image: ccs-rctf-halloween:2026-10-31-v1
+    image: ccs-rctf-halloween:2026-10-31-v2
     build: ./theme
     pull_policy: never
     restart: unless-stopped

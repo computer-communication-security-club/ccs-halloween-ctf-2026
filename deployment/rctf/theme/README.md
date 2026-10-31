@@ -54,14 +54,15 @@ After edits, regenerate the config and rerun `up -d --build --force-recreate`
 so the image assets and bind-mounted config are reloaded. Hard-refresh open
 browser tabs if necessary. No application source or lockfile changes are needed.
 
-The Dockerfile inserts a same-origin stylesheet into rCTF's SPA shell and
+The Dockerfile uses a namespaced pre-paint script to avoid stale CDN copies
+of the upstream `/theme.js`, inserts a same-origin stylesheet into the SPA shell, and
 removes the old compressed shell/script variants. rCTF still generates its
 own Content Security Policy at startup. Existing routes, forms, keyboard
 interaction, focus styling, and the theme toggle remain native rCTF features.
 
 ## Production integration
 
-The parent `compose.yml` builds `ccs-rctf-halloween:2026-10-31-v1` using this
+The parent `compose.yml` builds `ccs-rctf-halloween:2026-10-31-v2` using this
 Dockerfile. The installer copies `theme.json` to `rctf.d/90-halloween.json`. It keeps
 the existing production volumes, event schedule, and environment settings.
 `install.sh` pulls the database/proxy images and builds the themed app before

@@ -18,7 +18,8 @@ fi
 chmod 600 .env
 docker compose config --quiet
 docker compose pull --quiet --ignore-buildable
-docker compose build rctf
+# The host uses Docker's legacy builder (no buildx plugin).
+docker build -t ccs-rctf-halloween:2026-10-31-v2 theme
 install -m 0644 theme/theme.json rctf.d/90-halloween.json
 docker compose up -d --wait --wait-timeout 180
 install -m 0644 systemd/ccs-rctf-backup.service /etc/systemd/system/
