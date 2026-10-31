@@ -43,15 +43,23 @@ private deployment environment:
 - `RCTF_TOKEN`: an rCTF team token with `challsRead,challsWrite` permissions. Never commit it.
 - `CHALLENGE_HOST`: the challenge server's public IP, without a scheme or port.
   For IPv6 use brackets, e.g. `[2001:db8::1]`.
+- `MINECRAFT_HOST`: the separate Minecraft server's public IP.
 
 Then, from the repository root:
 
 ```sh
 : "${RCTF_TOKEN:?Set the rCTF admin team token}"
 : "${CHALLENGE_HOST:?Set the public challenge server IP}"
+: "${MINECRAFT_HOST:?Set the Minecraft server IP}"
 uv run tools/ctf.py check
 uv run tools/konata.py
-LOGURU_LEVEL=WARNING LOGURU_DIAGNOSE=NO uvx --from konata==0.0.33 kona sync
+for challenge in challenges/*/*; do
+  [ -f "$challenge/kona.yaml" ] || continue
+  host="$CHALLENGE_HOST"
+  [ "$challenge" != challenges/misc/sict-halloween ] || host="$MINECRAFT_HOST"
+  CHALLENGE_HOST="$host" LOGURU_LEVEL=WARNING LOGURU_DIAGNOSE=NO \
+    uvx --from konata==0.0.33 kona sync "$challenge" || exit 1
+done
 
 # Or sync one challenge:
 LOGURU_LEVEL=WARNING LOGURU_DIAGNOSE=NO uvx --from konata==0.0.33 kona sync challenges/web/piggyback
@@ -103,6 +111,12 @@ The repository's Actions secrets are:
 | --- | --- |
 | `RCTF_TOKEN` | Dedicated **Konata CI** team token; only `challsRead,challsWrite` permissions |
 | `CHALLENGE_HOST` | Public challenge-server IP used in descriptions and endpoints |
+| `MINECRAFT_HOST` | Separate Minecraft server IP, selected for `challenges/misc/sict-halloween` |
+
+The workflow exports the selected IP as `CHALLENGE_HOST` for each individual
+Konata invocation. A missing Minecraft host fails that challenge's job rather
+than silently falling back to the general worker. When syncing Minecraft
+locally, set `CHALLENGE_HOST` to the Minecraft server's IP for that invocation.
 
 No AWS credentials or SSH private keys are needed for this action. It syncs
 metadata, flags, and approved handouts; it does not deploy challenge containers.
@@ -111,8 +125,9 @@ Every sync reapplies the repository's `hidden` settings, including on a manual
 rerun. Change the canonical metadata to preserve intended visibility across
 future syncs.
 
-To rotate either secret, set it through the repository's Actions settings or
-`gh secret set RCTF_TOKEN` / `gh secret set CHALLENGE_HOST`. Supply values on
+To rotate a secret, set it through the repository's Actions settings or
+`gh secret set RCTF_TOKEN`, `gh secret set CHALLENGE_HOST`, or
+`gh secret set MINECRAFT_HOST`. Supply values on
 stdin or at the prompt, not in command-line arguments or Git commits.
 
 ## Scoring

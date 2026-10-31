@@ -107,14 +107,22 @@ jobs:
           ref: ${{ needs.prepare.outputs.sha }}
           persist-credentials: false
 
-      - name: Require deployment secrets
+      - name: Require deployment secrets and select the challenge host
         env:
           RCTF_TOKEN: ${{ secrets.RCTF_TOKEN }}
           CHALLENGE_HOST: ${{ secrets.CHALLENGE_HOST }}
+          MINECRAFT_HOST: ${{ secrets.MINECRAFT_HOST }}
+          CHALLENGE_PATH: ${{ matrix.challenge }}
         shell: bash
         run: |
           : "${RCTF_TOKEN:?Set the RCTF_TOKEN repository secret}"
-          : "${CHALLENGE_HOST:?Set the CHALLENGE_HOST repository secret}"
+          if [[ "$CHALLENGE_PATH" == 'challenges/misc/sict-halloween' ]]; then
+            : "${MINECRAFT_HOST:?Set the MINECRAFT_HOST repository secret}"
+            CHALLENGE_HOST="$MINECRAFT_HOST"
+          else
+            : "${CHALLENGE_HOST:?Set the CHALLENGE_HOST repository secret}"
+          fi
+          echo "CHALLENGE_HOST=$CHALLENGE_HOST" >> "$GITHUB_ENV"
 
       - name: Sync metadata, flags, and approved handouts
         uses: project-sekai-ctf/konata-deploy-action/sync@a6c31123d0eab4a79539a2225889bbba429f2c83
@@ -124,6 +132,5 @@ jobs:
           konata-version: konata==0.0.33
         env:
           RCTF_TOKEN: ${{ secrets.RCTF_TOKEN }}
-          CHALLENGE_HOST: ${{ secrets.CHALLENGE_HOST }}
           LOGURU_LEVEL: WARNING
           LOGURU_DIAGNOSE: 'NO'
