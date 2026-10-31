@@ -1,9 +1,15 @@
 # Architecture and instances
 
-The baseline is a small set of Linux amd64 challenge VMs running Docker Engine and Compose. CTFd handles descriptions, handouts, scoring, and submissions separately. There is **no Traefik, reverse proxy, Kubernetes, or instancer dependency** in the starter architecture.
+The baseline is a small set of Linux amd64 challenge VMs running Docker Engine and Compose. rCTF handles descriptions, handouts, scoring, and submissions separately. There is **no Traefik, reverse proxy, Kubernetes, or instancer dependency** in the starter architecture.
+
+The deployed 2026 event extends this authoring baseline with a separate
+Minecraft worker and a private instance manager for Shelloween and Poltergeist.
+Those two challenges use per-team HTTPS subdomains and transparent TLS routing.
+See the [event deployment](../deployment/challenges/README.md) for the active
+topology, endpoints, release schedule, and operating instructions.
 
 ```text
-Players ── HTTPS ──> CTFd (separate platform)
+Players ── HTTPS ──> rCTF (separate platform)
                        ├── challenge.yml: descriptions and accepted flags
                        └── dist/: downloadable files
 Players ── TCP :31001 ──> challenge VM ──> redpwn/jail ──> sandbox per connection
@@ -14,7 +20,7 @@ Static challenge ── Docker build ──> handout only; no hosted container
 
 ## 1. Ownership and deployment boundary
 
-Authors supply self-contained Docker builds, Compose for hosted services, metadata, handouts, deployment requirements, and solvers. Reviewers test-solve and inspect the package. Infra owns VMs, firewall rules, any private registry, CTFd publication, resets, capacity, and uptime monitoring. Nothing here automatically publishes or deploys a challenge.
+Authors supply self-contained Docker builds, Compose for hosted services, metadata, handouts, deployment requirements, and solvers. Reviewers test-solve and inspect the package. Infra owns VMs, firewall rules, any private registry, rCTF publication, resets, capacity, and uptime monitoring. Nothing here automatically publishes or deploys a challenge.
 
 Keep the scoreboard and its credentials off challenge hosts. Put privileged pwn containers on dedicated worker VMs where practical. Jail is useful process isolation; the VM remains the boundary for a host or privileged-container compromise. Do not mount repository directories into production containers.
 
@@ -40,9 +46,9 @@ Builds can need network access for dependencies. Pin package versions and use pa
 
 ## 4. Lightweight networking
 
-Web endpoints use **plain HTTP on an assigned port**, e.g. `http://CHALLENGE_HOST:32001`. TCP challenges use `nc CHALLENGE_HOST 31001`. Do not advertise HTTPS when there is no TLS endpoint. `CHALLENGE_HOST` is a documentation placeholder: infra replaces it in the release metadata before syncing CTFd.
+Web endpoints use **plain HTTP on an assigned port**, e.g. `http://CHALLENGE_HOST:32001`. TCP challenges use `nc CHALLENGE_HOST 31001`. Do not advertise HTTPS when there is no TLS endpoint. `CHALLENGE_HOST` is a documentation placeholder: infra replaces it in the release metadata before syncing rCTF.
 
-Only CTFd gets a domain: **`ctf.sict-ccs.club`**, with HTTPS. Challenges have no domain. `CHALLENGE_HOST` is the challenge server's public IP, so reserve a static IP before syncing CTFd. Keeping challenges off `sict-ccs.club` also means challenge pages are never same-site with CTFd, so a web challenge cannot set cookies for, or send same-site requests to, the scoreboard. If you use Cloudflare, proxy only the CTFd record; challenge traffic goes directly to the IP.
+Only rCTF gets a domain: **`ctf.sict-ccs.club`**, with HTTPS. Challenges have no domain. `CHALLENGE_HOST` is the challenge server's public IP, so reserve a static IP before syncing rCTF. Keeping challenges off `sict-ccs.club` also means challenge pages are never same-site with rCTF, so a web challenge cannot set cookies for, or send same-site requests to, the scoreboard. If you use Cloudflare, proxy only the rCTF record; challenge traffic goes directly to the IP.
 
 Local Compose files bind published ports to `127.0.0.1` by default. Infra sets `BIND_ADDR=0.0.0.0` or a dedicated challenge-facing IP when publishing to players. Expose only the app ingress port; database and bot ports stay private. This pattern requires no domain per challenge and no shared proxy network.
 
@@ -65,11 +71,23 @@ Check the solver from an external player network too. Start a TCP socket check b
 
 Reset with `docker compose -p ccs-<slug> down --volumes --remove-orphans`, then start again with the same project name. This deletes that project's data: authors must list any volumes and reset effects in `deployment.yml`. No source-host bind mounts or externally named persistent resources are allowed in challenge packages.
 
-CTFd metadata uses the [ctfcli format](https://github.com/CTFd/ctfcli/blob/master/ctfcli/spec/challenge-example.yml). Infra replaces endpoint placeholders in a release copy, imports/syncs it with their configured CTFd tooling, checks scoring and flags, then makes the challenge visible. `deployment.yml` is an organizer document, not an instancer configuration or a CTFd plugin.
+Authors maintain `challenge.yml` in the repository's [metadata format](CHALLENGE_SPEC.md).
+Generated per-challenge `kona.yaml` files sync to rCTF v2 through [Konata](KONATA.md).
+Infra configures the dedicated sync team's `RCTF_TOKEN` and `CHALLENGE_HOST` as
+Actions secrets. After the main-branch checks pass, the Konata workflow syncs
+metadata and handouts. Infra checks scoring and flags before making a challenge
+visible. The pinned sync command can also be run manually. Konata renders
+connection callouts in descriptions and keeps the configured hidden state.
+The rCTF server selects the score provider; challenges
+supply their 100–1000 point range. Pull requests validate offline; the production
+sync runs only for validated main commits and does not start services.
+`deployment.yml` is an organizer document, not an instancer configuration.
 
 ## 6. Per-team instances
 
-Per-team orchestration is **not implemented** in this repository. For a small event, infra may manage instances manually; an authenticated launcher can be added only if demand requires it. Authors still make the package compatible now:
+The event's per-team implementation is under `deployment/challenges/`; it is
+separate from the portable authoring packages described here. Authors keep
+packages compatible with per-team orchestration:
 
 - No `container_name`, fixed network/volume names, or host mounts. Let the Compose project scope resources.
 - Parameterize the public port and bind address. Accept the host/port assigned by infra, and avoid hardcoded origins in the application.
@@ -102,4 +120,4 @@ Each README/deployment document gives a readiness command, solver dependency lis
 
 Before freeze, infra tests the expected number of concurrent connections, records memory/CPU needs, and sets host-wide connection/rate limits. Compose limits cap a service container; jail limits cap each connection. Keep both. Keep logs small and rotated, and avoid logging flag-bearing responses. Monitoring frequency must account for destructive solvers and costly instance resets.
 
-Images containing flags remain private. Pin a reviewed deployment image digest, keep a rollback copy, back up CTFd independently, and solve-test after every rebuild or rollback. Do not assume rootless Docker supports privileged jail; validate the native Linux jail host separately.
+Images containing flags remain private. Pin a reviewed deployment image digest, keep a rollback copy, back up rCTF independently, and solve-test after every rebuild or rollback. Do not assume rootless Docker supports privileged jail; validate the native Linux jail host separately.

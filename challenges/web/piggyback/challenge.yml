@@ -1,5 +1,5 @@
 name: Piggyback
-author: '[deprrous](https://github.com/deprrous)'
+author: deprrous
 category: web
 connection_info: https://CHALLENGE_HOST:32002
 description: |
@@ -23,7 +23,6 @@ type: dynamic
 value: 1000
 extra:
   initial: 1000
-  decay: 10
   minimum: 100
 flags:
   - type: static
@@ -34,4 +33,5 @@ tags:
   - halloween
 files: []
 hints: []
-state: hidden
+state: visible
+release_time: "2026-10-31T18:00:00+08:00"

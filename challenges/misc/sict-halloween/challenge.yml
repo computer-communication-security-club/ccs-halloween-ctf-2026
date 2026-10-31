@@ -1,26 +1,16 @@
 name: SICT After Dark
-author: '[flame](https://github.com/zolbooo)'
+author: flame
 category: misc
-connection_info: nc CHALLENGE_HOST 35001
+connection_info: CHALLENGE_HOST:35001
 description: |
   SICT is closed for Halloween, but four pieces of a secret remain inside.
 
-  Use Minecraft Java Edition 26.3: Multiplayer -> Direct Connection ->
-  CHALLENGE_HOST:35001. Use a unique player name.
-  This is a Minecraft server, not an interactive netcat shell.
-
-  Find the hidden entrance near spawn and search the campus. Collect four
-  numbered paper fragments and join their contents in order. One fragment
-  requires completing the orange parkour course in the gym and scoring
-  a basket. Start on the gold pad, visit every orange platform in order,
-  then throw a Basketball through the orange hoop. The barrel refills shots.
-  Falling resets the parkour attempt. Nothing needs to be broken or placed.
+  Join using Minecraft Java Edition 26.3.
 type: dynamic
 value: 1000
 extra:
   initial: 1000
-  decay: 10
-  minimum: 100
+  minimum: 10
 flags:
   - type: static
     content: ccsCTF{S1CT_sp00ky_l0ckd0wn}
@@ -31,4 +21,5 @@ tags:
   - minecraft
 files: []
 hints: []
-state: hidden
+state: visible
+release_time: "2026-10-31T18:00:00+08:00"

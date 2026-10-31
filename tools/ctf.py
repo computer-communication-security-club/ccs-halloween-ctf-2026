@@ -14,6 +14,7 @@ CHALLENGE is a path such as challenges/web/piggyback. Flags are never printed.
 """
 
 import argparse
+from datetime import datetime
 import filecmp
 import json
 import os
@@ -45,7 +46,7 @@ PORT_RANGES = {
     "osint": (35000, 35999),
 }
 DIFFICULTIES = ("baby", "easy", "medium", "hard", "insane")
-SCORING = {"initial": 1000, "minimum": 100, "decay": 10}
+SCORING = {"initial": 1000, "minimum": 100}
 FLAG_RE = re.compile(r"^ccsCTF\{[A-Za-z0-9_!?@#$%^&*.\-]+\}$")
 SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 DIST_LIMIT = 50 * 1024 * 1024
@@ -215,11 +216,23 @@ def check_metadata(chall, meta, deploy, flag, report):
             report.error(f"challenge.yml: missing '{key}'")
     if meta.get("category") != category:
         report.error(f"challenge.yml: category '{meta.get('category')}' does not match directory '{category}'")
-    if meta.get("state") != "hidden":
-        report.error("challenge.yml: state must be 'hidden'")
+    if meta.get("state") not in ("hidden", "visible"):
+        report.error("challenge.yml: state must be 'hidden' or 'visible'")
+    if meta.get("state") == "visible" and not meta.get("release_time"):
+        report.error("challenge.yml: visible challenges require an organizer-set release_time")
+    if meta.get("release_time"):
+        try:
+            release = meta["release_time"]
+            release = datetime.fromisoformat(release) if isinstance(release, str) else release
+            if not isinstance(release, datetime) or release.tzinfo is None:
+                raise ValueError
+        except (TypeError, ValueError):
+            report.error("challenge.yml: release_time must be an ISO datetime with a timezone")
     if meta.get("type") != "dynamic":
         report.error("challenge.yml: type must be 'dynamic'")
     extra = meta.get("extra") or {}
+    if "decay" in extra or "function" in extra:
+        report.error("challenge.yml: configure decay in rCTF's server scoreProvider, not extra")
     for key, expected in SCORING.items():
         if extra.get(key) != expected:
             report.warn(f"challenge.yml: extra.{key} is {extra.get(key)!r}, event policy is {expected}")
@@ -289,7 +302,7 @@ def check_connection_info(meta, deploy, report):
     expected = {
         "http": f"http://CHALLENGE_HOST:{port}",
         "https": f"https://CHALLENGE_HOST:{port}",
-        "tcp": f"nc CHALLENGE_HOST {port}",
+        "tcp": f"CHALLENGE_HOST:{port}" if deploy.get("service") == "minecraft" else f"nc CHALLENGE_HOST {port}",
     }.get(protocol)
     if deploy.get("mode") == "per-team":
         if not info:
@@ -431,6 +444,9 @@ def check_layout(report):
     misplaced = set()
     for path in repo_files():
         parts = path.parts
+        # The worker's instance manager is infrastructure, not a challenge.
+        if path == Path("deployment/challenges/instancer/Dockerfile"):
+            continue
         in_challenge = len(parts) >= 4 and parts[0] == "challenges" and parts[1] in CATEGORIES
         if parts[0] in CATEGORIES or (len(parts) >= 2 and parts[0] == "challenges" and parts[1] not in CATEGORIES):
             misplaced.add(Path(*parts[:2]) if parts[0] == "challenges" else Path(parts[0]))

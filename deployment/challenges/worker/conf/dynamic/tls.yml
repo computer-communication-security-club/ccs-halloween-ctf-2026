@@ -1,0 +1,13 @@
+tls:
+  certificates:
+    - certFile: /certs/fullchain.pem
+      keyFile: /certs/privkey.pem
+  options:
+    default:
+      minVersion: VersionTLS12
+http:
+  middlewares:
+    permanent-https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true

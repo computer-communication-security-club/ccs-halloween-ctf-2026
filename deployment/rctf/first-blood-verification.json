@@ -1,0 +1,9 @@
+{
+  "verified_at": "2026-10-31T09:11:08.959870+00:00",
+  "enabled": true,
+  "provider": "messages/discord",
+  "bloods_count": 1,
+  "test_message_confirmed": true,
+  "mentions_enabled": false,
+  "scoreboard_modified": false
+}

@@ -1,0 +1,17 @@
+{
+  "profile": "ccs",
+  "region": "ap-southeast-1",
+  "availabilityZone": "ap-southeast-1a",
+  "instance": "ccs-rctf",
+  "blueprint": "ubuntu_24_04",
+  "bundle": "medium_3_0",
+  "monthlyInstanceUSD": 24,
+  "staticIpName": "ccs-rctf-ip",
+  "staticIp": "13.215.75.166",
+  "hostname": "ctf.sict-ccs.club",
+  "sshKeyPair": "ccs-rctf-deploy",
+  "sshAllowedCidr": "45.117.34.126/32",
+  "remotePath": "/opt/rctf",
+  "dailyLogicalBackupUTC": "02:00",
+  "dailySnapshotUTC": "03:00"
+}

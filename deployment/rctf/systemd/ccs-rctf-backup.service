@@ -1,0 +1,9 @@
+[Unit]
+Description=CCS rCTF logical database and upload backup
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/rctf/backup.sh
+UMask=0077

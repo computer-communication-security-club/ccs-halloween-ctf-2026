@@ -1,0 +1,81 @@
+name: ccs-instancer
+services:
+  traefik:
+    image: traefik:v3.6.8@sha256:1624b11e039cd7c7f477913554ae6ccd90fb395a582fd2fd35000b8f2fb49c4e
+    container_name: ccs-instancer-traefik
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 128
+    ports: ['80:80', '443:443']
+    command: [--configFile=/etc/traefik/traefik.yml]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./conf:/etc/traefik:ro
+      - ./certs:/certs:ro
+    networks:
+      control:
+        ipv4_address: 10.203.0.2
+  cache:
+    image: redis:8.2.6@sha256:ed95b546aa16d6a0b24ec53c7258456f26b5d18639799126dee0cfec15133a23
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?required}
+    command: [sh, -c, 'exec redis-server --requirepass "$$REDISCLI_AUTH" --appendonly yes --maxmemory 128mb --maxmemory-policy noeviction']
+    volumes: [redis_data:/data]
+    mem_limit: 256m
+    cpus: 0.25
+    pids_limit: 64
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      control:
+        ipv4_address: 10.203.0.3
+  instancer:
+    image: ${INSTANCER_IMAGE:?required}
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 512m
+    cpus: 0.5
+    pids_limit: 128
+    environment:
+      AUTH_TOKEN: ${AUTH_TOKEN:?required}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?required}
+      REDIS_HOST: cache
+      INSTANCES_HOST: ${INSTANCES_HOST:?required}
+      TRAEFIK_CONTAINER_NAME: ccs-instancer-traefik
+      DOCKER_MANAGER_NAME: ccs-instancer
+      PREFIX: ccs-ti
+      WEB_WORKERS: '1'
+      LOGURU_DIAGNOSE: 'NO'
+      LOGURU_LEVEL: WARNING
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./policy.json:/etc/ccs/policy.json:ro
+    ports: ['${PRIVATE_IP:?required}:12237:1337']
+    depends_on:
+      cache:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, 'import urllib.request; urllib.request.urlopen("http://127.0.0.1:1337/healthz", timeout=3)']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      control:
+        ipv4_address: 10.203.0.4
+networks:
+  control:
+    ipam:
+      config:
+        - subnet: 10.203.0.0/24
+volumes:
+  redis_data:

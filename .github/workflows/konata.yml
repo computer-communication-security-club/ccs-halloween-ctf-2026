@@ -1,0 +1,136 @@
+name: Sync rCTF with Konata
+
+on:
+  workflow_run:
+    workflows: [Challenges]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Finish each sync before another starts; do not interrupt partial uploads.
+concurrency:
+  group: konata-rctf-production
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Select a validated main commit
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+      sha: ${{ steps.gate.outputs.sha }}
+      challenges: ${{ steps.discover.outputs.challenges }}
+    steps:
+      - name: Require successful checks on the current main commit
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]
+          current_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+          if [[ "$current_sha" != "$TARGET_SHA" ]]; then
+            echo 'Skipping a superseded main commit.'
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+            passed=$(gh api --method GET \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/challenges.yml/runs" \
+              -f head_sha="$TARGET_SHA" -f branch=main -f status=completed -f per_page=100 \
+              --jq '[.workflow_runs[] | select(.conclusion == "success" and (.event == "push" or .event == "workflow_dispatch"))] | length')
+            if [[ "$passed" -eq 0 ]]; then
+              echo '::error::Run the Challenges workflow on this main commit successfully before syncing.'
+              exit 1
+            fi
+          fi
+          echo 'ready=true' >> "$GITHUB_OUTPUT"
+          echo "sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        if: steps.gate.outputs.ready == 'true'
+        with:
+          ref: ${{ steps.gate.outputs.sha }}
+          persist-credentials: false
+
+      - name: Discover all challenge configs
+        id: discover
+        if: steps.gate.outputs.ready == 'true'
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import re
+
+          paths = sorted(str(path.parent) for path in Path('challenges').glob('*/*/kona.yaml'))
+          if not paths:
+              raise SystemExit('No Konata challenge configs found')
+          if any(not re.fullmatch(r'challenges/[a-z0-9_-]+/[a-z0-9_-]+', path) for path in paths):
+              raise SystemExit('Unsupported challenge path')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('challenges=' + json.dumps(paths) + '\n')
+          print(f'Selected {len(paths)} challenges; Konata skips unchanged payloads.')
+          PY
+
+  sync:
+    name: Sync ${{ matrix.challenge }}
+    needs: prepare
+    if: needs.prepare.outputs.ready == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        challenge: ${{ fromJSON(needs.prepare.outputs.challenges) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+
+      - name: Require deployment secrets and select the challenge host
+        env:
+          RCTF_TOKEN: ${{ secrets.RCTF_TOKEN }}
+          CHALLENGE_HOST: ${{ secrets.CHALLENGE_HOST }}
+          MINECRAFT_HOST: ${{ secrets.MINECRAFT_HOST }}
+          CHALLENGE_PATH: ${{ matrix.challenge }}
+        shell: bash
+        run: |
+          : "${RCTF_TOKEN:?Set the RCTF_TOKEN repository secret}"
+          if [[ "$CHALLENGE_PATH" == 'challenges/misc/sict-halloween' ]]; then
+            : "${MINECRAFT_HOST:?Set the MINECRAFT_HOST repository secret}"
+            CHALLENGE_HOST="$MINECRAFT_HOST"
+          else
+            : "${CHALLENGE_HOST:?Set the CHALLENGE_HOST repository secret}"
+          fi
+          echo "CHALLENGE_HOST=$CHALLENGE_HOST" >> "$GITHUB_ENV"
+
+      - name: Sync metadata, flags, and approved handouts
+        uses: project-sekai-ctf/konata-deploy-action/sync@a6c31123d0eab4a79539a2225889bbba429f2c83
+        with:
+          deploy-directory: .
+          challenge-path: ${{ matrix.challenge }}
+          konata-version: konata==0.0.33
+        env:
+          RCTF_TOKEN: ${{ secrets.RCTF_TOKEN }}
+          LOGURU_LEVEL: WARNING
+          LOGURU_DIAGNOSE: 'NO'

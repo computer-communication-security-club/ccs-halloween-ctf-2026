@@ -1,0 +1,39 @@
+{
+  "url": "https://ctf.sict-ccs.club",
+  "clients": 100,
+  "requests": 1000,
+  "failed": 0,
+  "elapsed_seconds": 2.65,
+  "requests_per_second": 376.88,
+  "p95_ms": 324.42,
+  "errors": [],
+  "scope": "Homepage, readiness (Postgres/Redis), and public config; no registration or submissions",
+  "origin_https_ready": true,
+  "public_https_ready": true,
+  "database_restore": "passed: 11 public tables restored into a temporary database",
+  "daily_snapshot": "enabled at 03:00 UTC",
+  "rctf_revision": "364dc3bc223884e1c9c483bf81c5909333bb2738",
+  "recorded_at_utc": "2026-10-31T08:43:38.445921+00:00",
+  "registration_gate": "enabled: verified through public HTTPS client configuration",
+  "admin_authentication": "passed: unauthenticated request returned HTTP 401",
+  "initial_snapshot": {
+    "name": "ccs-rctf-initial-20261031",
+    "state_at_last_check": "pending"
+  },
+  "event_configuration": {
+    "start": "2026-10-31T18:00:00+08:00",
+    "end": "2026-11-01T00:00:00+08:00",
+    "timezone": "Asia/Ulaanbaatar",
+    "duration_hours": 6,
+    "public_config_verified": true,
+    "registrations_enabled": true
+  },
+  "admin_setup": {
+    "created": true,
+    "permissions": "all (63)",
+    "public_https_login": "passed",
+    "authenticated_admin_api": "passed",
+    "temporary_bootstrap_container": "removed"
+  },
+  "last_updated_at_utc": "2026-10-31T08:55:17.429362+00:00"
+}

@@ -1,5 +1,5 @@
 name: HYDRA VM
-author: '[bg0d](https://github.com/bg0d-glitch)'
+author: bg0d
 category: rev
 connection_info: nc CHALLENGE_HOST 34001
 description: |
@@ -18,7 +18,6 @@ type: dynamic
 value: 1000
 extra:
   initial: 1000
-  decay: 10
   minimum: 100
 flags:
   - type: static
@@ -33,4 +32,5 @@ files:
   - dist/hydra-server
   - dist/firmware.enc
 hints: []
-state: hidden
+state: visible
+release_time: "2026-10-31T18:00:00+08:00"

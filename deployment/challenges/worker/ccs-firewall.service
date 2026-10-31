@@ -1,0 +1,13 @@
+[Unit]
+Description=Challenge worker network isolation
+After=docker.service network-online.target
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/ccs-worker/firewall.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,5 +1,5 @@
 name: Shelloween
-author: '[now.sh](https://github.com/n0wsh)'
+author: now.sh
 category: web
 connection_info: http://CHALLENGE_HOST:32001
 description: |
@@ -11,7 +11,6 @@ type: dynamic
 value: 1000
 extra:
   initial: 1000
-  decay: 10
   minimum: 100
 flags:
   - type: static
@@ -21,4 +20,5 @@ tags:
   - hard
 files: []
 hints: []
-state: hidden
+state: visible
+release_time: "2026-10-31T18:00:00+08:00"

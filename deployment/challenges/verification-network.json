@@ -1,0 +1,14 @@
+{
+  "time": "2026-10-31T09:04:31.159007+00:00",
+  "passed": true,
+  "blocked": [
+    "Internet",
+    "AWS metadata",
+    "scoreboard",
+    "control Redis",
+    "control API",
+    "host SSH",
+    "other challenge",
+    "external DNS"
+  ]
+}

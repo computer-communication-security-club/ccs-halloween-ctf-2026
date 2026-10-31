@@ -1,5 +1,5 @@
 name: DEAD SIGNAL
-author: '[bg0d](https://github.com/bg0d-glitch)'
+author: bg0d
 category: rev
 description: |
   A satellite transmitted its final encrypted authentication sequence before
@@ -21,7 +21,6 @@ type: dynamic
 value: 1000
 extra:
   initial: 1000
-  decay: 10
   minimum: 100
 flags:
   - type: static
@@ -35,4 +34,5 @@ files:
   - dist/README.md
   - dist/SHA256SUMS
 hints: []
-state: hidden
+state: visible
+release_time: "2026-10-31T18:00:00+08:00"

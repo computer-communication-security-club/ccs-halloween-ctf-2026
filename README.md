@@ -7,6 +7,8 @@ This private repository contains challenge sources, real flags, and solutions. O
 | [Rules](docs/RULES.md) | Requirements for every challenge |
 | [Architecture and instances](docs/ARCHITECTURE.md) | Hosting, isolation, ports, and instance lifecycle |
 | [Challenge specification](docs/CHALLENGE_SPEC.md) | Directory structure and metadata |
+| [Konata / rCTF sync](docs/KONATA.md) | Generate, validate, and sync all challenge configs |
+| [Event worker deployment](deployment/challenges/README.md) | Live endpoints, per-team instances, release schedule, and operations |
 | [Contributing](CONTRIBUTING.md) | Author workflow and review checklist |
 
 **Every challenge is Dockerized**, including static challenges whose Dockerfile produces the handout. Remote pwn challenges use **redpwn/jail**. The default target is **Linux amd64**; authors on Apple Silicon should build with `--platform linux/amd64`. Pwn must also be tested on a native amd64 Linux host with jail support.
@@ -56,6 +58,7 @@ You need [Docker](https://docs.docker.com/get-docker/) and [uv](https://docs.ast
 | `uv run tools/ctf.py dist CHALLENGE` | Exports `dist/` from the Dockerfile's `dist` stage and removes stale files. |
 | `uv run tools/ctf.py dist --verify CHALLENGE` | Fails if the committed `dist/` differs from a fresh build. |
 | `uv run tools/ctf.py test CHALLENGE` | Static: runs the solver. Hosted: `compose up --wait`, runs the solver against it, compares with `flag.txt`, then `down --volumes`. Never prints the flag. |
+| `uv run tools/konata.py --write` | Generates per-challenge `kona.yaml` from the canonical `challenge.yml`; omit `--write` to check for drift and validate offline. |
 
 [GitHub Actions](.github/workflows/challenges.yml) runs `check` on every push and pull request, and `dist --verify` plus `test` for each changed challenge. Pwn needs a runner that can run privileged redpwn/jail; see the comment in the workflow. CI does not replace the independent test-solve or a manual look at `dist/`.
 

@@ -1,0 +1,34 @@
+# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
+challenges:
+- name: SICT After Dark
+  author: flame
+  category: misc
+  description: |
+    SICT is closed for Halloween, but four pieces of a secret remain inside.
+
+    Join using Minecraft Java Edition 26.3.
+  hidden: false
+  tags:
+  - hard
+  - halloween
+  - minecraft
+  scoring:
+    initial_value: 1000
+    minimum_value: 10
+    rctf:
+      kind: decay
+      eligible_for_tiebreaks: true
+  flags:
+    rctf:
+    - provider: flags/static
+      config:
+        flag:
+          file: flag.txt
+  attachments:
+    pre_compressed: []
+  release_time: '2026-10-31T18:00:00+08:00'
+  endpoints:
+  - type: nc
+    endpoint: '{{ config.secrets[''challenge_host''].loaded }}'
+    port: 35001
+    name: Minecraft Java

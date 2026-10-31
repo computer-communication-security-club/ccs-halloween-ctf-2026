@@ -1,0 +1,95 @@
+# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
+challenges:
+- name: Poltergeist
+  author: mundur
+  category: web
+  description: |-
+    The coven moved their séances online. **Séance** is a tiny PHP-flavoured
+    language served by a single long-lived worker: write a program, POST it, and
+    the worker brews it and whispers back the result. One cute feature crosses
+    the veil — a séance may `leave` an echo for the next page in the same séance
+    to `recall`.
+
+    They swear every séance starts clean — no spirit from one request may linger
+    into the next. They are wrong. The full source of the worker is in your hands
+    (the binary ships stripped); prove a spirit *can* linger, seize the worker, and
+    make it read aloud the one name it keeps on disk and never speaks.
+
+    The door is warded: the ritual chamber asks a small toll before it listens
+    (`GET /pow` — a proof-of-work), and turns away the clumsy. Read the source.
+
+    http://CHALLENGE_HOST:32731
+
+
+    Start your team's isolated instance using the instance controls below. Instances expire after 30 minutes.
+  hidden: false
+  tags:
+  - insane
+  - halloween
+  scoring:
+    initial_value: 1000
+    minimum_value: 100
+    rctf:
+      kind: decay
+      eligible_for_tiebreaks: true
+  flags:
+    rctf:
+    - provider: flags/static
+      config:
+        flag:
+          file: flag.txt
+  attachments:
+    pre_compressed:
+    - dist/chall
+    - dist/chall.c
+    - dist/libc.so.6
+    - dist/ld-linux-x86-64.so.2
+  release_time: '2026-10-31T18:00:00+08:00'
+  instancer_config:
+    challenge_integration_id: poltergeist
+    instancer: ccs
+    config:
+      services:
+        chall:
+          restart: unless-stopped
+          environment:
+            POW_BITS: '24'
+            GLIBC_TUNABLES: glibc.cpu.x86_shstk=off
+          user: 10001:10001
+          read_only: true
+          tmpfs:
+            /tmp: size=16m,mode=1777
+          cap_drop:
+          - ALL
+          security_opt:
+          - no-new-privileges:true
+          cpus: 0.5
+          mem_limit: 128m
+          pids_limit: 64
+          healthcheck:
+            test:
+            - CMD
+            - bash
+            - -c
+            - exec 3<>/dev/tcp/127.0.0.1/8080; printf 'GET /healthz HTTP/1.0\r\n\r\n'
+              >&3; grep -q ok <&3
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 5s
+          image: sha256:310b9c0f3196b9cdde12396e07df337aa16854641a930004e4eef9a3740f4d91
+          networks:
+          - internal
+          dns:
+          - 127.0.0.1
+      networks:
+        internal:
+          driver: bridge
+          internal: true
+    expose:
+    - kind: https
+      host_prefix: poltergeist
+      container_name: chall
+      container_port: 8080
+    timeout_milliseconds: 1800000
+    extendable: true

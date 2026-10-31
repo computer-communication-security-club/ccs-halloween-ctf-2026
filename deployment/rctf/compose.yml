@@ -1,0 +1,88 @@
+name: ccs-rctf
+
+services:
+  caddy:
+    image: caddy:2-alpine@sha256:04913b1da43339a40ad1ea87827d70a576ac5aa6cf674c6e24fdca675887533a
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [web]
+    mem_limit: 256m
+
+  rctf:
+    image: ghcr.io/otter-sec/rctf@sha256:5fd7cd4379e9bc87f181200fa061600a5fba27d035928407e13f29fda839d3c2
+    restart: unless-stopped
+    stop_grace_period: 45s
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m
+    ports:
+      - '127.0.0.1:8080:80'
+    env_file: .env
+    volumes:
+      - ./rctf.d:/app/rctf.d:ro
+      - uploads:/app/uploads
+    networks: [web, db]
+    mem_limit: 1536m
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/api/readyz']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18.0@sha256:192a387c789cac29fcc7ac9a3a99060642a052fa293fd1953954c0956ebb3aed
+    restart: unless-stopped
+    stop_grace_period: 60s
+    environment:
+      POSTGRES_USER: rctf
+      POSTGRES_DB: rctf
+      POSTGRES_PASSWORD: ${RCTF_DATABASE_PASSWORD:?required}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks: [db]
+    mem_limit: 1024m
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'rctf', '-d', 'rctf']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.2.6@sha256:ed95b546aa16d6a0b24ec53c7258456f26b5d18639799126dee0cfec15133a23
+    restart: unless-stopped
+    command: ['sh', '-c', 'exec redis-server --requirepass "$$REDISCLI_AUTH" --appendonly yes --maxmemory 192mb --maxmemory-policy noeviction']
+    environment:
+      REDISCLI_AUTH: ${RCTF_REDIS_PASSWORD:?required}
+    volumes:
+      - redis_data:/data
+    networks: [db]
+    mem_limit: 384m
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  web:
+  db:
+    internal: true
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads:
+  caddy_data:
+  caddy_config:

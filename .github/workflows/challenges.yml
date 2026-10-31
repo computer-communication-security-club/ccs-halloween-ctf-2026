@@ -23,6 +23,10 @@ jobs:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v10.3.2
       - run: uv run tools/ctf.py check
+      - name: Check Konata configs, flags, handouts, and rendered connections
+        run: uv run tools/konata.py
+      - name: Test Konata discovery and rCTF payloads offline
+        run: uv run tools/test_konata.py
 
   changed:
     name: Select changed challenges
