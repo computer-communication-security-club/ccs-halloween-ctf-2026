@@ -62,4 +62,4 @@ The challenge passed automated tests, solver verification, and concurrent connec
 - Live endpoint: `nc 35.253.220.32 34001` (current VM address; it is ephemeral and changes if the VM is restarted). Port 31337 is also published while the VM stays up. The VM idle auto-shutdown is disabled for the event.
 - The VM publishes both 34001 and 31337 to the container's 31337; `deployment.yml` declares 34001.
 - AI tools are allowed.
-- `challenge.yml` and the player handout both use the required `nc CHALLENGE_HOST 34001` form; the event platform substitutes the live address so the handout never carries a stale ephemeral IP.
+- `challenge.yml` keeps the required `nc CHALLENGE_HOST 34001` form for infra substitution; the player handout carries the current concrete endpoint `35.253.220.32:34001`.
