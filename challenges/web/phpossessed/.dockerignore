@@ -1,0 +1,11 @@
+.git
+dist
+solve
+README.md
+challenge.yml
+deployment.yml
+docker-compose.yml
+__pycache__
+**/__pycache__
+*.pyc
+.env

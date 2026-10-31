@@ -1,0 +1,26 @@
+name: PHPossessed
+author: now.sh
+category: web
+connection_info: http://CHALLENGE_HOST:32003
+description: |
+  A paranormal field journal of haunted places across Mongolia. Anyone can
+  register a place — a name, a story, a picture — and the journal runs a
+  bleeding-edge PHP stack: nothing custom, nothing hardened.
+
+  File a report, poke around, and read `/flag.txt`. It's haunted, alright.
+  Not by ghosts.
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  decay: 10
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{th1s_h0st_1s_p0ss3ss3d}
+    data: case_sensitive
+tags:
+  - hard
+files: []
+hints: []
+state: hidden
