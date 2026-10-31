@@ -10,7 +10,7 @@ challenges:
 
     File a report, poke around, and read `/flag.txt`. It's haunted, alright.
     Not by ghosts.
-  hidden: true
+  hidden: false
   tags:
   - hard
   scoring:
@@ -27,6 +27,7 @@ challenges:
           file: flag.txt
   attachments:
     pre_compressed: []
+  release_time: '2026-10-31T20:00:00+08:00'
   endpoints:
   - type: http
     endpoint: '{{ config.secrets[''challenge_host''].loaded }}'
