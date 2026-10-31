@@ -67,12 +67,15 @@ Reset with `docker compose -p ccs-<slug> down --volumes --remove-orphans`, then 
 
 Authors maintain `challenge.yml` in the repository's [metadata format](CHALLENGE_SPEC.md).
 Generated per-challenge `kona.yaml` files sync to rCTF v2 through [Konata](KONATA.md).
-Infra supplies the admin team's `RCTF_TOKEN` and `CHALLENGE_HOST`, explicitly runs
-the pinned sync command, checks scoring and flags, then makes the challenge
-visible. Konata renders connection callouts in descriptions and keeps the
-configured hidden state. The rCTF server selects the score provider; challenges
-supply their 100–1000 point range. CI validates offline; it does not publish or
-start services. `deployment.yml` is an organizer document, not an instancer configuration.
+Infra configures the dedicated sync team's `RCTF_TOKEN` and `CHALLENGE_HOST` as
+Actions secrets. After the main-branch checks pass, the Konata workflow syncs
+metadata and handouts. Infra checks scoring and flags before making a challenge
+visible. The pinned sync command can also be run manually. Konata renders
+connection callouts in descriptions and keeps the configured hidden state.
+The rCTF server selects the score provider; challenges
+supply their 100–1000 point range. Pull requests validate offline; the production
+sync runs only for validated main commits and does not start services.
+`deployment.yml` is an organizer document, not an instancer configuration.
 
 ## 6. Per-team instances
 

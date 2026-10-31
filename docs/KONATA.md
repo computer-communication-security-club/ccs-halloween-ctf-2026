@@ -40,7 +40,7 @@ First deploy and solve-test the hosted services using their Compose files and
 `deployment.yml` contracts. Supply these environment variables in your shell or
 private deployment environment:
 
-- `RCTF_TOKEN`: an rCTF admin team token. Never commit it.
+- `RCTF_TOKEN`: an rCTF team token with `challsRead,challsWrite` permissions. Never commit it.
 - `CHALLENGE_HOST`: the challenge server's public IP, without a scheme or port.
   For IPv6 use brackets, e.g. `[2001:db8::1]`.
 
@@ -57,7 +57,8 @@ LOGURU_LEVEL=WARNING LOGURU_DIAGNOSE=NO uvx --from konata==0.0.33 kona sync
 LOGURU_LEVEL=WARNING LOGURU_DIAGNOSE=NO uvx --from konata==0.0.33 kona sync challenges/web/piggyback
 ```
 
-This is an explicit write to rCTF; CI only validates and does not sync on push.
+This is an explicit write to rCTF. The GitHub Action below also syncs after
+successful main-branch checks.
 Konata uses stable path-based IDs, for example
 `challenges_web_piggyback`. Keep challenge paths stable after the first sync;
 renaming a display name preserves its ID, while moving a directory can create a
@@ -76,6 +77,43 @@ local-variable dumps. Keep sync diagnostics private. The repository's offline
 checks do not print flag values. For a staging rCTF instance, change the root
 `rctf.base_url` in a local checkout before syncing; validation itself requires
 neither tokens nor a running server.
+
+## GitHub Actions
+
+[`konata.yml`](../.github/workflows/konata.yml) runs after the **Challenges**
+workflow succeeds for a push to `main`. It checks out the exact tested commit,
+skips a queued commit if main has already advanced, and syncs all discovered
+challenge configs with the upstream `konata-deploy-action/sync` action and
+`konata==0.0.33`. Konata skips unchanged payloads. The action and checkout are
+pinned to commit SHAs. Syncs run one at a time and are not cancelled halfway
+through by a newer deployment.
+
+Pull-request runs never trigger production sync. The separate validation jobs
+do not receive the deployment secrets. Manual runs are allowed only on `main`
+and require a successful **Challenges** run for that same commit:
+
+```sh
+gh workflow run konata.yml --ref main
+gh run list --workflow konata.yml
+```
+
+The repository's Actions secrets are:
+
+| Secret | Purpose |
+| --- | --- |
+| `RCTF_TOKEN` | Dedicated **Konata CI** team token; only `challsRead,challsWrite` permissions |
+| `CHALLENGE_HOST` | Public challenge-server IP used in descriptions and endpoints |
+
+No AWS credentials or SSH private keys are needed for this action. It syncs
+metadata, flags, and approved handouts; it does not deploy challenge containers.
+Keep the worker services available and solve-tested before exposing challenges.
+Every sync reapplies the repository's `hidden` settings, including on a manual
+rerun. Change the canonical metadata to preserve intended visibility across
+future syncs.
+
+To rotate either secret, set it through the repository's Actions settings or
+`gh secret set RCTF_TOKEN` / `gh secret set CHALLENGE_HOST`. Supply values on
+stdin or at the prompt, not in command-line arguments or Git commits.
 
 ## Scoring
 
