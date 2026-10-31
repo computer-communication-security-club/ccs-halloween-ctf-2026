@@ -74,28 +74,73 @@ python3 solve/solve.py 127.0.0.1 32003
 docker compose down --volumes --remove-orphans
 ```
 
-Tested 2026-10-30 (WSL2/Docker Desktop): solver 3/3 + UI upload smoke test
-against the rebuilt image. **After any app change, rerun the solver** — the
-chain is allocation-sensitive.
+Tested 2026-10-31 on **native linux/amd64**: `ctf.py test` 12/12 against the
+hardened compose service (0.5 CPU, read-only rootfs, tmpfs `/tmp`, uid 10001).
+A WSL2/Docker-Desktop pass is **not** evidence for production: the chain was
+originally calibrated there and did not land a single leak on native Linux.
+**After any app change, rerun the solver** — the chain is allocation-sensitive,
+and B1 depends on `registry.php` staying output-free.
 
 ## Solver calibration (read before retargeting)
 
-`solve.py` encodes all of these; if the image or host changes, these are
-the knobs:
+Calibrated and verified on **native linux/amd64** (12/12 `ctf.py test` runs,
+Docker 28 / kernel 6.12, and GitHub's `ubuntu-24.04` runner shape). The four
+items below are what native Linux needs beyond the published reference chain;
+all of them are host behaviour, not app behaviour.
 
-- **Pointer floor** `0x100000000000`, not the reference's `0x7F...` —
-  WSL2/Docker-Desktop map heap/libphp at `0x7a..–0x7e..`.
-- **Read window** `fake_len=0x80000`, not `0xC8000`: the stale id sits at
-  page `0x137` of a 2MiB chunk and the longer read overruns it by 24 B →
-  SIGSEGV. 512KB still covers the `G:400` hole where the leak pointers are.
-- **No warm-up request** — the reference's warm GET runs our (heavy) app
-  right before A1 and shifts the ZendMM free lists off calibration.
-- **A1 knobs travel in pairs**: query shape (5× 8-char params), BIG=78,
-  BURN=20, F128=14 pin the dangling id to page `0x137`.
+- **A1 frees main-chunk slots for the session init** (`DUP_SLOTS=4`): the same
+  four field names are sent early and again just before the progress field, so
+  `zend_hash_update` releases the early (main-chunk) values. ZendMM hands small
+  slots out LIFO, so `s_open`'s `basedir` ("/tmp", bin 32) reuses one of them.
+  Without this, `basedir` lives in a chunk that is gone by the next request and
+  B1's `ps_close_files` -> `efree(basedir)` aborts the worker with
+  `zend_mm_heap corrupted` before the leak is sent. The reference chain relies
+  on the `G:511` fills overwriting `basedir`'s refcount instead; that cannot
+  help here, because the panic is in `_efree`'s `chunk->heap` check and fires
+  before any refcount is read.
+- **The forged `zend_string` must be interned and carry a legal key.**
+  `type_info = 0x106` (`IS_STRING|IS_STR_INTERNED`), because the rfc1867 END
+  event runs `php_rshutdown_session_globals` ->
+  `zend_string_release(PS(id))`; on a non-interned header that `efree()`s an
+  address inside the fill and poisons a small-bin free list. The value is a
+  NUL-terminated 31-char `[a-z0-9]` key, because `php_session_start()` runs
+  `strpbrk(ZSTR_VAL(id), "\r\n\t <>'\"\\")` and drops `PS(id)` on a hit —
+  the reference's `/NNBBBBB` payload loses the leak outright.
+- **B1 targets `/registry.php`, not the front controller.** The Set-Cookie is
+  built during request startup, but Apache only flushes it when the request
+  finishes, and `ps_close_files` has by then freed A1's stale `ps_files`
+  struct, which is live memory in this request. Compiling the whole front
+  controller allocates from the poisoned bin and aborts first; `registry.php`
+  only defines functions, emits nothing, and gets the response out. Response
+  is **HTTP 200 with an ~810KB body**.
+- **Retries, not precision**: a failed attempt costs ~2s (worker SIGSEGVs,
+  prefork respawns) and a successful one ~3s, so the solver retries up to 14
+  times inside the harness's 60s budget and waits on `/health.txt` between
+  attempts. Per-attempt success is roughly one in two; 14 attempts make the
+  run deterministic in practice.
+
+Unchanged from the reference calibration, and re-verified here:
+
+- **Pointer floor** `0x100000000000`, not `0x7F...` — WSL2/Docker-Desktop map
+  heap/libphp at `0x7a..–0x7e..`, so a `0x7f` floor drops every pointer there.
+- **Read window** `fake_len=0x80000`, not `0xC8000`: the stale id sits at page
+  `0x137` of a 2MiB chunk and the longer read overruns it. 512KB still covers
+  the `G:400` hole where the leak pointers are.
+- **No warm-up request** — a warm GET runs the app right before A1 and shifts
+  the ZendMM free lists off calibration. It also *clears* the dangle: any
+  request that reaches userland starts a session and releases `PS(id)`.
+- **A1 knobs travel in pairs**: query shape (5x 8-char params), BIG=78,
+  BURN=20, F128=14 pin the dangling id to page `0x137` and keep the OOM inside
+  `php_session_send_cookie`, which is what leaves `PS(send_cookie)=1`. Moving
+  the progress field, or adding page-sized A1 fields, moves the OOM out of
+  that window and the dangle disappears entirely.
 - **Per-build offsets**: `zval_ptr_dtor=+0x65EB60`, `zif_system=+0x465370`,
   `S=main+0xF8398`, delta band `0x1A00000..0x1F00000` — pinned to the amd64
-  digest below. Different build ⇒ re-derive.
-- **MAIN_BUCKET_COUNT=87** fingerprints the main-chunk bucket in the leak.
+  digest below, and all correct on native Linux (leaked libphp base checked
+  against `/proc/<worker>/maps`). Different build => re-derive.
+- **MAIN_BUCKET_COUNT=87** fingerprints the main-chunk bucket in the leak. The
+  solver now keeps every candidate whose libphp-main delta is in band instead
+  of judging the attempt on the first one.
 
 ## Operator notes
 
