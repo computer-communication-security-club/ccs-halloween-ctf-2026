@@ -1,0 +1,36 @@
+mode: shared
+protocol: http
+architecture: linux/amd64
+service: chall
+internal_port: 8080
+public_port: 32003
+solver: automated
+readiness: GET /health.txt returns 200 "ok" within ~5s of container start.
+reset: docker compose down --volumes --remove-orphans; docker compose up -d --build
+state: >-
+  No persistent state on disk beyond /tmp (session files, visitor reports and
+  uploaded photos under /tmp/phpossessed-reports, all tmpfs). One static
+  Apache prefork child (KeepAlive Off, MaxRequestWorkers 1): cross-request
+  state IS the challenge, so worker reuse is deliberate. A dead child is
+  respawned by the prefork master with the same mappings; a failed solve
+  cycle just starts over. Read-only root fs, non-root, no capabilities.
+ttl_minutes: null
+egress: none
+notes: >-
+  PHP2Shell (CVE-2026-109618 / CVE-2026-109619, disclosed 2026-10-21):
+  the runtime is the STOCK php:8.4.26-apache image with the STOCK
+  php.ini-production (display_errors=Off, memory_limit=128M,
+  post_max_size=8M, session.upload_progress at defaults) — VULNERABLE, the
+  fix landed in 8.4.27. The app is a themed front controller with no
+  unserialize, no custom ini, nothing bespoke: even Hello World is
+  vulnerable. Intended solve is the published mod_php chain: a chunked
+  multipart request OOMs during upload-progress END cleanup before
+  PG(modules_activated)=1, leaving PS(id) dangling; the next request forges
+  a zend_string header so Set-Cookie url-encodes worker heap (chunk bases +
+  zval_ptr_dtor -> libphp base); a second OOM dangles
+  PS(hash_serialize_verifier); the final multipart spray plants a fake
+  zend_array whose pDestructor is zif_system, and request shutdown runs
+  system(). The command drops /flag.txt into the session save path; a GET
+  with that PHPSESSID renders it as the flash message. Offsets are pinned
+  by the base-image digest; choreography follows the public reference
+  exploit (9bie/php2shell-bypass-aslr-exp).
