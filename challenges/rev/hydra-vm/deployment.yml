@@ -24,8 +24,7 @@ notes: >-
   contains no flag, solver, or writeup. The server runs the encrypted verifier
   firmware in the HYDRA VM and returns only AUTH-OK/AUTH-FAIL; it never
   computes or returns a tag or proof. The challenge VM publishes tcp/34001 and
-  tcp/31337, both mapped to the container's 31337; the player handout uses the
-  CHALLENGE_HOST placeholder and the platform substitutes the live address.
-  The player handout is four files:
+  tcp/31337 at 35.253.220.32, both mapped to the container's 31337; the player
+  handout carries that concrete endpoint. The player handout is four files:
   README.md, PROTOCOL.md, hydra-server, firmware.enc. Limit the service to the
   challenge VM's TCP port; no outbound dependency.
