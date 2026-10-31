@@ -21,13 +21,15 @@ their plan charges; destroy temporary workers after retaining needed data.
 | SICT Halloween | `18.139.70.187:35001`, Minecraft Java 26.3 |
 | Shelloween | Per-team HTTPS endpoint supplied by rCTF |
 | Poltergeist | Per-team HTTPS endpoint supplied by rCTF |
+| PHPossessed | Per-team HTTPS endpoint supplied by rCTF |
 | Dead Signal | Static handout in rCTF |
 | The Cursed MAYO | Per-team TCP-over-TLS hostname on port 443 supplied by rCTF |
 
-All seven challenges are scheduled through Konata to open on October 31, 2026 at
+The original seven challenges are scheduled through Konata to open on October 31, 2026 at
 18:00 Ulaanbaatar time (10:00 UTC). Their canonical metadata uses `state: visible`
 with `release_time: '2026-10-31T18:00:00+08:00'`; the future timestamp keeps them
 unavailable before the event. Review the verification results before opening.
+PHPossessed opens at 20:00 Ulaanbaatar time (12:00 UTC) on the same day.
 Minecraft's status check is not a manual gameplay solve.
 The operator explicitly accepted the Minecraft EULA for this deployment.
 
@@ -38,7 +40,7 @@ The API is not published on the public interface. Its Docker forwarding rule
 accepts only the scoreboard host's private IP. The worker has no scoreboard
 database credentials or administrator token.
 
-Shelloween and Poltergeist use isolated containers and networks, one instance
+Shelloween, Poltergeist, and PHPossessed use isolated containers and networks, one instance
 per team per challenge, a 30-minute renewable lifetime, a global cap of 60
 instances, and a cap of 30 per web challenge. The Cursed MAYO uses the same
 isolation and lifetime with a cap of 20, 1 CPU, 512 MiB RAM, 128 PIDs, and
@@ -142,3 +144,20 @@ To update only the per-team launcher policy after building images, run
 `python3 deployment/challenges/deploy.py install-instances instancer`. This
 recreates the launcher without restarting the proxy or existing team containers.
 Verify MAYO with `python3 deployment/challenges/verify.py instances --challenge the-cursed-mayo`.
+
+To add or rebuild PHPossessed without restarting the proxy or syncing other
+challenges:
+
+```sh
+python3 deployment/challenges/deploy.py build instancer --challenge phpossessed
+python3 deployment/challenges/deploy.py install-instances instancer
+uv run tools/konata.py --write
+python3 deployment/challenges/rctf.py sync --challenge phpossessed
+python3 deployment/challenges/verify.py instances --challenge phpossessed
+```
+
+PHPossessed uses 0.5 CPU, 256 MiB RAM, 128 PIDs, and three tmpfs mounts:
+`/tmp` (16 MiB), `/var/run/apache2` (1 MiB), and `/var/lock` (1 MiB).
+Its TCP router terminates TLS and forwards the unmodified HTTP stream to port
+8080. Probe only `/health.txt`; PHP requests can disturb the cross-request
+exploit state. Each team gets its own Apache worker and temporary reports.

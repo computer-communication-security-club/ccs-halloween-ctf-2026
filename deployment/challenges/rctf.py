@@ -67,7 +67,7 @@ class API:
                 kind = "non-JSON error"
             raise RuntimeError(f"{method or 'request'} {path}: HTTP {error.code}, {kind}") from None
 
-def sync():
+def sync(challenge=None):
     """Use the same pinned Konata implementation and generated configs as CI."""
     from datetime import datetime
     check_env = os.environ.copy()
@@ -75,8 +75,15 @@ def sync():
     subprocess.run(["uv", "run", "tools/konata.py"], cwd=manage.ROOT, env=check_env, check=True)
     secret = json.loads((RCTF / ".local/admin-access.json").read_text())
     state = manage.state()
-    summary = []
-    for path in sorted((manage.ROOT / "challenges").glob("*/*/kona.yaml")):
+    summary_path = manage.LOCAL / "import-summary.json"
+    summary = json.loads(summary_path.read_text()) if challenge and summary_path.exists() else []
+    paths = sorted((manage.ROOT / "challenges").glob("*/*/kona.yaml"))
+    if challenge:
+        paths = [path for path in paths if path.parent.name == challenge]
+        if not paths:
+            raise ValueError("Unknown challenge")
+        summary = [item for item in summary if item["slug"] != challenge]
+    for path in paths:
         directory = path.parent
         config = yaml.safe_load(path.read_text())["challenges"][0]
         env = os.environ.copy()
@@ -98,9 +105,14 @@ def sync():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["configure", "sync", "inspect"])
+    parser.add_argument("--challenge", help="Sync only this challenge slug")
     args = parser.parse_args()
+    if args.challenge and args.action != "sync":
+        parser.error("--challenge requires sync")
     if args.action == "inspect":
         for challenge in API().call("/api/v2/admin/challs")["data"]:
             print({key: challenge.get(key) for key in ["id", "name", "hidden"]})
+    elif args.action == "sync":
+        sync(args.challenge)
     else:
         globals()[args.action]()

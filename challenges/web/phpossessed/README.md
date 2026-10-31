@@ -2,8 +2,8 @@
 
 | | |
 | --- | --- |
-| Deployment | `shared`, one Compose project, one service (`chall`) |
-| Player endpoint | `http://CHALLENGE_HOST:32003`, plain HTTP, Apache + mod_php |
+| Deployment | `per-team`, isolated service (`chall`), renewable 30-minute lifetime |
+| Player endpoint | HTTPS hostname supplied by rCTF; local HTTP on port 32003 |
 | Handout | None (pure black-box); `dist/` intentionally empty |
 | Solver | `solve/solve.py HOST PORT`, stdlib only, ~5 s, no PHP needed |
 
@@ -146,8 +146,9 @@ Unchanged from the reference calibration, and re-verified here:
 
 - One published port, no other ingress, no egress. Non-root `10001`,
   `cap_drop: ALL`, `no-new-privileges`, read-only root fs.
-- Only writable path: `/tmp` tmpfs (16 MB) — sessions, reports/photos, and
-  the exfil channel. Reset = `compose down --volumes`.
+- Writable tmpfs: `/tmp` (16 MB) for sessions, reports/photos, and the
+  exfil channel; `/var/run/apache2` and `/var/lock` (1 MB each) for Apache.
+  Reset via the instance controls, or locally with `compose down --volumes`.
 - Flag baked from `flag.txt` to `/flag.txt`, `0444` root-owned.
 - No `disable_functions`, no custom ini — don't "harden" the image; that
   breaks both calibration and the real-world framing.

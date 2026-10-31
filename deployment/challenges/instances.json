@@ -111,6 +111,56 @@
     "timeout_milliseconds": 1800000,
     "extendable": true
   },
+  "phpossessed": {
+    "challenge_integration_id": "phpossessed",
+    "instancer": "ccs",
+    "config": {
+      "services": {
+        "chall": {
+          "restart": "unless-stopped",
+          "user": "10001:10001",
+          "read_only": true,
+          "tmpfs": {
+            "/tmp": "size=16m,mode=1777",
+            "/var/run/apache2": "size=1m,mode=0777",
+            "/var/lock": "size=1m,mode=0777"
+          },
+          "cap_drop": [
+            "ALL"
+          ],
+          "security_opt": [
+            "no-new-privileges:true"
+          ],
+          "cpus": 0.5,
+          "mem_limit": "256m",
+          "pids_limit": 128,
+          "image": "sha256:276e550519592c20346c0db0560595e1533882105b9722523e4275403b09c717",
+          "networks": [
+            "internal"
+          ],
+          "dns": [
+            "127.0.0.1"
+          ]
+        }
+      },
+      "networks": {
+        "internal": {
+          "driver": "bridge",
+          "internal": true
+        }
+      }
+    },
+    "expose": [
+      {
+        "kind": "https",
+        "host_prefix": "phpossessed",
+        "container_name": "chall",
+        "container_port": 8080
+      }
+    ],
+    "timeout_milliseconds": 1800000,
+    "extendable": true
+  },
   "the-cursed-mayo": {
     "challenge_integration_id": "the-cursed-mayo",
     "instancer": "ccs",

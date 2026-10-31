@@ -34,7 +34,7 @@ def bootstrap(role):
 def build(role, challenge=None):
     paths = [ROOT / "challenges/misc/sict-halloween"] if role == "minecraft" else [
         ROOT / "challenges" / name for name in ["web/piggyback", "web/shelloween",
-                                               "web/poltergeist", "rev/hydra-vm", "crypto/the-cursed-mayo"]]
+                                               "web/poltergeist", "web/phpossessed", "rev/hydra-vm", "crypto/the-cursed-mayo"]]
     if challenge:
         paths = [p for p in paths if p.name == challenge]
         if not paths:
@@ -128,14 +128,16 @@ def install_instances(role):
     policy = {"ttl_seconds": manage.CONFIG["ttl_seconds"],
               "max_instances": manage.CONFIG["max_instances"],
               "max_per_challenge": manage.CONFIG["max_instances_per_challenge"], "challenges": {}}
-    for category, slug in [("web", "shelloween"), ("web", "poltergeist"), ("crypto", "the-cursed-mayo")]:
+    for category, slug in [("web", "shelloween"), ("web", "poltergeist"), ("web", "phpossessed"), ("crypto", "the-cursed-mayo")]:
         service = yaml.safe_load((ROOT / "challenges" / category / slug / "docker-compose.yml").read_text())["services"]["chall"]
         spec = service.pop("build")
         target = spec.get("target", "runtime") if isinstance(spec, dict) else "runtime"
         service["image"] = image_id(role, f"ccs/{slug}:{target}")
         for key in ["ports", "platform", "logging"]:
             service.pop(key, None)
-        service["tmpfs"] = {"/tmp": "size=64m,mode=1777" if slug == "the-cursed-mayo" else "size=16m,mode=1777"}
+        # Preserve every writable mount, including Apache's PID and mutex dirs.
+        if isinstance(service.get("tmpfs"), list):
+            service["tmpfs"] = dict(mount.split(":", 1) for mount in service["tmpfs"])
         service["networks"] = ["internal"]
         service["dns"] = ["127.0.0.1"]
         if slug == "the-cursed-mayo":

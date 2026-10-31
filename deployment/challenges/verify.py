@@ -137,7 +137,8 @@ def main():
                     print(f"{item['slug']}: rCTF start/status passed")
                     continue
                 url = f"{'https' if tls else 'http'}://{host}:{port}"
-                path = "/health" if item["slug"] == "shelloween" else "/healthz"
+                # PHP probes must never enter the session-handling front controller.
+                path = {"shelloween": "/health", "phpossessed": "/health.txt"}.get(item["slug"], "/healthz")
                 with urllib.request.urlopen(url + path, timeout=15) as response:
                     assert response.status == 200
                 solve(manage.ROOT / "challenges/web" / item["slug"],

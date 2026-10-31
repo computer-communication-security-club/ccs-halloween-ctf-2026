@@ -1,4 +1,4 @@
-mode: shared
+mode: per-team
 protocol: http
 architecture: linux/amd64
 service: chall
@@ -14,7 +14,7 @@ state: >-
   state IS the challenge, so worker reuse is deliberate. A dead child is
   respawned by the prefork master with the same mappings; a failed solve
   cycle just starts over. Read-only root fs, non-root, no capabilities.
-ttl_minutes: null
+ttl_minutes: 30
 egress: none
 notes: >-
   PHP2Shell (CVE-2026-109618 / CVE-2026-109619, disclosed 2026-10-21):
