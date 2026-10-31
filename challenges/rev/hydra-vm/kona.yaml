@@ -1,0 +1,44 @@
+# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
+challenges:
+- name: HYDRA VM
+  author: '[bg0d](https://github.com/bg0d-glitch)'
+  category: rev
+  description: |
+    HYDRA boots a custom 16-bit virtual machine from encrypted firmware. The
+    gatekeeper issues a fresh 16-byte nonce and accepts a 16-byte **candidate
+    proof** only when its nonce-dependent verifier accepts it. No tag endpoint
+    exists, and the binary contains no routine that turns a nonce into an
+    accepted response.
+
+    Reverse `hydra-server`, recover the virtual instruction set, decrypt
+    `firmware.enc`, reconstruct the verifier's constraints, and produce a valid
+    proof for an arbitrary nonce.
+
+    Flag format: `ccsCTF{...}`
+  hidden: true
+  tags:
+  - hard
+  - halloween
+  scoring:
+    initial_value: 1000
+    minimum_value: 100
+    ctfd:
+      decay: 10
+      decay_function: logarithmic
+  flags:
+    ctfd:
+    - type: static
+      flag:
+        file: flag.txt
+  attachments:
+    pre_compressed:
+    - dist/README.md
+    - dist/PROTOCOL.md
+    - dist/hydra-server
+    - dist/firmware.enc
+  ctfd:
+    type: dynamic
+  endpoints:
+  - type: nc
+    endpoint: '{{ config.secrets[''challenge_host''].loaded }}'
+    port: 34001

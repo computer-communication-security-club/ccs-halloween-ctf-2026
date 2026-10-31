@@ -65,7 +65,7 @@ Check the solver from an external player network too. Start a TCP socket check b
 
 Reset with `docker compose -p ccs-<slug> down --volumes --remove-orphans`, then start again with the same project name. This deletes that project's data: authors must list any volumes and reset effects in `deployment.yml`. No source-host bind mounts or externally named persistent resources are allowed in challenge packages.
 
-CTFd metadata uses the [ctfcli format](https://github.com/CTFd/ctfcli/blob/master/ctfcli/spec/challenge-example.yml). Infra replaces endpoint placeholders in a release copy, imports/syncs it with their configured CTFd tooling, checks scoring and flags, then makes the challenge visible. `deployment.yml` is an organizer document, not an instancer configuration or a CTFd plugin.
+CTFd metadata uses the [ctfcli format](https://github.com/CTFd/ctfcli/blob/master/ctfcli/spec/challenge-example.yml). Generated per-challenge `kona.yaml` files sync it through [Konata](KONATA.md). Infra supplies `CTFD_TOKEN` and `CHALLENGE_HOST`, explicitly runs the pinned sync command, checks scoring and flags, then makes the challenge visible. Konata renders endpoints in descriptions and keeps the configured hidden state. CI validates offline; it does not publish or start services. `deployment.yml` is an organizer document, not an instancer configuration or a CTFd plugin.
 
 ## 6. Per-team instances
 

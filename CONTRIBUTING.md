@@ -4,6 +4,8 @@
 2. Create a branch: `git checkout -b chall/<category>-<slug>`.
 3. Create `challenges/<category>/<slug>/` following the [specification](docs/CHALLENGE_SPEC.md), or restore an [old example](README.md#start-a-challenge) from git history as a starting point. Keep the slug unique across the repository.
 4. Change `challenge.yml`, `deployment.yml`, `README.md`, `flag.txt`, sources, handout, and solver. Reserve an unused default port from your category range; search existing compose files with `rg 'published:|PUBLIC_PORT' challenges`.
+   Run `uv run tools/konata.py --write` after metadata edits and commit the generated
+   `kona.yaml`. Run `uv run tools/konata.py` to validate the [Konata config](docs/KONATA.md) offline.
 5. Export the public handout with `uv run tools/ctf.py dist challenges/<category>/<slug>`. It runs the Dockerfile's `dist` stage and removes stale files. Check every output before committing. Commit the generated handout, including pwn binary and runtime libraries.
 6. Run `uv run tools/ctf.py check challenges/<category>/<slug>` and fix every error. Then run `uv run tools/ctf.py test challenges/<category>/<slug>`: it starts hosted challenges with Compose, runs the real solver with a 60-second timeout, compares the result with `flag.txt` without printing it, and tears the project down. Static solvers must read only `dist/`. Declare solver dependencies inline at the top of `solve.py` (see the [specification](docs/CHALLENGE_SPEC.md#build-and-solver-contract)).
 7. For pwn, run `pwn checksec dist/chall`, record the output, and confirm the handout binary and libraries match the deployed image. Test again on native Linux amd64. For per-team mode, complete the two-instance test in [Architecture §6](docs/ARCHITECTURE.md#6-per-team-instances).

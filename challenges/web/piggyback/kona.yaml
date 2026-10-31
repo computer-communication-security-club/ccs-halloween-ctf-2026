@@ -1,0 +1,45 @@
+# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
+challenges:
+- name: Piggyback
+  author: '[deprrous](https://github.com/deprrous)'
+  category: web
+  description: |
+    Latency is a feature.
+
+    Piggyback terminates TLS right at the edge and answers your very first request
+    out of TLS 1.3 **0-RTT early data** — bytes coming back before the handshake
+    has even finished settling. Two edge nodes up front, one warm origin behind
+    them, keep-alives that never go cold. Two edges, one origin, zero wait.
+
+    The security review left exactly one line on the whiteboard before lunch:
+    **no privileged actions on the fast path.** We wrote the guard. We shipped on
+    time. Ship fast, they said.
+
+    Make yourself an admin and read `/flag`.
+
+    TLS 1.3 only, self-signed certificate. A client that actually speaks 0-RTT is
+    the whole ballgame. `openssl s_client -early_data` is more than enough — no
+    exotic tooling required.
+  hidden: true
+  tags:
+  - hard
+  - halloween
+  scoring:
+    initial_value: 1000
+    minimum_value: 100
+    ctfd:
+      decay: 10
+      decay_function: logarithmic
+  flags:
+    ctfd:
+    - type: static
+      flag:
+        file: flag.txt
+  attachments:
+    pre_compressed: []
+  ctfd:
+    type: dynamic
+  endpoints:
+  - type: https
+    endpoint: '{{ config.secrets[''challenge_host''].loaded }}'
+    port: 32002

@@ -1,0 +1,20 @@
+# Konata 0.0.33: sync CTFd metadata; services are managed with Docker Compose.
+ctfd:
+  base_url: https://ctf.sict-ccs.club
+  admin_token:
+    secret: ctfd_token
+secrets:
+  ctfd_token:
+    env: CTFD_TOKEN
+  challenge_host:
+    env: CHALLENGE_HOST
+discovery:
+  challenge_folder_depth: 3
+challenge_id_format: path
+templates:
+  challenge_description:
+    ctfd: |-
+      {{ challenge.description | replace('CHALLENGE_HOST', config.secrets['challenge_host'].loaded) }}
+
+      {{ endpoints_rendered.strip() }}
+  ctfd_attribution: '**Author**: {{ challenge.author }}'

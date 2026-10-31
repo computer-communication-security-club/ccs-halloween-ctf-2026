@@ -5,6 +5,7 @@
 ```text
 challenges/<category>/<slug>/
 ├── challenge.yml         # player metadata and accepted flags (private until release)
+├── kona.yaml             # generated Konata / CTFd sync config; flags read from flag.txt
 ├── deployment.yml        # organizer-only runtime/instance contract
 ├── README.md             # private author notes, exact commands, dependencies, risks
 ├── Dockerfile            # required for every category; dist export and/or service
@@ -50,6 +51,11 @@ state: hidden
 ```
 
 `value` initializes the score; `extra` defines the dynamic scoring policy. Exactly one tag is a difficulty. `author` may be a Markdown link, e.g. `[handle](https://github.com/handle)`. Omit `connection_info` for static challenges. For TCP use `nc CHALLENGE_HOST <port>`. Plain HTTP and direct ports are the default; no Traefik labels or proxy networks are needed.
+
+After changing metadata, run `uv run tools/konata.py --write` and commit the generated
+`kona.yaml`. [Konata](KONATA.md) syncs these generated configs to CTFd; `challenge.yml`
+remains the canonical authoring format. The generator currently rejects regex
+flags and nonempty hints rather than silently changing their semantics.
 
 `files` lists explicit paths under `dist/`, e.g. `dist/chall`, `dist/libc.so.6`, `dist/ld-linux-x86-64.so.2`. Files aren't recursively uploaded just because the directory exists. Default to hidden; infra releases the challenge after endpoint and flag verification.
 

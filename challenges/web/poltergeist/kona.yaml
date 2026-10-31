@@ -1,0 +1,48 @@
+# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
+challenges:
+- name: Poltergeist
+  author: '[mundur](https://github.com/M0nd0R)'
+  category: web
+  description: |
+    The coven moved their séances online. **Séance** is a tiny PHP-flavoured
+    language served by a single long-lived worker: write a program, POST it, and
+    the worker brews it and whispers back the result. One cute feature crosses
+    the veil — a séance may `leave` an echo for the next page in the same séance
+    to `recall`.
+
+    They swear every séance starts clean — no spirit from one request may linger
+    into the next. They are wrong. The full source of the worker is in your hands
+    (the binary ships stripped); prove a spirit *can* linger, seize the worker, and
+    make it read aloud the one name it keeps on disk and never speaks.
+
+    The door is warded: the ritual chamber asks a small toll before it listens
+    (`GET /pow` — a proof-of-work), and turns away the clumsy. Read the source.
+
+    http://CHALLENGE_HOST:32731
+  hidden: true
+  tags:
+  - insane
+  - halloween
+  scoring:
+    initial_value: 1000
+    minimum_value: 100
+    ctfd:
+      decay: 10
+      decay_function: logarithmic
+  flags:
+    ctfd:
+    - type: static
+      flag:
+        file: flag.txt
+  attachments:
+    pre_compressed:
+    - dist/chall
+    - dist/chall.c
+    - dist/libc.so.6
+    - dist/ld-linux-x86-64.so.2
+  ctfd:
+    type: dynamic
+  endpoints:
+  - type: http
+    endpoint: '{{ config.secrets[''challenge_host''].loaded }}'
+    port: 32731
