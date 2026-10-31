@@ -22,22 +22,21 @@ challenges:
   scoring:
     initial_value: 1000
     minimum_value: 100
-    ctfd:
-      decay: 10
-      decay_function: logarithmic
+    rctf:
+      kind: decay
+      eligible_for_tiebreaks: true
   flags:
-    ctfd:
-    - type: static
-      flag:
-        file: flag.txt
+    rctf:
+    - provider: flags/static
+      config:
+        flag:
+          file: flag.txt
   attachments:
     pre_compressed:
     - dist/README.md
     - dist/PROTOCOL.md
     - dist/hydra-server
     - dist/firmware.enc
-  ctfd:
-    type: dynamic
   endpoints:
   - type: nc
     endpoint: '{{ config.secrets[''challenge_host''].loaded }}'

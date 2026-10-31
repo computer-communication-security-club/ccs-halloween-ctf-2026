@@ -26,18 +26,17 @@ challenges:
   scoring:
     initial_value: 1000
     minimum_value: 100
-    ctfd:
-      decay: 10
-      decay_function: logarithmic
+    rctf:
+      kind: decay
+      eligible_for_tiebreaks: true
   flags:
-    ctfd:
-    - type: static
-      flag:
-        file: flag.txt
+    rctf:
+    - provider: flags/static
+      config:
+        flag:
+          file: flag.txt
   attachments:
     pre_compressed:
     - dist/dead_signal
     - dist/README.md
     - dist/SHA256SUMS
-  ctfd:
-    type: dynamic

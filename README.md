@@ -7,7 +7,7 @@ This private repository contains challenge sources, real flags, and solutions. O
 | [Rules](docs/RULES.md) | Requirements for every challenge |
 | [Architecture and instances](docs/ARCHITECTURE.md) | Hosting, isolation, ports, and instance lifecycle |
 | [Challenge specification](docs/CHALLENGE_SPEC.md) | Directory structure and metadata |
-| [Konata / CTFd sync](docs/KONATA.md) | Generate, validate, and sync all challenge configs |
+| [Konata / rCTF sync](docs/KONATA.md) | Generate, validate, and sync all challenge configs |
 | [Contributing](CONTRIBUTING.md) | Author workflow and review checklist |
 
 **Every challenge is Dockerized**, including static challenges whose Dockerfile produces the handout. Remote pwn challenges use **redpwn/jail**. The default target is **Linux amd64**; authors on Apple Silicon should build with `--platform linux/amd64`. Pwn must also be tested on a native amd64 Linux host with jail support.

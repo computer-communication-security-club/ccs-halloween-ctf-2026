@@ -6,7 +6,7 @@
 """Generate (--write) or check Konata configs against the canonical challenge.yml files.
 
 Checks use Konata's schema, flag resolver, attachment resolver, and templates
-offline. They never connect to CTFd, build images, or print flags.
+offline. They never connect to rCTF, build images, or print flags.
 """
 
 import argparse
@@ -47,6 +47,8 @@ def build_config(path):
     if flags[0]["content"] != (path / "flag.txt").read_text().strip():
         raise ValueError("flag.txt and challenge.yml differ")
     extra = meta["extra"]
+    if "decay" in extra or "function" in extra:
+        raise ValueError("configure the decay algorithm in rCTF's server scoreProvider, not challenge.yml")
     challenge = {
         "name": meta["name"],
         "author": meta["author"],
@@ -57,12 +59,11 @@ def build_config(path):
         "scoring": {
             "initial_value": extra["initial"],
             "minimum_value": extra["minimum"],
-            "ctfd": {"decay": extra["decay"], "decay_function": extra.get("function", "logarithmic")},
+            "rctf": {"kind": "decay", "eligible_for_tiebreaks": True},
         },
-        "flags": {"ctfd": [{"type": "static", "flag": {"file": "flag.txt"}}]},
+        "flags": {"rctf": [{"provider": "flags/static", "config": {"flag": {"file": "flag.txt"}}}]},
         # pre_compressed passes files through verbatim, including raw binaries.
         "attachments": {"pre_compressed": meta["files"]},
-        "ctfd": {"type": "dynamic"},
     }
     connection = meta.get("connection_info")
     if connection:
@@ -84,7 +85,7 @@ def check_resolved(path, config):
     group = load_schema(path, model=KonaChallengeConfig)
     challenge = group.challenges[0]
     challenge.resolve_flags(path)
-    if challenge.flags.ctfd[0].flag != (path / "flag.txt").read_text().strip():
+    if challenge.rctf_flag_entries[0].config["flag"] != (path / "flag.txt").read_text().strip():
         raise ValueError("Konata resolved a different flag")
     meta = yaml.safe_load((path / "challenge.yml").read_text())
     with tempfile.TemporaryDirectory(prefix="ccs-konata-") as tmp:
@@ -99,9 +100,9 @@ def check_resolved(path, config):
                 raise ValueError("attachment escapes dist/")
     for endpoint in challenge.endpoints:
         endpoint.endpoint = render_template(endpoint.endpoint, config=config)
-    endpoints = render_template(config.templates.endpoints_text.ctfd, challenge=challenge, config=config)
+    endpoints = render_template(config.templates.endpoints_text.rctf, challenge=challenge, config=config)
     description = render_template(
-        config.templates.challenge_description.ctfd,
+        config.templates.challenge_description.rctf,
         challenge=challenge, config=config, endpoints_rendered=endpoints,
     )
     if "CHALLENGE_HOST" in description or "{{" in description:
@@ -128,6 +129,8 @@ def main():
                 raise ValueError("kona.yaml is missing or stale; run uv run tools/konata.py --write")
             # A fresh config per challenge keeps offline dummy values out of other commands.
             config = load_schema(ROOT, model=KonaGlobalConfig)
+            if config.rctf is None or config.ctfd is not None:
+                raise ValueError("root config must enable rCTF only")
             config.secrets["challenge_host"] = KonaSecret(value="192.0.2.1")
             kona_global_state.root_path = ROOT
             kona_global_state.global_config = config

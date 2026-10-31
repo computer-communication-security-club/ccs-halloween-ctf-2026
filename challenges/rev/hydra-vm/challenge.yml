@@ -18,7 +18,6 @@ type: dynamic
 value: 1000
 extra:
   initial: 1000
-  decay: 10
   minimum: 100
 flags:
   - type: static

@@ -1,11 +1,11 @@
-# Konata 0.0.33: sync CTFd metadata; services are managed with Docker Compose.
-ctfd:
+# Konata 0.0.33: sync rCTF v2 metadata; services are managed with Docker Compose.
+rctf:
   base_url: https://ctf.sict-ccs.club
-  admin_token:
-    secret: ctfd_token
+  team_token:
+    secret: rctf_token
 secrets:
-  ctfd_token:
-    env: CTFD_TOKEN
+  rctf_token:
+    env: RCTF_TOKEN
   challenge_host:
     env: CHALLENGE_HOST
 discovery:
@@ -13,8 +13,7 @@ discovery:
 challenge_id_format: path
 templates:
   challenge_description:
-    ctfd: |-
+    rctf: |-
       {{ challenge.description | replace('CHALLENGE_HOST', config.secrets['challenge_host'].loaded) }}
 
       {{ endpoints_rendered.strip() }}
-  ctfd_attribution: '**Author**: {{ challenge.author }}'

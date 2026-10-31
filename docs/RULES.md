@@ -70,6 +70,11 @@ Declare `mode: static`, `shared`, or `per-team` in `deployment.yml`. A jail sand
 
 ## 8. Scoring and schedule
 
-Exactly one difficulty tag: `baby`, `easy`, `medium`, `hard`, or `insane`. Use dynamic scoring with `initial: 1000`, `minimum: 100`, `decay: 10`, unless organizers change the event policy. Baby challenges should be solvable by a beginner in under 30 minutes; aim for at least one per category.
+Exactly one difficulty tag: `baby`, `easy`, `medium`, `hard`, or `insane`. Use
+`type: dynamic` with `extra.initial: 1000` and `extra.minimum: 100`, unless
+organizers change the event policy. Konata maps this to rCTF decay scoring;
+configure the server with `scoreProvider.name: scores/classic`. Per-challenge
+`decay` and `function` values are not supported. Baby challenges should be
+solvable by a beginner in under 30 minutes; aim for at least one per category.
 
-Rules published: **2026-10-26**. Idea deadline, merge deadline, test-solve freeze, and event time are **TBD by organizers**. After freeze, changes require organizer approval and another solve check. Keep CTFd challenges hidden until release.
+Rules published: **2026-10-26**. Idea deadline, merge deadline, test-solve freeze, and event time are **TBD by organizers**. After freeze, changes require organizer approval and another solve check. Keep rCTF challenges hidden until release.

@@ -5,7 +5,7 @@
 ```text
 challenges/<category>/<slug>/
 ├── challenge.yml         # player metadata and accepted flags (private until release)
-├── kona.yaml             # generated Konata / CTFd sync config; flags read from flag.txt
+├── kona.yaml             # generated Konata / rCTF sync config; flags read from flag.txt
 ├── deployment.yml        # organizer-only runtime/instance contract
 ├── README.md             # private author notes, exact commands, dependencies, risks
 ├── Dockerfile            # required for every category; dist export and/or service
@@ -23,7 +23,9 @@ Manual-only challenges may omit `solve.py` with explicit organizer approval and 
 
 ## `challenge.yml`
 
-Use the supplied [ctfcli schema](https://github.com/CTFd/ctfcli/blob/master/ctfcli/spec/challenge-example.yml) style. Example:
+Use the repository's authoring schema below. It retains the existing metadata
+layout; `tools/konata.py` converts it into native Konata rCTF configuration.
+Do not import `challenge.yml` directly into rCTF. Example:
 
 ```yaml
 name: My Spooky Challenge
@@ -37,7 +39,6 @@ type: dynamic
 value: 1000
 extra:
   initial: 1000
-  decay: 10
   minimum: 100
 flags:
   - type: static
@@ -50,28 +51,30 @@ hints: []
 state: hidden
 ```
 
-`value` initializes the score; `extra` defines the dynamic scoring policy. Exactly one tag is a difficulty. `author` may be a Markdown link, e.g. `[handle](https://github.com/handle)`. Omit `connection_info` for static challenges. For TCP use `nc CHALLENGE_HOST <port>`. Plain HTTP and direct ports are the default; no Traefik labels or proxy networks are needed.
+`value` matches `extra.initial`; `extra.initial` and `extra.minimum` set the rCTF
+point range. `type: dynamic` maps to rCTF `scoring.kind: decay`, whose curve is
+selected by the server's `scoreProvider` (see [Konata setup](KONATA.md)). Do not
+set a per-challenge `decay` or `function`. Exactly one tag is a difficulty.
+`author` may be a Markdown link, e.g. `[handle](https://github.com/handle)`.
+Omit `connection_info` for static challenges. For TCP use
+`nc CHALLENGE_HOST <port>`. Plain HTTP and direct ports are the default.
 
 After changing metadata, run `uv run tools/konata.py --write` and commit the generated
-`kona.yaml`. [Konata](KONATA.md) syncs these generated configs to CTFd; `challenge.yml`
+`kona.yaml`. [Konata](KONATA.md) syncs these generated configs to rCTF; `challenge.yml`
 remains the canonical authoring format. The generator currently rejects regex
 flags and nonempty hints rather than silently changing their semantics.
 
 `files` lists explicit paths under `dist/`, e.g. `dist/chall`, `dist/libc.so.6`, `dist/ld-linux-x86-64.so.2`. Files aren't recursively uploaded just because the directory exists. Default to hidden; infra releases the challenge after endpoint and flag verification.
 
-Use static, case-sensitive flags by default. If variable flag segments are intentional and approved, CTFd supports regex entries:
-
-```yaml
-flags:
-  - type: regex
-    content: '^ccsCTF\{w3lc0m3_[A-Za-z0-9_-]+_t0_d3vt00lz_[A-Za-z0-9_-]+\}$'
-```
-
-Quote regexes with YAML single quotes so backslashes are preserved. Anchor them and escape literal braces. Test accepted and rejected examples in CTFd. A regex accepts every matching value; it does **not** bind a flag to a team or create an instance. A regex exception replaces the default exact `flag.txt` comparison and must document representative test flags and runtime injection. Never copy another event's flag prefix.
+Use one static, case-sensitive flag. The generated rCTF `flags/static` entry
+reads its value from `flag.txt`. rCTF also has a
+[regex flag provider](https://rctf.osec.io/providers/flags/), but using it here
+requires extending the generator and validation first. A regex does not bind
+a flag to a team or create an instance. Never copy another event's flag prefix.
 
 ## `deployment.yml`
 
-This is our private author/infra contract, separate from CTFd metadata. It is documentation, not an executable launcher schema.
+This is our private author/infra contract, separate from rCTF metadata. It is documentation, not an executable launcher schema.
 
 ```yaml
 mode: shared                 # static | shared | per-team

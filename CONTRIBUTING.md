@@ -10,7 +10,7 @@
 6. Run `uv run tools/ctf.py check challenges/<category>/<slug>` and fix every error. Then run `uv run tools/ctf.py test challenges/<category>/<slug>`: it starts hosted challenges with Compose, runs the real solver with a 60-second timeout, compares the result with `flag.txt` without printing it, and tears the project down. Static solvers must read only `dist/`. Declare solver dependencies inline at the top of `solve.py` (see the [specification](docs/CHALLENGE_SPEC.md#build-and-solver-contract)).
 7. For pwn, run `pwn checksec dist/chall`, record the output, and confirm the handout binary and libraries match the deployed image. Test again on native Linux amd64. For per-team mode, complete the two-instance test in [Architecture §6](docs/ARCHITECTURE.md#6-per-team-instances).
 8. Inspect `dist/` manually, including archive contents and metadata. It must contain no plaintext real flag or private solution. Verify every `files` entry exists and every intended download is listed.
-9. Open a PR; the template contains the checklist below. CI must be green, or the PR must explain the failing job. An independent reviewer solves using only the description, handout, and player endpoint. Merge after organizer approval; deployment and CTFd publication are infra tasks.
+9. Open a PR; the template contains the checklist below. CI must be green, or the PR must explain the failing job. An independent reviewer solves using only the description, handout, and player endpoint. Merge after organizer approval; deployment and rCTF publication are infra tasks.
 
 ## Review checklist
 

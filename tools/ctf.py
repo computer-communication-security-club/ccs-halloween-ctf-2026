@@ -45,7 +45,7 @@ PORT_RANGES = {
     "osint": (35000, 35999),
 }
 DIFFICULTIES = ("baby", "easy", "medium", "hard", "insane")
-SCORING = {"initial": 1000, "minimum": 100, "decay": 10}
+SCORING = {"initial": 1000, "minimum": 100}
 FLAG_RE = re.compile(r"^ccsCTF\{[A-Za-z0-9_!?@#$%^&*.\-]+\}$")
 SLUG_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 DIST_LIMIT = 50 * 1024 * 1024
@@ -220,6 +220,8 @@ def check_metadata(chall, meta, deploy, flag, report):
     if meta.get("type") != "dynamic":
         report.error("challenge.yml: type must be 'dynamic'")
     extra = meta.get("extra") or {}
+    if "decay" in extra or "function" in extra:
+        report.error("challenge.yml: configure decay in rCTF's server scoreProvider, not extra")
     for key, expected in SCORING.items():
         if extra.get(key) != expected:
             report.warn(f"challenge.yml: extra.{key} is {extra.get(key)!r}, event policy is {expected}")

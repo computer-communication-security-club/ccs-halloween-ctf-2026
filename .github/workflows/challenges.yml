@@ -25,7 +25,7 @@ jobs:
       - run: uv run tools/ctf.py check
       - name: Check Konata configs, flags, handouts, and rendered connections
         run: uv run tools/konata.py
-      - name: Test Konata discovery and CTFd payloads offline
+      - name: Test Konata discovery and rCTF payloads offline
         run: uv run tools/test_konata.py
 
   changed:
