@@ -22,7 +22,7 @@ jobs:
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.event == 'push' &&
-       github.event.workflow_run.conclusion == 'success' &&
+       contains(fromJSON('["success","failure"]'), github.event.workflow_run.conclusion) &&
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-24.04
@@ -35,10 +35,11 @@ jobs:
       sha: ${{ steps.gate.outputs.sha }}
       challenges: ${{ steps.discover.outputs.challenges }}
     steps:
-      - name: Require successful checks on the current main commit
+      - name: Select the latest checks on the current main commit
         id: gate
         env:
           GH_TOKEN: ${{ github.token }}
+          CHECK_RUN_ID: ${{ github.event.workflow_run.id }}
           TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         shell: bash
         run: |
@@ -51,15 +52,20 @@ jobs:
             exit 0
           fi
           if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
-            passed=$(gh api --method GET \
+            CHECK_RUN_ID=$(gh api --method GET \
               "repos/$GITHUB_REPOSITORY/actions/workflows/challenges.yml/runs" \
-              -f head_sha="$TARGET_SHA" -f branch=main -f status=completed -f per_page=100 \
-              --jq '[.workflow_runs[] | select(.conclusion == "success" and (.event == "push" or .event == "workflow_dispatch"))] | length')
-            if [[ "$passed" -eq 0 ]]; then
-              echo '::error::Run the Challenges workflow on this main commit successfully before syncing.'
+              -f head_sha="$TARGET_SHA" -f branch=main -f per_page=100 \
+              --jq '[.workflow_runs[] | select(.event == "push" or .event == "workflow_dispatch")] | sort_by(.id) | last | .id // empty')
+            if [[ -z "$CHECK_RUN_ID" ]]; then
+              echo '::error::Run the Challenges workflow on this main commit before syncing.'
               exit 1
             fi
           fi
+          [[ "$CHECK_RUN_ID" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CHECK_RUN_ID" > "$RUNNER_TEMP/challenge-run.json"
+          gh api --paginate --slurp \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$CHECK_RUN_ID/jobs?filter=latest&per_page=100" \
+            > "$RUNNER_TEMP/challenge-jobs.json"
           echo 'ready=true' >> "$GITHUB_OUTPUT"
           echo "sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
 
@@ -69,31 +75,21 @@ jobs:
           ref: ${{ steps.gate.outputs.sha }}
           persist-credentials: false
 
-      - name: Discover all challenge configs
+      - uses: astral-sh/setup-uv@v10.3.2
+        if: steps.gate.outputs.ready == 'true'
+
+      - name: Select challenges with passing checks
         id: discover
         if: steps.gate.outputs.ready == 'true'
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-          import re
-
-          paths = sorted(str(path.parent) for path in Path('challenges').glob('*/*/kona.yaml'))
-          if not paths:
-              raise SystemExit('No Konata challenge configs found')
-          if any(not re.fullmatch(r'challenges/[a-z0-9_-]+/[a-z0-9_-]+', path) for path in paths):
-              raise SystemExit('Unsupported challenge path')
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('challenges=' + json.dumps(paths) + '\n')
-          print(f'Selected {len(paths)} challenges; Konata skips unchanged payloads.')
-          PY
+        env:
+          TARGET_SHA: ${{ steps.gate.outputs.sha }}
+          GH_REPO: ${{ github.repository }}
+        run: uv run tools/select_konata.py "$RUNNER_TEMP/challenge-run.json" "$RUNNER_TEMP/challenge-jobs.json"
 
   sync:
     name: Sync ${{ matrix.challenge }}
     needs: prepare
-    if: needs.prepare.outputs.ready == 'true'
+    if: needs.prepare.outputs.ready == 'true' && needs.prepare.outputs.challenges != '[]'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     strategy:

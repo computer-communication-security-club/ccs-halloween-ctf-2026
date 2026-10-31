@@ -25,6 +25,8 @@ jobs:
       - run: uv run tools/ctf.py check
       - name: Test challenge validation and CI selection
         run: uv run tools/test_ctf.py
+      - name: Test per-challenge deployment selection
+        run: uv run tools/test_select_konata.py
       - name: Check Konata configs, flags, handouts, and rendered connections
         run: uv run tools/konata.py
       - name: Test Konata discovery and rCTF payloads offline

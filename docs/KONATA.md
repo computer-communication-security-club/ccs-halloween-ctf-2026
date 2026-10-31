@@ -65,8 +65,8 @@ done
 LOGURU_LEVEL=WARNING LOGURU_DIAGNOSE=NO uvx --from konata==0.0.33 kona sync challenges/web/piggyback
 ```
 
-This is an explicit write to rCTF. The GitHub Action below also syncs after
-successful main-branch checks.
+This is an explicit write to rCTF. The local loop does not filter CI failures;
+use the GitHub Action below to sync only eligible challenges automatically.
 Konata uses stable path-based IDs, for example
 `challenges_web_piggyback`. Keep challenge paths stable after the first sync;
 renaming a display name preserves its ID, while moving a directory can create a
@@ -95,16 +95,27 @@ neither tokens nor a running server.
 ## GitHub Actions
 
 [`konata.yml`](../.github/workflows/konata.yml) runs after the **Challenges**
-workflow succeeds for a push to `main`. It checks out the exact tested commit,
-skips a queued commit if main has already advanced, and syncs all discovered
-challenge configs with the upstream `konata-deploy-action/sync` action and
+workflow completes for a push to `main`, even if individual challenge tests fail.
+It requires successful metadata/handout and challenge-selection jobs, checks out
+the exact tested commit, and skips a queued commit if main has already advanced.
+Only local challenges with a successful `Test category/slug` job in that run are
+synced; failed, cancelled, skipped, or untested local challenges are left alone.
+External challenges have no local solver job and remain eligible after shared
+validation. A failed external test job, if present, still blocks that challenge.
+This does not hide or remove previously deployed challenges or stop containers.
+An empty selection skips sync entirely. Eligible configs use the upstream
+`konata-deploy-action/sync` action and
 `konata==0.0.33`. Konata skips unchanged payloads. The action and checkout are
 pinned to commit SHAs. Syncs run one at a time and are not cancelled halfway
 through by a newer deployment.
 
 Pull-request runs never trigger production sync. The separate validation jobs
 do not receive the deployment secrets. Manual runs are allowed only on `main`
-and require a successful **Challenges** run for that same commit:
+and use the latest push or manual **Challenges** run for that same commit.
+That run must be completed, and the same shared and per-challenge checks apply;
+an older passing run cannot override its failures. Since push validation only
+tests changed challenges, run **Challenges** manually first to test all local
+challenges when a full sync is needed:
 
 ```sh
 gh workflow run konata.yml --ref main
