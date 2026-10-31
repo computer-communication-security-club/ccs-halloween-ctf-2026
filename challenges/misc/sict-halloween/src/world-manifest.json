@@ -55,6 +55,36 @@
       "sha256": "0924dcbd9a9dbe93aeeaa936fb01c430516f2cc0f03c7793e5e8fe01cb88a352"
     },
     {
+      "path": "datapacks/sict-campus/data/minecraft/chat_type/chat.json",
+      "bytes": 138,
+      "sha256": "a834f1f2f2aa106b74f3d7082f2fffd21cb945a6637829e5c777b9d19c078c89"
+    },
+    {
+      "path": "datapacks/sict-campus/data/minecraft/chat_type/emote_command.json",
+      "bytes": 138,
+      "sha256": "a834f1f2f2aa106b74f3d7082f2fffd21cb945a6637829e5c777b9d19c078c89"
+    },
+    {
+      "path": "datapacks/sict-campus/data/minecraft/chat_type/msg_command_incoming.json",
+      "bytes": 138,
+      "sha256": "a834f1f2f2aa106b74f3d7082f2fffd21cb945a6637829e5c777b9d19c078c89"
+    },
+    {
+      "path": "datapacks/sict-campus/data/minecraft/chat_type/msg_command_outgoing.json",
+      "bytes": 138,
+      "sha256": "a834f1f2f2aa106b74f3d7082f2fffd21cb945a6637829e5c777b9d19c078c89"
+    },
+    {
+      "path": "datapacks/sict-campus/data/minecraft/chat_type/team_msg_command_incoming.json",
+      "bytes": 138,
+      "sha256": "a834f1f2f2aa106b74f3d7082f2fffd21cb945a6637829e5c777b9d19c078c89"
+    },
+    {
+      "path": "datapacks/sict-campus/data/minecraft/chat_type/team_msg_command_outgoing.json",
+      "bytes": 138,
+      "sha256": "a834f1f2f2aa106b74f3d7082f2fffd21cb945a6637829e5c777b9d19c078c89"
+    },
+    {
       "path": "datapacks/sict-campus/data/minecraft/tags/function/load.json",
       "bytes": 76,
       "sha256": "0f1b74445c4c457d81992aa11e1e1e8accfe4659ebf28d99ee0c4bac048deb26"
@@ -1025,9 +1055,14 @@
       "sha256": "7ceeea0c2a6bb300db4eb442de17521eaf414cc2a2a7e22513080590db9f7796"
     },
     {
+      "path": "datapacks/sict-campus/data/sict/function/spawn_indoor_reinforcements.mcfunction",
+      "bytes": 3747,
+      "sha256": "fc2093f7e327109ffe158e361cca06d8cc9e59ff0a7bada5c036bacb0114fce1"
+    },
+    {
       "path": "datapacks/sict-campus/data/sict/function/spawn_spooks.mcfunction",
-      "bytes": 7717,
-      "sha256": "805e4d6077f0a97dcb7500f23fb365cf1fcfb5206810e514d27ed5da4ba57a60"
+      "bytes": 7761,
+      "sha256": "5b738640b5a6dcdc24f1c6ca172b942e0104078afc9445378e383232732cdd7e"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/step_000.mcfunction",

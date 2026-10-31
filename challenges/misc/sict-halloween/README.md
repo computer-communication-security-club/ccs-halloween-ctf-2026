@@ -39,7 +39,7 @@ docker compose exec -T minecraft /opt/sict/admin "data get storage sict:server i
 docker compose exec -T minecraft /opt/sict/admin "execute as PLAYER_NAME run function sict:server_reset_player"
 ```
 
-To populate the loaded campus with 16 persistent adult zombies named `Spook` (eight outdoors, eight indoors), each wearing a jack-o’-lantern, plus one persistent courtyard cat, run `/opt/sict/admin "function sict:spawn_spooks"` in the container. Per-location storage prevents duplicates on repeat calls, including after a mob dies; blocked or unloaded locations can be retried. These mobs retain normal AI and can be killed. This is a manual population step, not a respawn loop.
+To populate the loaded campus with 24 persistent adult zombies named `Spook` (eight outdoors, sixteen indoors), each wearing a jack-o’-lantern, plus one persistent courtyard cat, run `/opt/sict/admin "function sict:spawn_spooks"` in the container. Per-location storage prevents duplicates on repeat calls, including after a mob dies; blocked or unloaded locations can be retried. These mobs retain normal AI and can be killed. This is a manual population step, not a respawn loop. To add only the eight indoor reinforcements to an already populated server, run `/opt/sict/admin "function sict:spawn_indoor_reinforcements"`.
 
 RCON uses a random password saved inside `/data`; port 25575 is not published. `/opt/sict/admin` reads its private configuration. Resetting a connected player clears their CTF scores and challenge items, then returns them to spawn.
 
@@ -94,6 +94,12 @@ The campus is an interpreted block model built from reference photographs and Op
 `validation/local-map-checks.json` records the earlier checks on the saved map before flag templating and repository packaging. It is evidence about that map, not a Docker runtime test.
 
 `validation/hardening-checks.json` records a separate test of the committed seed with a fake flag and the official 26.3 server JAR. The server ran directly on Java 25 with loopback-only access; this verifies command compatibility and applied rules, but does not exercise the container entrypoint, RCON wrapper, or multiplayer behavior. PvP and border settings were rechecked after a datapack reload.
+
+## Player chat
+
+The datapack hides public player chat, `/msg` (`/tell`, `/w`), `/teammsg` (`/tm`), and `/me` messages and their narration with empty chat-type formats. Administrative `/say`, system messages, and gameplay commands remain available. This hides presentation in standard clients; it does not prevent transmission, logging, or a modified client from reading messages. A server-side moderation mod is required for a complete transmission block.
+
+Chat types are synchronized when clients join. Restart the server after installing these registry changes and have players reconnect; `/reload` alone does not reload chat-type registries. See the [official chat-type documentation](https://feedback.minecraft.net/hc/en-us/articles/6731464524941-Minecraft-Java-Edition-1-19).
 
 ## Multiplayer defaults
 
