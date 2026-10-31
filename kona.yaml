@@ -12,6 +12,22 @@ discovery:
   challenge_folder_depth: 3
 challenge_id_format: path
 templates:
+  endpoints_text:
+    rctf: |-
+      {% for endpoint in challenge.endpoints %}
+      > [!CONNECTION]
+      {% if endpoint.name == 'Minecraft Java' -%}
+      > {{ endpoint.endpoint }}:{{ endpoint.port }}
+      {%- elif endpoint.type == models.KonaEndpointType.SOCAT -%}
+      > {{ endpoint.name_prefix }}socat -,raw,echo=0 tcp:{{ endpoint.endpoint }}:{{ endpoint.port or 1337 }}
+      {%- elif endpoint.type == models.KonaEndpointType.NC -%}
+      > {{ endpoint.name_prefix }}nc {{ endpoint.endpoint }} {{ endpoint.port or 1337 }}
+      {%- elif endpoint.type == models.KonaEndpointType.NCAT_SSL -%}
+      > {{ endpoint.name_prefix }}ncat --ssl {{ endpoint.endpoint }} {{ endpoint.port or 1337 }}
+      {%- elif endpoint.type in (models.KonaEndpointType.HTTP, models.KonaEndpointType.HTTPS) -%}
+      > {{ endpoint.http_endpoint }}
+      {%- endif %}
+      {% endfor -%}
   challenge_description:
     rctf: |-
       {{ challenge.description | replace('CHALLENGE_HOST', config.secrets['challenge_host'].loaded) }}

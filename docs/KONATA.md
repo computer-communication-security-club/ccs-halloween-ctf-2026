@@ -77,8 +77,10 @@ until October 31 at 18:00 Ulaanbaatar time. `hidden: true` overrides the timesta
 and would prevent automatic opening. Future syncs preserve the schedule.
 
 Connections render as rCTF `> [!CONNECTION]` callouts. The description template
-also replaces `CHALLENGE_HOST` in narrative text, including the Minecraft
-instructions. Piggyback keeps its native TLS endpoint; TCP challenges retain
+renders Minecraft's named endpoint as a copyable `HOST:PORT` address, without
+an `nc` command or an HTTP link. The Minecraft version stays in the description.
+The description template also replaces `CHALLENGE_HOST` in narrative text.
+Piggyback keeps its native TLS endpoint; TCP challenges retain
 their assigned ports. Shelloween and Poltergeist use the reviewed per-team HTTPS
 settings in `deployment/challenges/instances.json`, which the generator includes
 as `instancer_config` instead of an obsolete shared HTTP endpoint. The author is
@@ -137,8 +139,9 @@ stdin or at the prompt, not in command-line arguments or Git commits.
 ## Scoring
 
 `type: dynamic` in the authoring metadata becomes Konata `scoring.rctf.kind:
-decay`. Each challenge supplies `initial_value: 1000` and `minimum_value: 100`,
-which become rCTF `points.max` and `points.min`. Tiebreak eligibility is enabled.
+decay`. Each challenge supplies `initial_value: 1000` and its configured
+`minimum_value`, which become rCTF `points.max` and `points.min`. The default
+minimum is 100; SICT After Dark uses 10. Tiebreak eligibility is enabled.
 
 Configure the **rCTF server**, separately from Konata, with:
 

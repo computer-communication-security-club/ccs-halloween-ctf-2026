@@ -83,7 +83,13 @@ def build_config(path):
         deploy = yaml.safe_load((path / "deployment.yml").read_text())
         protocol = deploy["protocol"]
         port = deploy["public_port"]
-        expected = f"nc CHALLENGE_HOST {port}" if protocol == "tcp" else f"{protocol}://CHALLENGE_HOST:{port}"
+        minecraft = protocol == "tcp" and deploy.get("service") == "minecraft"
+        if minecraft:
+            expected = f"CHALLENGE_HOST:{port}"
+        elif protocol == "tcp":
+            expected = f"nc CHALLENGE_HOST {port}"
+        else:
+            expected = f"{protocol}://CHALLENGE_HOST:{port}"
         if protocol not in ("tcp", "http", "https") or connection != expected:
             raise ValueError("connection_info does not match the deployment protocol and port")
         challenge["endpoints"] = [{
@@ -91,6 +97,8 @@ def build_config(path):
             "endpoint": HOST_TEMPLATE,
             "port": port,
         }]
+        if minecraft:
+            challenge["endpoints"][0]["name"] = "Minecraft Java"
     return {"challenges": [challenge]}
 
 

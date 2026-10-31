@@ -117,6 +117,11 @@ class KonataTests(unittest.IsolatedAsyncioTestCase):
                     elif "connection_info" in meta:
                         self.assertIn(meta["connection_info"].replace("CHALLENGE_HOST", "192.0.2.1"), description)
                         self.assertIn("> [!CONNECTION]", description)
+                        if path.name == "sict-halloween":
+                            self.assertIn("> [!CONNECTION]\n> 192.0.2.1:35001", description)
+                            self.assertNotIn("nc 192.0.2.1", description)
+                            self.assertNotIn("http://192.0.2.1:35001", description)
+                            self.assertNotIn("https://192.0.2.1:35001", description)
                     else:
                         self.assertNotIn("> [!CONNECTION]", description)
                     expected_files = []

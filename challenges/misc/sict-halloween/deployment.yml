@@ -29,9 +29,9 @@ notes: >-
   Manual gameplay solver needs organizer sign-off before merge/release;
   approval is not recorded here. Online authentication, if enabled, also needs
   approval for its external-service dependency.
-  Clients need Minecraft Java Edition 26.3. Offline usernames are not authenticated. The nc connection_info
-  follows this repository's raw-TCP convention; players must use the Minecraft
-  client address from the description. Budget 2 CPUs and 6 GiB per instance
+  Clients need Minecraft Java Edition 26.3. Offline usernames are not authenticated.
+  The Connection box provides the copyable Minecraft client address, without an
+  nc command or a browser URL. Budget 2 CPUs and 6 GiB per instance
   (4 GiB Java heap); the 20-player default is not load-tested. PvP and player
   collision are disabled, but sharing fragments between players is permitted.
   Only TCP 35001 is published; RCON stays private. EULA acceptance is an explicit

@@ -57,7 +57,9 @@ selected by the server's `scoreProvider` (see [Konata setup](KONATA.md)). Do not
 set a per-challenge `decay` or `function`. Exactly one tag is a difficulty.
 `author` may be a Markdown link, e.g. `[handle](https://github.com/handle)`.
 Omit `connection_info` for static challenges. For TCP use
-`nc CHALLENGE_HOST <port>`. Plain HTTP and direct ports are the default.
+`nc CHALLENGE_HOST <port>`. Minecraft deployments (`service: minecraft`) use
+`CHALLENGE_HOST:<port>` so players can copy the address into the Minecraft
+client. Plain HTTP and direct ports are the default.
 
 After changing metadata, run `uv run tools/konata.py --write` and commit the generated
 `kona.yaml`. [Konata](KONATA.md) syncs these generated configs to rCTF; `challenge.yml`

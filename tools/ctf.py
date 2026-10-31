@@ -302,7 +302,7 @@ def check_connection_info(meta, deploy, report):
     expected = {
         "http": f"http://CHALLENGE_HOST:{port}",
         "https": f"https://CHALLENGE_HOST:{port}",
-        "tcp": f"nc CHALLENGE_HOST {port}",
+        "tcp": f"CHALLENGE_HOST:{port}" if deploy.get("service") == "minecraft" else f"nc CHALLENGE_HOST {port}",
     }.get(protocol)
     if deploy.get("mode") == "per-team":
         if not info:
