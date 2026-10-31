@@ -1,0 +1,20 @@
+name: The Pumpkin Patch
+author: R.
+category: forensics
+connection_info: https://d2o1rk98pkw6lk.cloudfront.net
+description: |
+  huuchnii bodlogo xD
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{tr1ck_0r_tr34t}
+    data: case_sensitive
+tags:
+  - easy
+files: []
+hints: []
+state: hidden

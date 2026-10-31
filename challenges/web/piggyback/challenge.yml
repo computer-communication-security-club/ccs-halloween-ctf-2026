@@ -30,7 +30,6 @@ flags:
     data: case_sensitive
 tags:
   - hard
-  - halloween
 files: []
 hints: []
 state: visible

@@ -28,7 +28,6 @@ flags:
     data: case_sensitive
 tags:
   - hard
-  - halloween
 files:
   - dist/dead_signal
   - dist/README.md

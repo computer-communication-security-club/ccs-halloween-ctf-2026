@@ -1,0 +1,20 @@
+name: The Hollow Server
+author: R.
+category: forensics
+connection_info: https://d2o1rk98pkw6lk.cloudfront.net
+description: |
+  huuchnii bodlogo xD
+type: dynamic
+value: 1000
+extra:
+  initial: 1000
+  minimum: 100
+flags:
+  - type: static
+    content: ccsCTF{sp00ky_m3m}
+    data: case_sensitive
+tags:
+  - easy
+files: []
+hints: []
+state: hidden

@@ -10,7 +10,6 @@ challenges:
   hidden: false
   tags:
   - hard
-  - halloween
   - minecraft
   scoring:
     initial_value: 1000
