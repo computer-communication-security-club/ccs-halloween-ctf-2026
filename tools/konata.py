@@ -10,6 +10,8 @@ offline. They never connect to rCTF, build images, or print flags.
 """
 
 import argparse
+from datetime import datetime
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -65,8 +67,19 @@ def build_config(path):
         # pre_compressed passes files through verbatim, including raw binaries.
         "attachments": {"pre_compressed": meta["files"]},
     }
+    if meta.get("release_time"):
+        release = meta["release_time"]
+        release = datetime.fromisoformat(release) if isinstance(release, str) else release
+        if not isinstance(release, datetime) or release.tzinfo is None:
+            raise ValueError("release_time must include a timezone")
+        challenge["release_time"] = release.isoformat()
+    runtime_path = ROOT / "deployment/challenges/instances.json"
+    runtime = json.loads(runtime_path.read_text()) if runtime_path.exists() else {}
+    if path.name in runtime:
+        challenge["instancer_config"] = runtime[path.name]
+        challenge["description"] += "\n\nStart your team's isolated instance using the instance controls below. Instances expire after 30 minutes."
     connection = meta.get("connection_info")
-    if connection:
+    if connection and path.name not in runtime:
         deploy = yaml.safe_load((path / "deployment.yml").read_text())
         protocol = deploy["protocol"]
         port = deploy["public_port"]
@@ -107,7 +120,7 @@ def check_resolved(path, config):
     )
     if "CHALLENGE_HOST" in description or "{{" in description:
         raise ValueError("unresolved template in the player description")
-    if meta.get("connection_info"):
+    if meta.get("connection_info") and challenge.instancer_config is None:
         connection = meta["connection_info"].replace("CHALLENGE_HOST", "192.0.2.1")
         if connection not in description:
             raise ValueError("rendered description is missing the connection information")

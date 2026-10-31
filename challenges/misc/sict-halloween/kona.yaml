@@ -16,7 +16,7 @@ challenges:
     a basket. Start on the gold pad, visit every orange platform in order,
     then throw a Basketball through the orange hoop. The barrel refills shots.
     Falling resets the parkour attempt. Nothing needs to be broken or placed.
-  hidden: true
+  hidden: false
   tags:
   - hard
   - halloween
@@ -35,6 +35,7 @@ challenges:
           file: flag.txt
   attachments:
     pre_compressed: []
+  release_time: '2026-10-31T18:00:00+08:00'
   endpoints:
   - type: nc
     endpoint: '{{ config.secrets[''challenge_host''].loaded }}'

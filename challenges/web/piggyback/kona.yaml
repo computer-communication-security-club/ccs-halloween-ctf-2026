@@ -20,7 +20,7 @@ challenges:
     TLS 1.3 only, self-signed certificate. A client that actually speaks 0-RTT is
     the whole ballgame. `openssl s_client -early_data` is more than enough — no
     exotic tooling required.
-  hidden: true
+  hidden: false
   tags:
   - hard
   - halloween
@@ -38,6 +38,7 @@ challenges:
           file: flag.txt
   attachments:
     pre_compressed: []
+  release_time: '2026-10-31T18:00:00+08:00'
   endpoints:
   - type: https
     endpoint: '{{ config.secrets[''challenge_host''].loaded }}'

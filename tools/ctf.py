@@ -14,6 +14,7 @@ CHALLENGE is a path such as challenges/web/piggyback. Flags are never printed.
 """
 
 import argparse
+from datetime import datetime
 import filecmp
 import json
 import os
@@ -215,8 +216,18 @@ def check_metadata(chall, meta, deploy, flag, report):
             report.error(f"challenge.yml: missing '{key}'")
     if meta.get("category") != category:
         report.error(f"challenge.yml: category '{meta.get('category')}' does not match directory '{category}'")
-    if meta.get("state") != "hidden":
-        report.error("challenge.yml: state must be 'hidden'")
+    if meta.get("state") not in ("hidden", "visible"):
+        report.error("challenge.yml: state must be 'hidden' or 'visible'")
+    if meta.get("state") == "visible" and not meta.get("release_time"):
+        report.error("challenge.yml: visible challenges require an organizer-set release_time")
+    if meta.get("release_time"):
+        try:
+            release = meta["release_time"]
+            release = datetime.fromisoformat(release) if isinstance(release, str) else release
+            if not isinstance(release, datetime) or release.tzinfo is None:
+                raise ValueError
+        except (TypeError, ValueError):
+            report.error("challenge.yml: release_time must be an ISO datetime with a timezone")
     if meta.get("type") != "dynamic":
         report.error("challenge.yml: type must be 'dynamic'")
     extra = meta.get("extra") or {}
@@ -433,6 +444,9 @@ def check_layout(report):
     misplaced = set()
     for path in repo_files():
         parts = path.parts
+        # The worker's instance manager is infrastructure, not a challenge.
+        if path == Path("deployment/challenges/instancer/Dockerfile"):
+            continue
         in_challenge = len(parts) >= 4 and parts[0] == "challenges" and parts[1] in CATEGORIES
         if parts[0] in CATEGORIES or (len(parts) >= 2 and parts[0] == "challenges" and parts[1] not in CATEGORIES):
             misplaced.add(Path(*parts[:2]) if parts[0] == "challenges" else Path(parts[0]))

@@ -6,6 +6,7 @@
 """Exercise real Konata discovery and rCTF sync against an offline HTTP transport."""
 
 import hashlib
+from datetime import datetime
 import json
 import unittest
 from pathlib import Path
@@ -90,6 +91,11 @@ class KonataTests(unittest.IsolatedAsyncioTestCase):
                 with self.subTest(challenge=challenge_id):
                     path, meta = sources[challenge_id]
                     self.assertEqual(payload["hidden"], meta["state"] == "hidden")
+                    release = meta.get("release_time")
+                    release = datetime.fromisoformat(release) if isinstance(release, str) else release
+                    self.assertEqual(payload["releaseTime"], int(release.timestamp() * 1000) if release else None)
+                    if meta["state"] == "visible" and release:
+                        self.assertFalse(payload["hidden"], "hidden would prevent scheduled release")
                     self.assertEqual(payload["scoring"], {"kind": "decay"})
                     self.assertEqual(payload["points"], {
                         "max": meta["extra"]["initial"], "min": meta["extra"]["minimum"],
@@ -102,7 +108,13 @@ class KonataTests(unittest.IsolatedAsyncioTestCase):
                                   description)
                     self.assertNotIn("CHALLENGE_HOST", description)
                     self.assertNotIn("{{", description)
-                    if "connection_info" in meta:
+                    runtime = json.loads((ROOT / "deployment/challenges/instances.json").read_text())
+                    if path.name in runtime:
+                        expected = runtime[path.name]
+                        self.assertEqual(payload["instancerConfig"]["config"], expected["config"])
+                        self.assertEqual(payload["instancerConfig"]["challengeIntegrationId"], path.name)
+                        self.assertNotIn("> [!CONNECTION]", description)
+                    elif "connection_info" in meta:
                         self.assertIn(meta["connection_info"].replace("CHALLENGE_HOST", "192.0.2.1"), description)
                         self.assertIn("> [!CONNECTION]", description)
                     else:

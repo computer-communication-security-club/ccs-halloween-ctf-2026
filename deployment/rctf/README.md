@@ -39,7 +39,8 @@ This test covers the homepage, public configuration, and database/Redis
 readiness. It does not establish capacity for registration, flag submissions,
 or the final event data. Repeat realistic event testing after importing
 challenges. Public registration is open. An organizer admin account has
-been created; no challenge data has been published.
+been created. Six challenges are now imported and scheduled to open at the
+event start; see the [worker deployment](../challenges/README.md).
 
 ## Connect and operate
 
@@ -99,10 +100,11 @@ docker compose exec rctf rctf user promote organizer@example.com
 docker compose exec rctf rctf user list-admins
 ```
 
-The existing root `kona.yaml` and `tools/konata.py` still target **CTFd**.
-Do not run their sync against this rCTF server. No challenges or flags were
-published by this infrastructure deployment. Adapt and validate the rCTF
-import separately before releasing challenges.
+The root `kona.yaml` and `tools/konata.py` target this rCTF server using Konata
+0.0.33. They preserve the scheduled release time and the per-team instance
+settings. See [Konata sync](../../docs/KONATA.md). The private worker connection
+is configured in `/opt/rctf/rctf.d/50-challenge-instancer.yaml`, with its shared
+token and API URL in the server's root-only `.env`.
 
 ## Apply configuration changes
 

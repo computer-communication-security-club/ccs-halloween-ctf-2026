@@ -66,6 +66,12 @@ flags and nonempty hints rather than silently changing their semantics.
 
 `files` lists explicit paths under `dist/`, e.g. `dist/chall`, `dist/libc.so.6`, `dist/ld-linux-x86-64.so.2`. Files aren't recursively uploaded just because the directory exists. Default to hidden; infra releases the challenge after endpoint and flag verification.
 
+For an organizer-approved scheduled release, set `state: visible` and a
+timezone-qualified `release_time`, for example `"2026-10-31T18:00:00+08:00"`.
+The generator writes Konata's `hidden: false` and `release_time`; rCTF keeps the
+challenge unavailable until that timestamp. Leaving `state: hidden` prevents
+release even after the timestamp. Regenerate `kona.yaml` after changing either.
+
 Use one static, case-sensitive flag. The generated rCTF `flags/static` entry
 reads its value from `flag.txt`. rCTF also has a
 [regex flag provider](https://rctf.osec.io/providers/flags/), but using it here

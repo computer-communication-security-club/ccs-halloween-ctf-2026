@@ -19,7 +19,7 @@ challenges:
     binary to skip the check will not give up the flag — you need the real token.
 
     `dead_signal` runs on any modern x86_64 Linux system (glibc).
-  hidden: true
+  hidden: false
   tags:
   - hard
   - halloween
@@ -40,3 +40,4 @@ challenges:
     - dist/dead_signal
     - dist/README.md
     - dist/SHA256SUMS
+  release_time: '2026-10-31T18:00:00+08:00'

@@ -3,12 +3,15 @@ challenges:
 - name: Shelloween
   author: '[now.sh](https://github.com/n0wsh)'
   category: web
-  description: |
+  description: |-
     The Shell Market is open for the season — Bash, Zsh, Fish, every shell a
     growing goblin could want.
 
     Buy one, or get one. Read `/flag.txt`.
-  hidden: true
+
+
+    Start your team's isolated instance using the instance controls below. Instances expire after 30 minutes.
+  hidden: false
   tags:
   - hard
   scoring:
@@ -25,7 +28,38 @@ challenges:
           file: flag.txt
   attachments:
     pre_compressed: []
-  endpoints:
-  - type: http
-    endpoint: '{{ config.secrets[''challenge_host''].loaded }}'
-    port: 32001
+  release_time: '2026-10-31T18:00:00+08:00'
+  instancer_config:
+    challenge_integration_id: shelloween
+    instancer: ccs
+    config:
+      services:
+        chall:
+          restart: unless-stopped
+          user: node
+          read_only: true
+          tmpfs:
+            /tmp: size=16m,mode=1777
+          cap_drop:
+          - ALL
+          security_opt:
+          - no-new-privileges:true
+          cpus: 0.5
+          mem_limit: 256m
+          pids_limit: 128
+          image: sha256:0549701aa70a005a52a2a9ce756d700eadbe477fcc8dac20ce23a81b9eef89c2
+          networks:
+          - internal
+          dns:
+          - 127.0.0.1
+      networks:
+        internal:
+          driver: bridge
+          internal: true
+    expose:
+    - kind: https
+      host_prefix: shelloween
+      container_name: chall
+      container_port: 8000
+    timeout_milliseconds: 1800000
+    extendable: true

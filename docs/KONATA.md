@@ -70,15 +70,19 @@ successful main-branch checks.
 Konata uses stable path-based IDs, for example
 `challenges_web_piggyback`. Keep challenge paths stable after the first sync;
 renaming a display name preserves its ID, while moving a directory can create a
-new record. All current configs set `hidden: true`, matching `state: hidden`;
-syncing will hide a challenge again if it was made visible only in the rCTF UI.
-Organizer release still happens after endpoint and flag verification.
+new record. Current event configs set `hidden: false` and
+`release_time: '2026-10-31T18:00:00+08:00'`, generated from the organizer-approved
+`state` and `release_time` fields in `challenge.yml`. rCTF keeps them unavailable
+until October 31 at 18:00 Ulaanbaatar time. `hidden: true` overrides the timestamp
+and would prevent automatic opening. Future syncs preserve the schedule.
 
 Connections render as rCTF `> [!CONNECTION]` callouts. The description template
 also replaces `CHALLENGE_HOST` in narrative text, including the Minecraft
-instructions. Piggyback keeps HTTPS; the other web challenges keep HTTP; TCP
-challenges retain their assigned ports. The author is sent through rCTF's native
-`author` field.
+instructions. Piggyback keeps its native TLS endpoint; TCP challenges retain
+their assigned ports. Shelloween and Poltergeist use the reviewed per-team HTTPS
+settings in `deployment/challenges/instances.json`, which the generator includes
+as `instancer_config` instead of an obsolete shared HTTP endpoint. The author is
+sent through rCTF's native `author` field.
 
 The logging settings above suppress informational messages and traceback
 local-variable dumps. Keep sync diagnostics private. The repository's offline

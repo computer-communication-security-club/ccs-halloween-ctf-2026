@@ -1,0 +1,13 @@
+{
+  "time": "2026-10-31T09:00:37.580097+00:00",
+  "passed": true,
+  "checks": [
+    "token validation",
+    "config allowlist",
+    "team isolation",
+    "resource limits",
+    "renewal",
+    "manual cleanup",
+    "automatic expiry cleanup"
+  ]
+}

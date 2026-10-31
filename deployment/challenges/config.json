@@ -1,0 +1,29 @@
+{
+  "profile": "ccs",
+  "region": "ap-southeast-1",
+  "availability_zone": "ap-southeast-1a",
+  "blueprint": "ubuntu_24_04",
+  "ssh_cidr": "45.117.34.126/32",
+  "key_pair": "ccs-challenge-workers",
+  "instances_host": "challenge.ctf.sict-ccs.club",
+  "rctf_instance": "ccs-rctf",
+  "rctf_origin": "https://ctf.sict-ccs.club",
+  "upstream_revision": "364dc3bc223884e1c9c483bf81c5909333bb2738",
+  "ttl_seconds": 1800,
+  "max_instances": 60,
+  "max_instances_per_challenge": 30,
+  "workers": {
+    "instancer": {
+      "name": "ccs-challenges",
+      "bundle": "xlarge_3_0",
+      "monthly_usd": 84,
+      "public_tcp": [80, 443, 32002, 34001]
+    },
+    "minecraft": {
+      "name": "ccs-minecraft",
+      "bundle": "large_3_0",
+      "monthly_usd": 44,
+      "public_tcp": [35001]
+    }
+  }
+}

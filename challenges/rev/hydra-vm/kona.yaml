@@ -15,7 +15,7 @@ challenges:
     proof for an arbitrary nonce.
 
     Flag format: `ccsCTF{...}`
-  hidden: true
+  hidden: false
   tags:
   - hard
   - halloween
@@ -37,6 +37,7 @@ challenges:
     - dist/PROTOCOL.md
     - dist/hydra-server
     - dist/firmware.enc
+  release_time: '2026-10-31T18:00:00+08:00'
   endpoints:
   - type: nc
     endpoint: '{{ config.secrets[''challenge_host''].loaded }}'

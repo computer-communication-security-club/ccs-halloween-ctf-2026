@@ -2,6 +2,12 @@
 
 The baseline is a small set of Linux amd64 challenge VMs running Docker Engine and Compose. rCTF handles descriptions, handouts, scoring, and submissions separately. There is **no Traefik, reverse proxy, Kubernetes, or instancer dependency** in the starter architecture.
 
+The deployed 2026 event extends this authoring baseline with a separate
+Minecraft worker and a private instance manager for Shelloween and Poltergeist.
+Those two challenges use per-team HTTPS subdomains and transparent TLS routing.
+See the [event deployment](../deployment/challenges/README.md) for the active
+topology, endpoints, release schedule, and operating instructions.
+
 ```text
 Players ── HTTPS ──> rCTF (separate platform)
                        ├── challenge.yml: descriptions and accepted flags
@@ -79,7 +85,9 @@ sync runs only for validated main commits and does not start services.
 
 ## 6. Per-team instances
 
-Per-team orchestration is **not implemented** in this repository. For a small event, infra may manage instances manually; an authenticated launcher can be added only if demand requires it. Authors still make the package compatible now:
+The event's per-team implementation is under `deployment/challenges/`; it is
+separate from the portable authoring packages described here. Authors keep
+packages compatible with per-team orchestration:
 
 - No `container_name`, fixed network/volume names, or host mounts. Let the Compose project scope resources.
 - Parameterize the public port and bind address. Accept the host/port assigned by infra, and avoid hardcoded origins in the application.
