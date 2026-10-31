@@ -23,7 +23,6 @@ challenges:
   hidden: false
   tags:
   - hard
-  - halloween
   scoring:
     initial_value: 1000
     minimum_value: 100

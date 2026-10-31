@@ -28,8 +28,7 @@ flags:
     content: ccsCTF{th3_l1ng3r1ng_3ch0_r0se_fr0m_uaf_t0_a_full_r0p_r3m0t3_c0d3_3x3c_518d6171ffd89ec9}
     data: case_sensitive
 tags:
-  - insane
-  - halloween
+  - hard
 files:
   - dist/chall
   - dist/chall.c

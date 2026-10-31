@@ -25,7 +25,6 @@ flags:
     data: case_sensitive
 tags:
   - hard
-  - halloween
 files:
   - dist/README.md
   - dist/PROTOCOL.md

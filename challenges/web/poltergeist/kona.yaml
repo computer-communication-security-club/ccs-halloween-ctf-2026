@@ -24,8 +24,7 @@ challenges:
     Start your team's isolated instance using the instance controls below. Instances expire after 30 minutes.
   hidden: false
   tags:
-  - insane
-  - halloween
+  - hard
   scoring:
     initial_value: 1000
     minimum_value: 100
