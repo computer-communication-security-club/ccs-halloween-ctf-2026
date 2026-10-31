@@ -32,7 +32,7 @@ notes: >-
   Clients need Minecraft Java Edition 26.3. Offline usernames are not authenticated.
   The Connection box provides the copyable Minecraft client address, without an
   nc command or a browser URL. Budget 2 CPUs and 6 GiB per instance
-  (4 GiB Java heap); the 20-player default is not load-tested. PvP and player
-  collision are disabled, but sharing fragments between players is permitted.
+  (4 GiB Java heap); the 20-player default is not load-tested. PvP and friendly fire are enabled; health and hunger deplete normally. Player
+  collision is disabled, and sharing fragments between players is permitted.
   Only TCP 35001 is published; RCON stays private. EULA acceptance is an explicit
   operator step. No public map download or player container is provided.

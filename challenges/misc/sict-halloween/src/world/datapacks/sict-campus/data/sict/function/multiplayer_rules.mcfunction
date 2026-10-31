@@ -5,7 +5,7 @@ gamerule minecraft:advance_time false
 gamerule minecraft:players_sleeping_percentage 101
 weather thunder
 time set midnight
-gamerule minecraft:pvp false
+gamerule minecraft:pvp true
 gamerule minecraft:mob_griefing false
 gamerule minecraft:tnt_explodes false
 gamerule minecraft:fire_spread_radius_around_player 0
@@ -16,6 +16,6 @@ gamerule minecraft:locator_bar false
 gamerule minecraft:show_advancement_messages false
 team add sict_players
 team modify sict_players collisionRule never
-team modify sict_players friendlyFire false
+team modify sict_players friendlyFire true
 worldborder center -137 11
 worldborder set 256

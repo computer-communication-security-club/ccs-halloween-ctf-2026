@@ -101,8 +101,8 @@
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/adventure_tick.mcfunction",
-      "bytes": 345,
-      "sha256": "f03b95cb202beaa7444f023fb8be7906f617d521b0035d2672cae33667059618"
+      "bytes": 242,
+      "sha256": "112ce5aaf127707167e072bebd4600896f3768344b8f825e273729f7d02c28f1"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/build.mcfunction",
@@ -226,8 +226,8 @@
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/ctf/tick.mcfunction",
-      "bytes": 3673,
-      "sha256": "e1892b8ea3cd37d7dcfb7584d99d854568d5b5a20288ae2d5e91f795f7f06fcf"
+      "bytes": 3568,
+      "sha256": "0903237184dc4a610262498f857668258494b9123a284416de4d63dfd8b2fe93"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/detail_residence.mcfunction",
@@ -926,8 +926,8 @@
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/multiplayer_rules.mcfunction",
-      "bytes": 875,
-      "sha256": "737a5affdd93770e68dcb37c416bb61cc3b0233fa852e292d323330c207b646a"
+      "bytes": 873,
+      "sha256": "a12fc96de40fb1f00058bc0e6a9dc2f92ecfb985b535db1c299bc4a21d5e9d01"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/overview.mcfunction",

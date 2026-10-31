@@ -22,7 +22,6 @@ execute as @e[type=minecraft:interaction,tag=ctf_ball_rack] if data entity @s in
 execute as @a[x=-131,y=72,z=-36,dx=2,dy=0,dz=2] at @s if block ~ ~-1 ~ minecraft:gold_block unless score @s sict_pk matches 1..10 run function sict:ctf/start
 execute as @a[scores={sict_pk=2..10},x=-138,y=70,z=-59,dx=20,dy=20,dz=28] store result score @s sict_y run data get entity @s Pos[1] 10
 execute as @a[scores={sict_pk=2..10},x=-138,y=70,z=-59,dx=20,dy=20,dz=28] if score @s sict_y matches ..721 run function sict:ctf/fall
-effect give @a[scores={sict_pk=1..10},x=-138,y=70,z=-59,dx=20,dy=20,dz=28] minecraft:resistance 2 4 true
 scoreboard players remove @a[scores={sict_refill=1..}] sict_refill 1
 execute as @e[type=minecraft:snowball,tag=!sict_checked,x=-142,y=70,z=-62,dx=26,dy=13,dz=34] run function sict:ctf/check_ball
 execute as @e[type=minecraft:snowball,tag=sict_ball,x=-125,y=78,z=-55,dx=0,dy=0,dz=2] at @s run function sict:ctf/score_ball

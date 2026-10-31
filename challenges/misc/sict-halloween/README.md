@@ -54,9 +54,9 @@ To back up, stop the service and archive the `server-data` volume with a tempora
 
 ## Gameplay and isolation
 
-The entrance button is downward-facing at `-180 65 76`; both entrance buttons also have precise interaction targets. Safe door closing, stair connections, item-name fragments, and the gym logic are carried over from the verified local map. Hunger is replenished within the map and inventory is kept on death. Missing fragments can be reclaimed. There are no floating labels or challenge chat messages.
+The entrance button is downward-facing at `-180 65 76`; both entrance buttons also have precise interaction targets. Safe door closing, stair connections, item-name fragments, and the gym logic are carried over from the verified local map. Health and hunger deplete normally, including in the parkour area; inventory is kept on death. Missing fragments can be reclaimed. There are no floating labels or challenge chat messages.
 
-Scores and shot ownership are per player. The shared server disables PvP and player collision to prevent direct interference. Sharing fragments is allowed; this is not a system for enforcing team identity. Infra must capacity-test the requested 20-player limit.
+Scores and shot ownership are per player. The shared server enables PvP and friendly fire; player collision remains disabled. Sharing fragments is allowed; this is not a system for enforcing team identity. Infra must capacity-test the requested 20-player limit.
 
 ## Review gates and egress
 
@@ -99,7 +99,7 @@ The campus is an interpreted block model built from reference photographs and Op
 
 This configuration targets a fresh deployment; no existing world migration is included.
 
-- PvP and friendly fire are disabled by the Minecraft 26.3 gamerule and team settings; player collision is disabled.
+- PvP and friendly fire are enabled by the Minecraft 26.3 gamerule and team settings; player collision is disabled. Hunger replenishment and parkour damage resistance are disabled.
 - Midnight and thunder are set on every datapack load. Time and weather progression are disabled, and the sleeping threshold is 101% so beds cannot skip the night or clear the storm. For an existing world, update its `multiplayer_rules.mcfunction` and reload the datapack; rebuilding alone preserves the old datapack in the persistent volume.
 - Adventure mode is enforced for every player each tick, preventing ordinary block placement and breaking even if a saved player was in Survival or Creative. Challenge items grant no placement or breaking permissions. This enforcement also applies to operators; map editing requires disabling it deliberately.
 - On their first living tick, players receive an explicit personal respawn point and teleport to the clear spawn outside the front fence. A persistent player tag prevents repeat teleports on reconnect. Applying this fix to an existing server also moves untagged players outside the front fence once, preserving their inventory and challenge scores.
