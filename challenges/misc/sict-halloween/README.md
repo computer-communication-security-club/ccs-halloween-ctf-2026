@@ -12,6 +12,7 @@ A Minecraft Java **26.3** exploration challenge in the SICT campus, with a conce
 | Resources | 2 CPUs, 6 GiB container memory, 4 GiB Java heap, 512 PIDs |
 | Persistent state | Project-scoped `server-data` volume |
 | Default game mode | Adventure, enforced on join and every tick |
+| Atmosphere | Permanent midnight and thunderstorms; sleeping cannot skip the night |
 | Spawn | `-130 71 60`, outside the front fence, facing north |
 
 ## Run
@@ -37,6 +38,8 @@ docker compose exec -T minecraft /opt/sict/admin list
 docker compose exec -T minecraft /opt/sict/admin "data get storage sict:server initialized"
 docker compose exec -T minecraft /opt/sict/admin "execute as PLAYER_NAME run function sict:server_reset_player"
 ```
+
+To populate the loaded campus with 16 persistent adult zombies named `Spook` (eight outdoors, eight indoors), each wearing a jack-o’-lantern, plus one persistent courtyard cat, run `/opt/sict/admin "function sict:spawn_spooks"` in the container. Per-location storage prevents duplicates on repeat calls, including after a mob dies; blocked or unloaded locations can be retried. These mobs retain normal AI and can be killed. This is a manual population step, not a respawn loop.
 
 RCON uses a random password saved inside `/data`; port 25575 is not published. `/opt/sict/admin` reads its private configuration. Resetting a connected player clears their CTF scores and challenge items, then returns them to spawn.
 
@@ -97,6 +100,7 @@ The campus is an interpreted block model built from reference photographs and Op
 This configuration targets a fresh deployment; no existing world migration is included.
 
 - PvP and friendly fire are disabled by the Minecraft 26.3 gamerule and team settings; player collision is disabled.
+- Midnight and thunder are set on every datapack load. Time and weather progression are disabled, and the sleeping threshold is 101% so beds cannot skip the night or clear the storm. For an existing world, update its `multiplayer_rules.mcfunction` and reload the datapack; rebuilding alone preserves the old datapack in the persistent volume.
 - Adventure mode is enforced for every player each tick, preventing ordinary block placement and breaking even if a saved player was in Survival or Creative. Challenge items grant no placement or breaking permissions. This enforcement also applies to operators; map editing requires disabling it deliberately.
 - On their first living tick, players receive an explicit personal respawn point and teleport to the clear spawn outside the front fence. A persistent player tag prevents repeat teleports on reconnect. Applying this fix to an existing server also moves untagged players outside the front fence once, preserving their inventory and challenge scores.
 - Mob griefing, TNT explosions, fire spread, and projectile block damage cannot destroy the campus. Command blocks and Nether travel are disabled; datapack functions and basketball projectiles remain enabled.

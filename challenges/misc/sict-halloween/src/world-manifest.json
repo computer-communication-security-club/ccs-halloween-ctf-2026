@@ -926,8 +926,8 @@
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/multiplayer_rules.mcfunction",
-      "bytes": 639,
-      "sha256": "3ea07cfa4de8f11267d58c92e132830067203306c7a4bad4fafab73374e3ef9b"
+      "bytes": 875,
+      "sha256": "737a5affdd93770e68dcb37c416bb61cc3b0233fa852e292d323330c207b646a"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/overview.mcfunction",
@@ -1023,6 +1023,11 @@
       "path": "datapacks/sict-campus/data/sict/function/server_spawn_player.mcfunction",
       "bytes": 86,
       "sha256": "7ceeea0c2a6bb300db4eb442de17521eaf414cc2a2a7e22513080590db9f7796"
+    },
+    {
+      "path": "datapacks/sict-campus/data/sict/function/spawn_spooks.mcfunction",
+      "bytes": 7717,
+      "sha256": "805e4d6077f0a97dcb7500f23fb365cf1fcfb5206810e514d27ed5da4ba57a60"
     },
     {
       "path": "datapacks/sict-campus/data/sict/function/step_000.mcfunction",

@@ -1,4 +1,10 @@
 # Shared adventure map protection. Minecraft 26.3 uses gamerules for PvP.
+# Keep the Halloween atmosphere fixed, including when players use beds.
+gamerule minecraft:advance_weather false
+gamerule minecraft:advance_time false
+gamerule minecraft:players_sleeping_percentage 101
+weather thunder
+time set midnight
 gamerule minecraft:pvp false
 gamerule minecraft:mob_griefing false
 gamerule minecraft:tnt_explodes false
