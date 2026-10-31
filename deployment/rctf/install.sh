@@ -17,7 +17,9 @@ PY
 fi
 chmod 600 .env
 docker compose config --quiet
-docker compose pull --quiet
+docker compose pull --quiet --ignore-buildable
+docker compose build rctf
+install -m 0644 theme/theme.json rctf.d/90-halloween.json
 docker compose up -d --wait --wait-timeout 180
 install -m 0644 systemd/ccs-rctf-backup.service /etc/systemd/system/
 install -m 0644 systemd/ccs-rctf-backup.timer /etc/systemd/system/

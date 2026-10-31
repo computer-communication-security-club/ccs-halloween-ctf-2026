@@ -15,7 +15,9 @@ services:
     mem_limit: 256m
 
   rctf:
-    image: ghcr.io/otter-sec/rctf@sha256:5fd7cd4379e9bc87f181200fa061600a5fba27d035928407e13f29fda839d3c2
+    image: ccs-rctf-halloween:2026-10-31-v1
+    build: ./theme
+    pull_policy: never
     restart: unless-stopped
     stop_grace_period: 45s
     read_only: true

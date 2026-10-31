@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="540" height="520" viewBox="0 0 540 520" fill="none">
+<defs>
+<radialGradient id="halo"><stop stop-color="#f99a4e" stop-opacity=".17"/><stop offset="1" stop-color="#f99a4e" stop-opacity="0"/></radialGradient>
+<linearGradient id="skin" x1="260" y1="220" x2="310" y2="440" gradientUnits="userSpaceOnUse"><stop stop-color="#b76539"/><stop offset=".5" stop-color="#703c30"/><stop offset="1" stop-color="#291f28"/></linearGradient>
+<linearGradient id="moon" x1="330" y1="50" x2="430" y2="230" gradientUnits="userSpaceOnUse"><stop stop-color="#ffe1a2"/><stop offset="1" stop-color="#c08351"/></linearGradient>
+<linearGradient id="fire" x1="230" y1="320" x2="250" y2="400" gradientUnits="userSpaceOnUse"><stop stop-color="#fff0b3"/><stop offset="1" stop-color="#ef9b4e"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="7"/></filter>
+<path id="bat" d="M0 10Q-10-5-26 0Q-18 6-20 16Q-8 10-3 20L0 17L3 20Q8 10 20 16Q18 6 26 0Q10-5 0 10Z"/>
+</defs>
+<circle cx="284" cy="271" r="240" fill="url(#halo)"/>
+<g stroke="#b78a66" stroke-opacity=".18"><circle cx="290" cy="261" r="194"/><circle cx="290" cy="261" r="208" stroke-dasharray="2 10"/><path d="M290 38V67M290 455V482M68 261H95M485 261H514"/></g>
+<path d="M381 61C350 78 343 116 361 147C376 176 409 186 438 174C418 207 375 217 341 196C305 174 298 128 319 95C334 72 358 61 381 61Z" fill="url(#moon)"/>
+<g fill="#bd916b"><path d="m171 104 3 10 10 3-10 3-3 10-3-10-10-3 10-3zM455 235l3 8 8 3-8 3-3 8-3-8-8-3 8-3zM107 289l2 7 7 2-7 2-2 7-2-7-7-2 7-2z"/><circle cx="220" cy="72" r="2"/><circle cx="437" cy="106" r="2"/><circle cx="145" cy="201" r="2"/><circle cx="466" cy="320" r="2"/><circle cx="379" cy="433" r="2"/></g>
+<g fill="#b38f85"><use href="#bat" transform="translate(203 182) rotate(-15) scale(.85)"/><use href="#bat" transform="translate(449 168) rotate(16) scale(.58)"/><use href="#bat" transform="translate(118 234) rotate(-25) scale(.44)"/></g>
+<g stroke="#a77553" stroke-opacity=".3"><path d="M105 434Q133 382 118 348M125 401l-22-16m21-1 12-18M425 430q-21-47 8-76m-12 34 24-10m-20-4-10-15M143 437l-20-27m296 29 29-27"/></g>
+<g stroke="#be855d" stroke-opacity=".35"><path d="M155 464h86m39 0h60m23-9h40M158 476h35m22 0h102"/></g>
+</svg>

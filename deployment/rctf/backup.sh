@@ -14,6 +14,8 @@ docker compose exec -T postgres pg_dump -U rctf -d rctf -Fc > "$archive/database
 docker compose exec -T rctf tar -C /app/uploads -czf - . > "$archive/uploads.tar.gz"
 cp .env compose.yml Caddyfile "$archive/"
 cp -a rctf.d "$archive/"
+# The themed app image can be rebuilt from these files after a restore.
+if [[ -d theme ]]; then cp -a theme "$archive/"; fi
 tar -C backups -czf "backups/$stamp.tar.gz.partial" "$stamp"
 mv "backups/$stamp.tar.gz.partial" "backups/$stamp.tar.gz"
 find backups -maxdepth 1 -type f -name '*.tar.gz' -mtime +6 -delete

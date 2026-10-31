@@ -1,0 +1,43 @@
+name: ccs-halloween-preview
+services:
+  rctf:
+    build: ./theme
+    image: ccs-rctf-halloween:local
+    restart: unless-stopped
+    ports: ['127.0.0.1:8080:80']
+    environment:
+      RCTF_DATABASE_PASSWORD: local-preview-only
+      RCTF_REDIS_PASSWORD: local-preview-only
+      RCTF_TOKEN_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      RCTF_ORIGIN: http://localhost:8080
+    volumes:
+      - ./rctf.d/01-event.yaml:/app/rctf.d/01-event.yaml:ro
+      - ./theme/theme.json:/app/rctf.d/90-halloween.json:ro
+      - ./theme/preview.json:/app/rctf.d/99-preview.json:ro
+      - preview_uploads:/app/uploads
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+  postgres:
+    image: postgres:18.0
+    environment:
+      POSTGRES_USER: rctf
+      POSTGRES_DB: rctf
+      POSTGRES_PASSWORD: local-preview-only
+    volumes: ['preview_postgres:/var/lib/postgresql']
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'rctf']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:8.2.2
+    command: ['redis-server', '--requirepass', 'local-preview-only']
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 'local-preview-only', 'ping']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  preview_postgres:
+  preview_uploads:

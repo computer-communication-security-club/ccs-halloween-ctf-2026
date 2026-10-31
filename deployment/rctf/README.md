@@ -1,5 +1,9 @@
 # CCS rCTF on AWS
 
+The production Compose file builds the Halloween theme over the pinned rCTF
+image; the installer adds its UI configuration separately from the event settings.
+For local review and theme maintenance, see [theme/README.md](theme/README.md).
+
 The scoreboard runs on one dedicated Lightsail VM in Singapore. Challenge
 containers belong on separate hosts. The instance is sized for an initial
 100-player event, subject to testing with the final challenges and traffic.
@@ -131,20 +135,21 @@ copy only the deployment files; never copy `.local/` or overwrite `.env`:
 
 ```sh
 bash deployment/rctf/ssh.sh 'sudo bash /opt/rctf/backup.sh'
-tar -C deployment/rctf -cf - compose.yml Caddyfile rctf.d install.sh backup.sh verify-restore.sh systemd \
+tar -C deployment/rctf -cf - compose.yml Caddyfile rctf.d theme install.sh backup.sh verify-restore.sh systemd \
   | bash deployment/rctf/ssh.sh 'sudo tar -C /opt/rctf -xf -'
 bash deployment/rctf/ssh.sh 'sudo bash /opt/rctf/install.sh'
 ```
 
-All four images are pinned to Linux amd64 digests. Deliberately update those
-pins for maintenance, back up first, and verify compatibility. An image rollback
+The rCTF theme image is built locally from a pinned upstream digest; the other
+three images are pinned to Linux amd64 digests. Deliberately update those pins for maintenance, back up first, and verify compatibility. An image rollback
 alone may not undo a database migration. Retain the matching database backup.
 The application shuts down gracefully with a 45-second container grace period.
 
 ## Backups and recovery
 
 At 02:00 UTC, `ccs-rctf-backup.timer` creates a compressed archive containing a
-PostgreSQL logical dump, uploaded files, `.env`, Compose, Caddy, and event config.
+PostgreSQL logical dump, uploaded files, `.env`, Compose, Caddy, event config,
+and theme build sources.
 Archives older than roughly seven days are removed. Treat every archive as a
 secret: it contains account data, flags once imported, and credentials.
 

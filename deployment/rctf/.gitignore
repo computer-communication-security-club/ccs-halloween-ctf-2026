@@ -6,3 +6,4 @@ admin-access.json
 *.dump
 *.tar.gz
 rctf.d/60-first-blood.json
+theme/__pycache__/
