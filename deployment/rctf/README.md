@@ -108,6 +108,24 @@ token and API URL in the server's root-only `.env`.
 
 ## Apply configuration changes
 
+### Discord first-blood notifications
+
+`first-blood.template.json` prepares rCTF's native Discord notifier for the
+first solve of each challenge (`bloodsCount: 1`). Messages include the team
+profile link and challenge category/name. The Discord provider disables all
+mentions and does not include submitted flags in the message.
+
+First-blood notifications are enabled on the server in
+`/opt/rctf/rctf.d/60-first-blood.json`. The file is owned by root with group 1001
+and mode 0640 so the rCTF runtime can read it. The template remains outside
+`rctf.d`; it contains no real webhook URL. For a webhook rotation, replace the
+placeholder in a private copy, install it with the same ownership and mode,
+then reload rCTF. Keep the filled file and webhook URL out of Git and command
+output; the corresponding local config path is ignored. Do not install the
+unfilled template into the active config.
+
+### Other configuration
+
 Update the local files first. Back up the current remote configuration, then
 copy only the deployment files; never copy `.local/` or overwrite `.env`:
 

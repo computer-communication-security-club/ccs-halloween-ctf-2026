@@ -1,0 +1,17 @@
+{
+  "bloodBot": {
+    "bloodsCount": 1,
+    "destinations": [
+      {
+        "provider": {
+          "name": "messages/discord",
+          "options": {
+            "url": "__DISCORD_WEBHOOK_URL__"
+          }
+        },
+        "bloodEmojis": ["🩸"],
+        "messageTemplate": "{{bloodEmoji}} **First blood!** [{{teamName}}]({{teamUrl}}) solved **{{challengeCategory}} / {{challengeName}}**."
+      }
+    ]
+  }
+}

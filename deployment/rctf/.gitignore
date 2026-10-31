@@ -5,3 +5,4 @@ admin-access.json
 *.sql
 *.dump
 *.tar.gz
+rctf.d/60-first-blood.json
