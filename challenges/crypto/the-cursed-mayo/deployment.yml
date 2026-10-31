@@ -1,0 +1,29 @@
+mode: per-team
+protocol: tcp
+architecture: linux/amd64
+service: chall
+internal_port: 1337
+public_port: 33001
+solver: automated
+readiness: >-
+  TCP connect to the published port returns the Cursed MAYO banner and menu.
+  `solve/solve.py HOST PORT` completes 384 rituals, forges the offering, and
+  prints the flag in under 60 seconds locally.
+reset: >-
+  docker compose down --volumes --remove-orphans; docker compose up -d --build
+state: >-
+  Ephemeral per-team instance. The MAYO keypair and the global query counter
+  live in /tmp/cursed-data on a size-limited tmpfs. The container has no named
+  volumes. Recreating the container generates a new keypair and resets the
+  query counter. Restarting the service discards all player progress.
+ttl_minutes: 30
+egress: none
+notes: >-
+  Per-team mode is required because the 600-query oracle budget is global to an
+  instance. Startup timeout: 30 seconds including a cold build; the review image
+  starts in under 5 seconds after build. Maximum simultaneous instances
+  requested: 20, to be confirmed by infra. Resource request: 1.0 CPU, 512 MiB
+  memory, 128 PIDs per instance. Endpoint injection: set BIND_ADDR and
+  PUBLIC_PORT; no external services or egress. The solver is non-destructive
+  and uses 384 of 600 rituals. The private runtime image contains /flag.txt;
+  the committed dist/ handout contains no flag.

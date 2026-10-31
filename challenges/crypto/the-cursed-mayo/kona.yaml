@@ -1,0 +1,45 @@
+# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
+challenges:
+- name: The Cursed MAYO
+  author: just-s1lence
+  category: crypto
+  description: |
+    A cryptographic laboratory tried to summon an unbreakable post-quantum
+    signature scheme. The Halloween ritual stuttered, and the signing oracle has
+    been haunted ever since.
+
+    Every invocation returns a MAYO-2 signature with four wounded nibbles. The
+    wounds are selected by a sigil map inside the provided signer, and the value
+    written into each wound is stained by a fresh, unexposed field element.
+
+    Reverse the haunted signer, recover the hidden signing structure, and forge a
+    signature for the oracle's next message to break the curse.
+
+    The handout contains `cursed_signer`, a player README, and a small ritual
+    client. The service is a per-team instance; use the assigned host and port.
+  hidden: false
+  tags:
+  - hard
+  - halloween
+  scoring:
+    initial_value: 1000
+    minimum_value: 100
+    rctf:
+      kind: decay
+      eligible_for_tiebreaks: true
+  flags:
+    rctf:
+    - provider: flags/static
+      config:
+        flag:
+          file: flag.txt
+  attachments:
+    pre_compressed:
+    - dist/README.md
+    - dist/cursed_signer
+    - dist/ritual_client.py
+  release_time: '2026-10-31T18:00:00+08:00'
+  endpoints:
+  - type: nc
+    endpoint: '{{ config.secrets[''challenge_host''].loaded }}'
+    port: 33001

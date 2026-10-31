@@ -1,0 +1,5 @@
+build/
+public/
+__pycache__/
+*.pyc
+solve/cursed_work/
