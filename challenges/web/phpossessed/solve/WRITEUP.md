@@ -1,12 +1,10 @@
-# PHPossessed — intended solution (spoilers)
+# PHPossessed - PHP2Shell (CVE-2026-109618, CVE-2026-109619)
 
-Real-world PHP2Shell: no handout, no application bug, no `unserialize`.
 The target is the stock `php:8.4.26-apache` runtime (CVE-2026-109618 /
 CVE-2026-109619, disclosed 2026-10-21, fixed in 8.4.27) and the only
 authored part is a themed app wrapped around it — the same app you'd find
 on any small PHP site. Everything below is reproducible with the shipped
-`solve/solve.py`, Python stdlib only, against
-`http://HOST:32003`.
+`solve/solve.py`, Python stdlib only, against `http://HOST:32003`.
 
 ## 1. Reconnaissance
 
@@ -66,58 +64,33 @@ no target-side files, no PHP on the player side.
 **A1 — dangle `PS(id)`** (`build_a1`, ~1MB, path `/index.php` +
 `?q0000000=v&…` five 8-char params):
 
-4 duplicate 7B fields (sent again at the tail, see below) + 860 nested
-depth-64 empty-file fields + 14×103B fillers + 78×8000B values + 20×4000B
-burners + a 4000B `PHP_SESSION_UPLOAD_PROGRESS` value. The
+860 nested depth-64 empty-file fields + 14×103B fillers + 78×8000B values
++ 20×4000B burners + a 4000B `PHP_SESSION_UPLOAD_PROGRESS` value. The
 query string is not decoration: GET params allocate before POST parsing
 and shift the bin-40/bin-64 free-list heads, pinning the dangling id to
 page `0x137` of its chunk. The trio *(query shape, BIG=78, burners)* is
-calibrated as a set — move one and the id page moves with it, and move the
-progress field and the OOM leaves `php_session_send_cookie` altogether,
-taking `PS(send_cookie)=1` (and so the whole leak) with it.
-
-The four duplicate field names are the native-Linux addition. Repeating
-them just before the progress field makes `zend_hash_update` release the
-early values, and ZendMM hands small slots out LIFO, so `s_open`'s
-`basedir` ("/tmp", bin 32) reuses a **main-chunk** slot. The main chunk is
-never unmapped, so B1's `ps_close_files` -> `efree(basedir)` survives.
-Without it that `efree` lands in a chunk whose header is gone and
-`_efree`'s `chunk->heap` check aborts the worker before the leak is sent.
-Expected result: **HTTP 500** (the OOM bailout), worker survives.
+calibrated as a set — move one and the id page moves with it. Expected
+result: **HTTP 500** (the OOM bailout), worker survives.
 
 **B1 — leak heap + libphp** (`build_leak_b`, ~33MB):
 
 14× `G:511:0x137` full-chunk forgeries + 1× `G:400:0x137` + 1×
 `G:511:0x137` + 900 nested `X` array fields, all with a fake
 `zend_string` header at page `0x137` (where the stale id points),
-`len=0x80000`, `refcount=0`, type `IS_STRING|IS_STR_INTERNED` (`0x106`),
-data a NUL-terminated 31-char `[a-z0-9]` key:
+`len=0x80000`, `refcount=0`, type `IS_STRING|GC_NOT_COLLECTABLE`, data
+starting `/NNBBBBB`:
 
-- The `G:511` values reuse the freed 2MiB chunks and plant the forged
-  header the stale id reads.
-- The header must be **interned**: the rfc1867 END event runs
-  `php_rshutdown_session_globals` -> `zend_string_release(PS(id))`, and on
-  a non-interned header that `efree()`s an address inside the fill and
-  poisons a small-bin free list. Interned makes the release a no-op.
-- The key must be **legal and NUL-terminated**: `php_session_start()` runs
-  `strpbrk(ZSTR_VAL(id), "\r\n\t <>'\"\\")` and drops `PS(id)` on a
-  hit, which costs the leak. (The stricter `[a-zA-Z0-9,-]` rule is only
-  the *files* handler's, and only decides the session filename.)
+- The `G:511` values reuse the freed 2MiB chunks (basedir-killer: they
+  overwrite `basedir`'s refcount so its release at close is a no-op
+  instead of a `zend_mm_panic`).
 - `G:400` stops at page 400, leaving an **111-page hole** (pages
   `0x191..0x1ff`) in the id's chunk; the 900 `X` fields' real HashTables
   are carved into it by Best-Fit, planting genuine `pDestructor =
   zval_ptr_dtor` pointers inside the read window.
 - At session start the forged id is url-encoded into `Set-Cookie`:
-  ~512KB of worker heap leave in the response header. `php_session_reset_id`
-  runs *inside* `php_session_initialize`, before `s_read`, so the cookie is
-  already queued when the files handler later rejects the long id.
-- B1 is posted to **`/registry.php`**, not the front controller. Apache only
-  flushes the header once the request finishes, and `ps_close_files` has by
-  then freed A1's stale `ps_files` struct — live memory in this request — so
-  a bin free list is poisoned. Compiling the whole front controller allocates
-  from it and aborts first; `registry.php` only defines functions, emits
-  nothing, and gets the response out. Expected result: **HTTP 200 with an
-  ~810KB body**.
+  ~512KB of worker heap leave in the response header. Expected result:
+  **HTTP 404 with an ~811KB body** (404 because `/index.php` as a path
+  falls through the front controller — harmless).
 
 `parse_leak` then scans the decoded window for user-space pointers,
 clusters them by 2MiB (`& ~0x1FFFFF`), and reads off:
@@ -195,21 +168,8 @@ A final `GET /` with `Cookie: PHPSESSID=zz` makes the app's own
   nice proof that RCE actually happened *inside* the app's world.
 - **Warm-up requests break the chain** on this app. A `GET /index.php`
   before A1 runs a real `session_start()` and a ~3KB render, shifting the
-  ZendMM free lists so the dangling id misses the forged header — and worse,
-  it *clears* the dangle: any request that reaches userland starts a session
-  and releases `PS(id)`. The solver sends no warm-up at all; `ServerLimit 1`
-  makes it unnecessary.
-- **Three separate stale pointers have to be made survivable**, not just
-  the id. B1's session init touches all of them before it can emit the
-  cookie: `PS(mod_data)`'s `basedir` (fixed by A1's duplicate fields,
-  which move it into the never-unmapped main chunk), `PS(id)` itself
-  (fixed by forging an *interned* header so its release is a no-op), and
-  the stale `ps_files` struct that `ps_close_files` frees regardless
-  (worked around by leaking from `registry.php`, whose compile is small
-  enough not to allocate from the poisoned bin before Apache flushes).
-  Each one aborts the worker *before* the response if left alone, which
-  is why a chain that leaks happily on one kernel can look completely
-  dead on another.
+  ZendMM free lists so the dangling id misses the forged header. The
+  solver sends no warm-up at all; `ServerLimit 1` makes it unnecessary.
 
 ## 5. Difficulty knobs
 
@@ -219,7 +179,6 @@ A final `GET /` with `Cookie: PHPSESSID=zz` makes the app's own
 | Warm-up page | an `echo "OK"` target (reference) | shipped: a themed app whose per-request allocations break naive ports of the public chain |
 | Worker pinning | `ServerLimit 1` (shipped) | stock `MaxRequestWorkers=150`: solver must pin workers with holder connections |
 | Read window | ship `0x80000` (shipped) | let players discover the 2MiB-boundary overrun themselves |
-| Leak endpoint | any script (reference) | shipped: the front controller's compile trips the poisoned bin; players must notice a smaller target flushes |
 | Exfil | `disable_functions` maze | shipped: none — the 200-byte carrier and no-egress are the real constraints |
 
 Shipped difficulty: **hard**. The vulnerability is public, but the
@@ -227,11 +186,3 @@ reference exploit does not run unmodified against a real app: the warm-up
 page, the pointer floor, and the read window all have to be re-derived,
 and the exfil needs the session-file trick. That gap — public chain to
 working solve on an unmodified, realistic target — is the challenge.
-
-Verified on native linux/amd64, 12/12 `ctf.py test` runs, 2026-10-31.
-
-## 6. Test record
-
-| Date | Platform | Command | Result |
-| --- | --- | --- | --- |
-| 2026-10-30 | WSL2 amd64, Docker 29.9.2, `BIND_ADDR=0.0.0.0` compose up | `python3 solve/solve.py 127.0.0.1 32003` | **4/4**, flag in 2.8–5.5s, including one full chain after `docker restart` (fresh ASLR) |
