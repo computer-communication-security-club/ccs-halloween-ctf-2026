@@ -26,6 +26,7 @@ import tarfile
 import tempfile
 import zipfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
 try:
     import yaml
@@ -154,8 +155,10 @@ def check_challenge(chall, report):
 
     mode = (deploy or {}).get("mode")
     solver = (deploy or {}).get("solver")
-    required = ["README.md", "Dockerfile", ".dockerignore", "flag.txt", "solve/WRITEUP.md"]
-    if solver != "manual":
+    required = ["README.md", "flag.txt"]
+    if mode != "external":
+        required += ["Dockerfile", ".dockerignore", "solve/WRITEUP.md"]
+    if mode != "external" and solver != "manual":
         required.append("solve/solve.py")
     if mode in ("shared", "per-team"):
         required.append("docker-compose.yml")
@@ -295,6 +298,20 @@ def check_metadata(chall, meta, deploy, flag, report):
 def check_connection_info(meta, deploy, report):
     info = meta.get("connection_info")
     protocol, port = deploy.get("protocol"), deploy.get("public_port")
+    if deploy.get("mode") == "external":
+        try:
+            url = urlsplit(info) if isinstance(info, str) else None
+            valid = (url and url.scheme in ("http", "https") and url.scheme == protocol
+                     and url.hostname and not url.username and not url.password
+                     and "CHALLENGE_HOST" not in info
+                     and not any(c.isspace() or c in "{}" for c in info))
+            if url:
+                url.port  # Validate an explicit port, if present.
+        except ValueError:
+            valid = False
+        if not valid:
+            report.error("challenge.yml: external challenges require an absolute HTTP(S) connection_info matching protocol")
+        return
     if deploy.get("mode") == "static":
         if info:
             report.error("challenge.yml: static challenges must omit connection_info")
@@ -316,11 +333,19 @@ def check_deployment(chall, deploy, report):
         if key not in deploy:
             report.error(f"deployment.yml: missing '{key}'")
     mode, protocol = deploy.get("mode"), deploy.get("protocol")
-    if mode not in ("static", "shared", "per-team"):
-        report.error("deployment.yml: mode must be static, shared, or per-team")
+    if mode not in ("static", "shared", "per-team", "external"):
+        report.error("deployment.yml: mode must be static, shared, per-team, or external")
     if protocol not in ("none", "tcp", "http", "https"):
         report.error("deployment.yml: protocol must be none, tcp, http, or https")
-    if deploy.get("solver") not in ("automated", "manual"):
+    if mode == "external":
+        if protocol not in ("http", "https"):
+            report.error("deployment.yml: external challenges use protocol http or https")
+        if deploy.get("solver") != "external":
+            report.error("deployment.yml: external challenges use solver: external")
+        for key in ("service", "internal_port", "public_port", "ttl_minutes"):
+            if deploy.get(key) is not None:
+                report.error(f"deployment.yml: external challenges use {key}: null")
+    elif deploy.get("solver") not in ("automated", "manual"):
         report.error("deployment.yml: solver must be automated or manual")
     if deploy.get("architecture") != "linux/amd64":
         report.warn("deployment.yml: architecture other than linux/amd64 needs infra approval")
@@ -527,6 +552,10 @@ def build_dist(chall, dest):
 
 def cmd_dist(args):
     chall = resolve_challenge(args.challenge)
+    deploy = yaml.safe_load((chall / "deployment.yml").read_text())
+    if deploy.get("mode") == "external":
+        print("SKIP: externally managed challenge; no local dist build")
+        return 0
     dist = chall / "dist"
     with tempfile.TemporaryDirectory(prefix="ctf-dist-") as tmp:
         build_dist(chall, tmp)
@@ -609,6 +638,9 @@ def cmd_test(args):
     deploy = load_yaml(chall / "deployment.yml", report)
     if report.errors:
         die("; ".join(report.errors))
+    if deploy.get("mode") == "external":
+        print("SKIP: externally managed challenge; no local solver")
+        return 0
     if deploy.get("solver") == "manual":
         print("SKIP: solver: manual; follow solve/WRITEUP.md")
         return 0
@@ -666,6 +698,8 @@ def cmd_changed(args):
     rows = []
     for chall in challs:
         deploy = yaml.safe_load((chall / "deployment.yml").read_text()) if (chall / "deployment.yml").is_file() else {}
+        if (deploy or {}).get("mode") == "external":
+            continue
         compose = chall / "docker-compose.yml"
         jail = compose.is_file() and "privileged: true" in compose.read_text()
         rows.append({

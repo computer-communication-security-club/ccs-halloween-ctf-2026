@@ -1,0 +1,28 @@
+# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.
+challenges:
+- name: The Hollow Server
+  author: R.
+  category: forensics
+  description: |-
+    huuchnii bodlogo xD
+
+
+    > [!CONNECTION]
+    > https://d2o1rk98pkw6lk.cloudfront.net
+  hidden: true
+  tags:
+  - easy
+  scoring:
+    initial_value: 1000
+    minimum_value: 100
+    rctf:
+      kind: decay
+      eligible_for_tiebreaks: true
+  flags:
+    rctf:
+    - provider: flags/static
+      config:
+        flag:
+          file: flag.txt
+  attachments:
+    pre_compressed: []

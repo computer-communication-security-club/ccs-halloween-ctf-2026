@@ -1,0 +1,13 @@
+mode: external
+protocol: https
+architecture: linux/amd64
+service: null
+internal_port: null
+public_port: null
+solver: external
+readiness: Open the external site and confirm the challenge is available.
+reset: Managed outside this repository.
+state: Managed outside this repository.
+ttl_minutes: null
+egress: Player browser accesses the external HTTPS site.
+notes: Metadata and accepted flag only; hosting and challenge artifacts are external.

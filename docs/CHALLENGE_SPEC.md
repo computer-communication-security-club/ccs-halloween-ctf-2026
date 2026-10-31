@@ -21,6 +21,18 @@ challenges/<category>/<slug>/
 
 Manual-only challenges may omit `solve.py` with explicit organizer approval and `solver: manual` in `deployment.yml`. Put the complete procedure in `WRITEUP.md`. Everything outside `dist/` is private. Generated pwn binaries and libraries must be built and committed before release; the source examples include the build recipe rather than fabricated binary artifacts.
 
+Externally hosted challenges use `mode: external` and `solver: external` in
+`deployment.yml`. They require `challenge.yml`, `flag.txt`, `README.md`, and a
+generated `kona.yaml`, but may omit Docker files and `solve/`. Set `protocol`
+to `http` or `https`, and `service`, both ports, and `ttl_minutes` to null.
+Keep the other deployment fields to document external ownership and readiness.
+Their `connection_info` is an absolute HTTP(S) URL matching `protocol`, without
+credentials or template placeholders. Konata preserves that URL in the player
+description. Metadata, flag, and any committed handout checks still apply;
+CI excludes these entries from the local build/solver matrix, and direct `dist`
+and `test` commands report a skip. External availability and solve verification
+remain the organizer's responsibility and should be documented in `README.md`.
+
 ## `challenge.yml`
 
 Use the repository's authoring schema below. It retains the existing metadata
@@ -86,7 +98,7 @@ a flag to a team or create an instance. Never copy another event's flag prefix.
 This is our private author/infra contract, separate from rCTF metadata. It is documentation, not an executable launcher schema.
 
 ```yaml
-mode: shared                 # static | shared | per-team
+mode: shared                 # static | shared | per-team | external
 protocol: http               # none | tcp | http | https
 architecture: linux/amd64
 service: chall               # Compose service; null for static

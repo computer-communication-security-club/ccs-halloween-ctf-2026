@@ -21,6 +21,7 @@ from kona.core.provide import resolve_attachments
 from kona.schema.models import KonaChallengeConfig, KonaGlobalConfig, KonaSecret, kona_global_state
 from kona.schema.parsers import load_schema
 from kona.util.jinja import render_template
+from ctf import Report, check_connection_info
 
 ROOT = Path(__file__).resolve().parents[1]
 HEADER = "# Generated from challenge.yml by uv run tools/konata.py --write. Do not edit.\n"
@@ -81,6 +82,13 @@ def build_config(path):
     connection = meta.get("connection_info")
     if connection and path.name not in runtime:
         deploy = yaml.safe_load((path / "deployment.yml").read_text())
+        if deploy.get("mode") == "external":
+            report = Report(str(path))
+            check_connection_info(meta, deploy, report)
+            if report.errors:
+                raise ValueError("invalid external connection_info")
+            challenge["description"] += f"\n\n> [!CONNECTION]\n> {connection}"
+            return {"challenges": [challenge]}
         protocol = deploy["protocol"]
         port = deploy["public_port"]
         minecraft = protocol == "tcp" and deploy.get("service") == "minecraft"
