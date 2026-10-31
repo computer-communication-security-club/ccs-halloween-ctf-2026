@@ -1,0 +1,7 @@
+.local/
+.env
+admin-access.json
+*.pem
+*.sql
+*.dump
+*.tar.gz

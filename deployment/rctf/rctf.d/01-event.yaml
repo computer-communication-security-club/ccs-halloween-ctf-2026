@@ -1,0 +1,29 @@
+ctfName: CCS Halloween CTF 2026
+origin: https://ctf.sict-ccs.club
+homeContent: |
+  # CCS Halloween CTF 2026
+
+  Join us on October 31, 2026 from 18:00 until midnight, Ulaanbaatar time (UTC+8).
+meta:
+  description: CCS Halloween CTF 2026
+flagFormatPlaceholder: 'ccsCTF{...}'
+divisions:
+  open: Open
+defaultDivision: open
+# Public team registration is open.
+registrationsEnabled: true
+# 2026-10-31 18:00 Asia/Ulaanbaatar (10:00 UTC).
+startTime: 1793440800000
+# Six hours: 2026-11-01 00:00 Asia/Ulaanbaatar (October 31, 16:00 UTC).
+endTime: 1793462400000
+proxy:
+  trust: 2
+database:
+  sql:
+    host: postgres
+    user: rctf
+    database: rctf
+    maxPoolSize: 20
+  redis:
+    host: redis
+  migrate: before

@@ -1,0 +1,9 @@
+[Unit]
+Description=Daily CCS rCTF backup before the Lightsail snapshot
+
+[Timer]
+OnCalendar=*-*-* 02:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
