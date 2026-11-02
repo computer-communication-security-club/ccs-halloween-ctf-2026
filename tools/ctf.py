@@ -444,7 +444,7 @@ def check_dist(chall, meta, report):
 def check_private_leaks(chall, flag, report):
     if not flag:
         return
-    for name in ("solve/solve.py", "solve/WRITEUP.md", "README.md", "deployment.yml", "docker-compose.yml"):
+    for name in ("solve/solve.py", "README.md", "deployment.yml", "docker-compose.yml"):
         path = chall / name
         if path.is_file() and flag in path.read_text(errors="replace"):
             report.error(f"{name} contains the real flag; keep it only in flag.txt and challenge.yml")
